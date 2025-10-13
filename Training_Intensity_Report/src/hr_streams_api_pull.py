@@ -7,7 +7,7 @@ import time
 # ----------------------
 # Load credentials
 # ----------------------
-def load_credentials(path=r"D:\OneDrive\Python\Training_Intensity_Report\config\credentials.json"):
+def load_credentials(path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\config\credentials.json"):
     with open(path, "r") as f:
         creds = json.load(f)
     return creds["client_id"], creds["client_secret"], creds["refresh_token"]
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
     # CSV path
-    csv_file = r"D:\OneDrive\Python\Training_Intensity_Report\data\all_hr_activities.csv"
+    csv_file = r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\all_hr_activities.csv"
     os.makedirs(os.path.dirname(csv_file), exist_ok=True)
 
     existing_df = load_existing_csv(csv_file)

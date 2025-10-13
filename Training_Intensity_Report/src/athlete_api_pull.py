@@ -8,7 +8,7 @@ import csv  # needed for DictWriter
 # ----------------------
 # Load credentials
 # ----------------------
-def load_credentials(path=r"D:\OneDrive\Python\Training_Intensity_Report\config\credentials.json"):
+def load_credentials(path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\config\credentials.json"):
     with open(path, "r") as f:
         creds = json.load(f)
     return creds["client_id"], creds["client_secret"], creds["refresh_token"]
@@ -59,7 +59,7 @@ def get_athlete_data(access_token):
 # ----------------------
 # Write to CSV in /data path
 # ----------------------
-def write_csv(data, path=r"D:\OneDrive\Python\Training_Intensity_Report\data\athlete_data.csv"):
+def write_csv(data, path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\athlete_data.csv"):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     headers = list(data.keys())
     with open(path, "w", newline="") as f:

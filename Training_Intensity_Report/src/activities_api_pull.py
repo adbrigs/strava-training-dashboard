@@ -6,7 +6,7 @@ import pandas as pd
 # ----------------------
 # Load credentials from JSON
 # ----------------------
-def load_credentials(path=r"D:\OneDrive\Python\Training_Intensity_Report\config\credentials.json"):
+def load_credentials(path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\config\credentials.json"):
     with open(path, "r") as f:
         creds = json.load(f)
     return creds["client_id"], creds["client_secret"], creds["refresh_token"]
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN = load_credentials()
     access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
-    csv_path = r"D:\OneDrive\Python\Training_Intensity_Report\data\all_activities_rawdata.csv"
+    csv_path = r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\all_activities_rawdata.csv"
     existing_df = load_existing_activities(csv_path)
 
     # Fetch new data
