@@ -310,3 +310,66 @@ if not df_filtered.empty:
     st.plotly_chart(fig_pie, use_container_width=True)
 else:
     st.info("No workouts in selected filters.")
+
+# --- Activity Details Section ---
+st.markdown("### 🏃 Activity Details")
+
+if not df_filtered.empty:
+
+    # Convert start date to datetime with explicit format
+    if "start_date_local_formatted" in df_filtered.columns:
+        df_filtered["Date_dt"] = pd.to_datetime(
+            df_filtered["start_date_local_formatted"],
+            format="%b %d, %Y %I:%M %p",
+            errors="coerce"
+        )
+    else:
+        df_filtered["Date_dt"] = pd.NaT
+
+    # Sort by datetime descending (newest first)
+    df_sorted = df_filtered.sort_values("Date_dt", ascending=False)
+
+    # Map CSV column names to user-friendly names
+    rename_map = {
+        "start_date_local_formatted": "Date",
+        "name": "Activity Name",
+        "sport_type": "Sport Type",
+        "distance_miles": "Distance (mi)",
+        "moving_time_minutes": "Moving Time (min)",
+        "moving_time": "Moving Time (min)",
+        "elevation_gain_feet": "Elevation Gain (ft)",
+        "elevation_gain": "Elevation Gain (ft)",
+        "average_heartrate": "Avg HR",
+        "max_heartrate": "Max HR",
+        "hr_ratio": "HR Ratio",
+        "hr_ratio_0_1": "HR Ratio",
+        "hr_zone": "HR Zone",
+        "hr_zone_1_5": "HR Zone",
+        "trimp_score": "TRIMP",
+        "trimp": "TRIMP",
+        "id": "Activity ID"
+    }
+
+    # Keep only columns that exist
+    existing_cols = [col for col in rename_map if col in df_sorted.columns]
+    df_display = df_sorted[existing_cols].rename(columns={k: rename_map[k] for k in existing_cols})
+
+    # --- Filter by Activity Name ---
+    search_term = st.text_input("🔍 Filter by Activity Name (type any part of the name):")
+    if search_term:
+        df_display = df_display[df_display["Activity Name"].str.contains(search_term, case=False, na=False)]
+
+    # Display dataframe
+    st.dataframe(df_display, hide_index=True)
+
+    # CSV download button
+    csv = df_display.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        "📥 Download Table as CSV",
+        csv,
+        "activity_details.csv",
+        "text/csv"
+    )
+
+else:
+    st.info("No activities to display for the selected filters.")
