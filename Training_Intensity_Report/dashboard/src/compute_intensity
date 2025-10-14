@@ -6,7 +6,7 @@ import os
 # Compute personalized intensity and TRIMP
 # ----------------------
 def compute_personalized_intensity(
-    base_path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report",
+    base_path = os.path.dirname(os.path.dirname(__file__)),
     age=27,
     hr_rest=60
 ):

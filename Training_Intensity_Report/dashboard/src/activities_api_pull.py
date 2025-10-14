@@ -95,7 +95,7 @@ if __name__ == "__main__":
     CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN = load_credentials()
     access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
-    csv_path = r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\all_activities_rawdata.csv"
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "data", "all_activities_rawdata.csv")
     existing_df = load_existing_activities(csv_path)
 
     # Fetch new data

@@ -59,13 +59,28 @@ def get_athlete_data(access_token):
 # ----------------------
 # Write to CSV in /data path
 # ----------------------
-def write_csv(data, path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\athlete_data.csv"):
+
+def write_csv(data, filename="athlete_data.csv"):
+    """
+    Write a dictionary to a CSV file in the dashboard/data folder (relative path).
+    
+    Parameters:
+        data (dict): Dictionary containing data to write
+        filename (str): Name of the CSV file (default: athlete_data.csv)
+    """
+    # Build path relative to this script (dashboard folder)
+    path = os.path.join(os.path.dirname(__file__),'..', "data", filename)
+    
+    # Make sure the data folder exists
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    
+    # Write the CSV
     headers = list(data.keys())
     with open(path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
         writer.writerow(data)
+    
     print(f"Athlete data written to {path}")
 
 # ----------------------
