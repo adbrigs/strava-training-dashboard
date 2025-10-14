@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import re
 import numpy as np
+import os
 
 # -------------------------
 # Page configuration
@@ -17,7 +18,8 @@ st.markdown("Visualize your TRIMP (Training Impulse) scores by activity and over
 # -------------------------
 # Load CSV
 # -------------------------
-csv_path = r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\data\activity_data_with_intensity.csv"
+
+csv_path = os.path.join(os.path.dirname(__file__), "data", "activity_data_with_intensity.csv")
 df = pd.read_csv(csv_path)
 
 # -------------------------
