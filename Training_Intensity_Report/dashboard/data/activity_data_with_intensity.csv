@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Oct 14, 2025 04:35 PM",Afternoon Weight Training - Legs,WeightTraining,0.0,41.65,0.0,118.3,159.0,0.4640423921271764,1,47.109910500458334,16142666204
 "Oct 13, 2025 04:57 PM",Afternoon Weight Training - Pull,WeightTraining,0.0,55.65,0.0,103.0,137.0,0.348221044663134,1,37.81661923997694,16131639139
 "Oct 12, 2025 05:09 PM",Afternoon Weight Training - Push,WeightTraining,0.0,55.5,0.0,112.0,141.0,0.41635124905374715,1,51.39553971071723,16122028435
 "Oct 11, 2025 01:52 PM",Afternoon Weight Training - Legs,WeightTraining,0.0,42.0,0.0,114.5,150.0,0.4352763058289175,1,42.16649134859176,16109296244
