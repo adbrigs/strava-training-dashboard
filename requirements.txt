@@ -1,0 +1,16 @@
+requests
+pandas
+matplotlib
+seaborn
+jupyter
+openpyxl
+plotly
+dash
+streamlit
+numpy
+os
+json
+time
+datetime
+timedelta
+re
