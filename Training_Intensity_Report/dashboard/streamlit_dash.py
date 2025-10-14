@@ -341,10 +341,8 @@ if not df_filtered.empty:
         "elevation_gain": "Elevation Gain (ft)",
         "average_heartrate": "Avg HR",
         "max_heartrate": "Max HR",
-        "hr_ratio": "HR Ratio",
-        "hr_ratio_0_1": "HR Ratio",
-        "hr_zone": "HR Zone",
-        "hr_zone_1_5": "HR Zone",
+        "hr_ratio_0-1": "HR Ratio",
+        "hr_zone_1-5": "HR Zone",
         "trimp_score": "TRIMP",
         "trimp": "TRIMP",
         "id": "Activity ID"
