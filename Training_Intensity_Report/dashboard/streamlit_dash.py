@@ -51,7 +51,19 @@ date_range = st.sidebar.date_input(
     "Select Date Range",
     [default_start.date(), default_end.date()]
 )
-
+# -------------------------
+# Show last data update timestamp in sidebar
+# -------------------------
+csv_path = os.path.join(os.path.dirname(__file__), "data", "activity_data_with_intensity.csv")
+if os.path.exists(csv_path):
+    # Get last modified time of CSV
+    last_modified_ts = os.path.getmtime(csv_path)
+    last_modified_dt = datetime.fromtimestamp(last_modified_ts)
+    # Display nicely in sidebar
+    st.sidebar.markdown(f"**Data last updated:** {last_modified_dt.strftime('%Y-%m-%d %H:%M:%S')}")
+else:
+    st.sidebar.markdown("**Data last updated:** No data file found")
+    
 # -------------------------
 # Filter dataframe (include full end date)
 # -------------------------
