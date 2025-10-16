@@ -2,13 +2,36 @@ import os
 import json
 import requests
 import pandas as pd
+from pathlib import Path
 
-# ----------------------
-# Load credentials from JSON
-# ----------------------
-def load_credentials(path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\config\credentials.json"):
+# Load Credentials
+
+def load_credentials(path=None):
+    """
+    Load client_id, client_secret, refresh_token from config/credentials.json
+    or from environment variable CREDENTIALS_JSON (for GitHub Actions).
+    """
+    import os, json
+    from pathlib import Path
+
+    # 1️⃣ If running on GitHub Actions, use the secret environment variable
+    creds_json = os.environ.get("CREDENTIALS_JSON")
+    if creds_json:
+        creds = json.loads(creds_json)
+        return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+
+    # 2️⃣ Otherwise, use local file
+    if path is None:
+        from pathlib import Path
+        repo_root = Path(__file__).parent.parent.parent  # one more .parent to go up to repo root
+        path = repo_root / "config" / "credentials.json"
+
+    if not path.exists():
+        raise FileNotFoundError(f"Credentials file not found at {path}")
+
     with open(path, "r") as f:
         creds = json.load(f)
+
     return creds["client_id"], creds["client_secret"], creds["refresh_token"]
 
 # ----------------------

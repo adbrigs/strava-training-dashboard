@@ -27,8 +27,8 @@ while True:
     print("\n✅ Data updated successfully.")
     print("🔄 Launching Streamlit dashboard...")
 
-    # Step 3: Run Streamlit dashboard
-    os.system(f'streamlit run "{DASHBOARD}" --server.port 8501')
+    # Step 3: Run Streamlit dashboard, removed for github
+    # os.system(f'streamlit run "{DASHBOARD}" --server.port 8501')
 
     print(f"⏰ Streamlit app closed or restarted. Waiting {REFRESH_INTERVAL_HOURS} hours before next refresh...\n")
     time.sleep(REFRESH_INTERVAL_HOURS * 60 * 60)
