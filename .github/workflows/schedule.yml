@@ -42,4 +42,4 @@ jobs:
 
       # 6️⃣ Run the Python script
       - name: Run refresh script
-        run: python dashboard/refresh_app_daily.py
+        run: python Training_Intensity_Report\dashboard\refresh_app_daily.py
