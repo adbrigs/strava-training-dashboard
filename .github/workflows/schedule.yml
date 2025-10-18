@@ -14,6 +14,8 @@ jobs:
       # 1️⃣ Check out the repository
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 2️⃣ Set up Python
       - name: Setup Python 3.10
@@ -35,13 +37,28 @@ jobs:
           mkdir -p Training_Intensity_Report/config
           echo "$CREDENTIALS_JSON" > Training_Intensity_Report/config/credentials.json
 
-
       # 5️⃣ Verify CSV/JSON files exist (optional but helps debug)
       - name: List data files
-        run: |
-          ls -R
+        run: ls -R
 
       # 6️⃣ Run the Python script
       - name: Run refresh script
         run: python Training_Intensity_Report/dashboard/refresh_app_daily.py
 
+      # 7️⃣ Commit and push updated CSV file
+      - name: Commit and push changes
+        if: success()  # Only run if previous steps were successful
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Stage ONLY the updated CSV (prevents accidental credentials commit)
+          git add Training_Intensity_Report/dashboard/data/activity_data_with_intensity.csv
+
+          # Commit if there are changes
+          git diff --cached --quiet || git commit -m "Automated data refresh"
+
+          # Push changes back to the repository
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
