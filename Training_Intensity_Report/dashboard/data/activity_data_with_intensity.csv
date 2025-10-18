@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Oct 18, 2025 11:58 AM",Lunch Run,Run,1.0130832784000001,10.35,9.84252,141.6,154.0,0.6404239212717638,2,22.668482047618838,16182361571
 "Oct 17, 2025 12:37 PM",Lunch Weight Training - Pull,WeightTraining,0.0,40.833333333333336,0.0,110.6,134.0,0.40575321725965174,1,36.108733995277234,16172089358
 "Oct 16, 2025 02:56 PM",Afternoon Weight Training - Push,WeightTraining,0.0,53.03333333333333,0.0,116.6,147.0,0.45117335352006055,1,56.89854945796359,16163438309
 "Oct 14, 2025 04:35 PM",Afternoon Weight Training - Legs,WeightTraining,0.0,41.65,0.0,118.3,159.0,0.4640423921271764,1,47.109910500458334,16142666204
