@@ -8,3 +8,5 @@ plotly
 dash
 streamlit
 numpy
+subprocess
+sys
