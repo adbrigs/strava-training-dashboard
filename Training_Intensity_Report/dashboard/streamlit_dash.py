@@ -189,6 +189,24 @@ if not df_filtered.empty:
         title="Weekly Workout Count by Activity Type"
     )
 
+    # Add 3-month rolling average of weekly total workouts
+    if len(df_weekly_total_count) >= 1:
+        try:
+            df_weekly_total_count_sorted = df_weekly_total_count.sort_values('week')
+            s_total = df_weekly_total_count_sorted.set_index('week')['total']
+            rolling_3mo_avg = s_total.rolling('90D', min_periods=1).mean()
+            fig_count.add_trace(
+                go.Scatter(
+                    x=rolling_3mo_avg.index,
+                    y=rolling_3mo_avg.values,
+                    mode='lines+markers',
+                    name='3-Month Rolling Avg',
+                    line=dict(color='magenta', width=3, dash='dot')
+                )
+            )
+        except Exception:
+            rolling_3mo_avg = None
+
     # Add total number annotation on top of each stacked bar
     for week, total in total_dict.items():
         fig_count.add_annotation(
@@ -202,6 +220,14 @@ if not df_filtered.empty:
 
     fig_count.update_layout(**transparent_layout, bargap=0.2)
     st.plotly_chart(fig_count, use_container_width=True)
+
+    # Display current workouts/week average (latest 3-month rolling value)
+    try:
+        if 'rolling_3mo_avg' in locals() and rolling_3mo_avg is not None and len(rolling_3mo_avg) > 0:
+            current_avg = float(rolling_3mo_avg.iloc[-1])
+            st.caption(f"Current 3-month rolling workouts/week average: {current_avg:.2f}")
+    except Exception:
+        pass
 
 # -------------------------
 # Total TRIMP by Week (stacked + rolling average)
