@@ -42,6 +42,25 @@ def compute_personalized_intensity(
     df["distance (miles)"] = df["distance"] * 0.000621371
     df["elevation_gain (feet)"] = df["total_elevation_gain"] * 3.28084
     df["moving_time (minutes)"] = df["moving_time"] / 60
+    
+    # --- Pace (min per mile) ---
+    # Compute only where distance is positive to avoid divide-by-zero
+    def _calc_pace_min_per_mile(row):
+        dist_mi = row.get("distance (miles)")
+        time_min = row.get("moving_time (minutes)")
+        if pd.isna(dist_mi) or pd.isna(time_min) or dist_mi <= 0:
+            return np.nan
+        return time_min / dist_mi
+
+    def _format_pace(pace_min_per_mile):
+        if pd.isna(pace_min_per_mile) or np.isinf(pace_min_per_mile):
+            return None
+        total_seconds = int(round(pace_min_per_mile * 60))
+        minutes, seconds = divmod(total_seconds, 60)
+        return f"{minutes}:{seconds:02d} /mi"
+
+    df["pace (min_per_mile)"] = df.apply(_calc_pace_min_per_mile, axis=1)
+    df["pace_formatted"] = df["pace (min_per_mile)"].apply(_format_pace)
 
     # --- HR Ratio ---
     df["hr_ratio (0-1)"] = (df["average_heartrate"] - hr_rest) / (hr_max - hr_rest)
@@ -73,7 +92,7 @@ def compute_personalized_intensity(
     # --- Reorder columns for readability ---
     columns_order = [
         "start_date_local_formatted", "name", "sport_type",
-        "distance (miles)", "moving_time (minutes)", "elevation_gain (feet)",
+        "distance (miles)", "moving_time (minutes)", "pace (min_per_mile)", "pace_formatted", "elevation_gain (feet)",
         "average_heartrate", "max_heartrate", "hr_ratio (0-1)", "hr_zone (1-5)",
         "trimp (score)", "id"
     ]

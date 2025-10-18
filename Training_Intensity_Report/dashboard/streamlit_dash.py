@@ -349,6 +349,8 @@ if not df_filtered.empty:
         "distance_miles": "Distance (mi)",
         "moving_time_minutes": "Moving Time (min)",
         "moving_time": "Moving Time (min)",
+        "pace_min_per_mile": "Pace (min/mi)",
+        "pace_formatted": "Pace",
         "elevation_gain_feet": "Elevation Gain (ft)",
         "elevation_gain": "Elevation Gain (ft)",
         "average_heartrate": "Avg HR",
