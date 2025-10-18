@@ -32,8 +32,9 @@ jobs:
         env:
           CREDENTIALS_JSON: ${{ secrets.CREDENTIALS_JSON }}
         run: |
-          mkdir -p config
-          echo "$CREDENTIALS_JSON" > config/credentials.json
+          mkdir -p Training_Intensity_Report/config
+          echo "$CREDENTIALS_JSON" > Training_Intensity_Report/config/credentials.json
+
 
       # 5️⃣ Verify CSV/JSON files exist (optional but helps debug)
       - name: List data files
