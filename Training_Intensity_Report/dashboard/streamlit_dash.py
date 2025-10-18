@@ -295,117 +295,122 @@ if not df_filtered.empty:
         color_continuous_scale='Viridis'
     )
     fig_heatmap.update_layout(**transparent_layout)
-st.plotly_chart(fig_heatmap, use_container_width=True)
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
 # -------------------------
-# Run Pace Over Time
+# Run Pace and TRIMP Breakdown (side by side)
 # -------------------------
-st.header("Run Pace Over Time")
-if not df_filtered.empty:
-    # Subset to running-related activities while respecting the date filter
-    df_runs = df_filtered[df_filtered['activity_type'].str.contains('Run', case=False, na=False)].copy()
+st.header("Run Pace and Activity Breakdown")
+col_left, col_right = st.columns([2, 1], gap="large")
 
-    if not df_runs.empty:
-        # Ensure pace exists; if missing, compute from moving time and distance
-        if 'pace_min_per_mile' not in df_runs.columns:
-            if {'moving_time_minutes','distance_miles'}.issubset(df_runs.columns):
-                df_runs['pace_min_per_mile'] = (
-                    pd.to_numeric(df_runs['moving_time_minutes'], errors='coerce') /
-                    pd.to_numeric(df_runs['distance_miles'], errors='coerce')
-                )
-            else:
-                # As a last resort, try generic names set earlier
-                if {'moving_time_minutes','distance'}.issubset(df_runs.columns):
-                    df_runs['pace_min_per_mile'] = (
-                        pd.to_numeric(df_runs['moving_time_minutes'], errors='coerce') /
-                        pd.to_numeric(df_runs['distance'], errors='coerce')
-                    )
-
-        # Ensure a numeric distance column for size encoding
-        if 'distance' not in df_runs.columns and 'distance_miles' in df_runs.columns:
-            df_runs['distance'] = df_runs['distance_miles']
-
-        # Drop rows without valid pace or distance
-        df_runs = df_runs.dropna(subset=['pace_min_per_mile', 'distance'])
-        df_runs = df_runs[(df_runs['distance'] > 0) & (df_runs['pace_min_per_mile'] > 0)]
+with col_left:
+    if not df_filtered.empty:
+        # Subset to running-related activities while respecting the date filter
+        df_runs = df_filtered[df_filtered['activity_type'].str.contains('Run', case=False, na=False)].copy()
 
         if not df_runs.empty:
-            # Build scatter: date vs pace, bubble size by distance
-            hover_cols = {
-                'name': True,
-                'distance': ':.2f',
-                'avg_hr': True
-            }
-            # Include formatted pace in hover if present
-            if 'pace_formatted' in df_runs.columns:
-                hover_cols['pace_formatted'] = True
-            else:
-                hover_cols['pace_min_per_mile'] = ':.2f'
-
-            fig_runs = px.scatter(
-                df_runs,
-                x='date',
-                y='pace_min_per_mile',
-                size='distance',
-                color='distance',
-                color_continuous_scale='Turbo',
-                hover_data=hover_cols,
-                title='Run Pace Over Time (bubble size = distance)'
-            )
-
-            # Faster pace is smaller minutes; invert y-axis so faster appears higher
-            fig_runs.update_yaxes(autorange='reversed', title_text='Pace (min/mi)')
-            fig_runs.update_xaxes(title_text='Date')
-
-            # Add a 21-day rolling median pace line for context
-            try:
-                tmp = df_runs[['date','pace_min_per_mile']].dropna().sort_values('date')
-                tmp = tmp.set_index('date').asfreq('D')  # daily frequency to smooth gaps
-                roll_med = tmp['pace_min_per_mile'].rolling('21D', min_periods=1).median()
-                fig_runs.add_trace(
-                    go.Scatter(
-                        x=roll_med.index,
-                        y=roll_med.values,
-                        mode='lines',
-                        name='21-day rolling median',
-                        line=dict(color='magenta', width=3, dash='dot')
+            # Ensure pace exists; if missing, compute from moving time and distance
+            if 'pace_min_per_mile' not in df_runs.columns:
+                if {'moving_time_minutes','distance_miles'}.issubset(df_runs.columns):
+                    df_runs['pace_min_per_mile'] = (
+                        pd.to_numeric(df_runs['moving_time_minutes'], errors='coerce') /
+                        pd.to_numeric(df_runs['distance_miles'], errors='coerce')
                     )
+                else:
+                    # As a last resort, try generic names set earlier
+                    if {'moving_time_minutes','distance'}.issubset(df_runs.columns):
+                        df_runs['pace_min_per_mile'] = (
+                            pd.to_numeric(df_runs['moving_time_minutes'], errors='coerce') /
+                            pd.to_numeric(df_runs['distance'], errors='coerce')
+                        )
+
+            # Ensure a numeric distance column for size encoding
+            if 'distance' not in df_runs.columns and 'distance_miles' in df_runs.columns:
+                df_runs['distance'] = df_runs['distance_miles']
+
+            # Drop rows without valid pace or distance
+            df_runs = df_runs.dropna(subset=['pace_min_per_mile', 'distance'])
+            df_runs = df_runs[(df_runs['distance'] > 0) & (df_runs['pace_min_per_mile'] > 0)]
+
+            if not df_runs.empty:
+                # Build scatter: date vs pace, bubble size by distance
+                hover_cols = {
+                    'name': True,
+                    'distance': ':.2f',
+                    'avg_hr': True
+                }
+                # Include formatted pace in hover if present
+                if 'pace_formatted' in df_runs.columns:
+                    hover_cols['pace_formatted'] = True
+                else:
+                    hover_cols['pace_min_per_mile'] = ':.2f'
+
+                fig_runs = px.scatter(
+                    df_runs,
+                    x='date',
+                    y='pace_min_per_mile',
+                    size='distance',
+                    color='distance',
+                    color_continuous_scale='Turbo',
+                    hover_data=hover_cols,
+                    title='Run Pace Over Time (bubble size = distance)'
                 )
-            except Exception:
-                pass
 
-            fig_runs.update_layout(**transparent_layout)
-            st.plotly_chart(fig_runs, use_container_width=True)
+                # Faster pace is smaller minutes; invert y-axis so faster appears higher
+                fig_runs.update_yaxes(autorange='reversed', title_text='Pace (min/mi)')
+                fig_runs.update_xaxes(title_text='Date')
+
+                # Add a 21-day rolling median pace line for context
+                try:
+                    tmp = df_runs[['date','pace_min_per_mile']].dropna().sort_values('date')
+                    tmp = tmp.set_index('date').asfreq('D')  # daily frequency to smooth gaps
+                    roll_med = tmp['pace_min_per_mile'].rolling('21D', min_periods=1).median()
+                    fig_runs.add_trace(
+                        go.Scatter(
+                            x=roll_med.index,
+                            y=roll_med.values,
+                            mode='lines',
+                            name='21-day rolling median',
+                            line=dict(color='magenta', width=3, dash='dot')
+                        )
+                    )
+                except Exception:
+                    pass
+
+                fig_runs.update_layout(**transparent_layout)
+                st.plotly_chart(fig_runs, use_container_width=True)
+            else:
+                st.info('No run entries with valid pace and distance in the selected range.')
         else:
-            st.info('No run entries with valid pace and distance in the selected range.')
+            st.info('No runs in current filters. Include Run in Activity Type or adjust dates.')
     else:
-        st.info('No runs in current filters. Include Run in Activity Type or adjust dates.')
+        st.info('No data in selected filters.')
 
-# -------------------------
-# TRIMP Breakdown by Activity Type (Pie Chart)
-# -------------------------
-st.header("TRIMP Breakdown by Activity Type")
-if not df_filtered.empty:
-    df_type = df_filtered.groupby('activity_type', as_index=False)['intensity'].sum()
-    fig_pie = px.pie(
-        df_type,
-        names='activity_type',
-        values='intensity',
-        hole=0.4,
-        color_discrete_sequence=px.colors.qualitative.Set2
-    )
+with col_right:
+    if not df_filtered.empty:
+        df_type = df_filtered.groupby('activity_type', as_index=False)['intensity'].sum()
+        fig_pie = px.pie(
+            df_type,
+            names='activity_type',
+            values='intensity',
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Set2
+        )
 
-    # Center labels and contrast-aware colors
-    for i, trace in enumerate(fig_pie.data):
-        color = trace.marker.colors
-        contrast_color = get_contrast_color(color)
-        trace.textposition = 'inside'
-        trace.textfont = dict(color=contrast_color, size=14)
+        # Donut with inside labels only
+        fig_pie.update_traces(textposition='inside', textinfo='percent+label', insidetextorientation='auto')
 
-    fig_pie.update_layout(**transparent_layout)
-    st.plotly_chart(fig_pie, use_container_width=True)
-else:
-    st.info("No workouts in selected filters.")
+        # Contrast-aware text color (fallbacks to white)
+        for i, trace in enumerate(fig_pie.data):
+            color = trace.marker.colors
+            contrast_color = get_contrast_color(color)
+            trace.textposition = 'inside'
+            trace.textfont = dict(color=contrast_color, size=14)
+
+        fig_pie.update_layout(**transparent_layout)
+        st.plotly_chart(fig_pie, use_container_width=True)
+    else:
+        st.info("No workouts in selected filters.")
 
 # --- Activity Details Section ---
 st.markdown("### 🏃 Activity Details")
