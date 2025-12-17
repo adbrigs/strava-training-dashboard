@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Dec 16, 2025 02:27 PM",Afternoon Weight Training,WeightTraining,0.0,28.95,,,0.0,108.9,135.0,0.392884178652536,1,24.183423174906384,16764108841
 "Dec 15, 2025 11:34 AM",Lunch Weight Training - Push,WeightTraining,0.0,49.11666666666667,,,0.0,110.3,150.0,0.40348221044663135,1,43.00263462720161,16750403164
 "Dec 09, 2025 02:04 PM",Afternoon Weight Training,WeightTraining,0.0,36.75,,,0.0,108.1,131.0,0.38682816048448143,1,29.87654067013552,16749559715
 "Dec 08, 2025 05:42 PM",Afternoon Weight Training - Push,WeightTraining,0.0,38.86666666666667,,,0.0,104.7,131.0,0.36109008327024983,1,28.072827945664,16689606629
