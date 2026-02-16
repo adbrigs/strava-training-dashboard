@@ -1,4 +1,6 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Feb 16, 2026 11:42 AM",Lunch Weight Training,WeightTraining,0.0,14.116666666666667,,,0.0,121.8,151.0,0.49053747161241484,1,17.759746605532566,17419807509
+"Feb 16, 2026 11:30 AM",Lunch Run,Run,1.0332778359,12.733333333333333,12.323242491930946,12:19 /mi,0.0,141.7,160.0,0.6411809235427706,2,27.96201523120293,17419807503
 "Feb 13, 2026 12:02 PM",Lunch Weight Training - Pull,WeightTraining,0.0,58.833333333333336,,,0.0,106.3,153.0,0.3732021196063588,1,44.95318104210418,17386449488
 "Feb 12, 2026 02:14 PM",Afternoon Weight Training - Push,WeightTraining,0.0,45.61666666666667,,,0.0,98.1,136.0,0.3111279333838001,1,25.792601542615493,17377182880
 "Feb 10, 2026 12:35 PM",Lunch Weight Training - Legs,WeightTraining,0.0,50.666666666666664,,,0.0,113.2,151.0,0.42543527630582895,1,48.78688408853294,17353664022
