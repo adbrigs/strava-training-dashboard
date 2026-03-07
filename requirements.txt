@@ -6,6 +6,6 @@ jupyter
 openpyxl
 plotly
 dash
-streamlit
+streamlit==1.19.0
 numpy
 altair==4.2.2
