@@ -8,14 +8,13 @@ import re
 import numpy as np
 import os
 
-# Monkey patch for Python 3.13
-try:
-    import imghdr
-except ModuleNotFoundError:
-    import imghdr as _imghdr
-    import sys
-    sys.modules['imghdr'] = _imghdr
-    
+# At the very top of streamlit_dash.py
+import sys
+import types
+sys.modules['imghdr'] = types.SimpleNamespace(
+    what=lambda *args, **kwargs: None
+)
+
 # -------------------------
 # Page configuration
 # -------------------------
