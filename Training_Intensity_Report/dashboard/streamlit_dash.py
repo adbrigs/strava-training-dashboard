@@ -8,6 +8,13 @@ import re
 import numpy as np
 import os
 
+# Add this at the very top, before importing streamlit
+try:
+    import imghdr
+except ModuleNotFoundError:
+    import sys
+    import types
+    sys.modules['imghdr'] = types.ModuleType('imghdr')
 # -------------------------
 # Page configuration
 # -------------------------
