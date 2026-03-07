@@ -8,13 +8,14 @@ import re
 import numpy as np
 import os
 
-# Add this at the very top, before importing streamlit
+# Monkey patch for Python 3.13
 try:
     import imghdr
 except ModuleNotFoundError:
+    import imghdr as _imghdr
     import sys
-    import types
-    sys.modules['imghdr'] = types.ModuleType('imghdr')
+    sys.modules['imghdr'] = _imghdr
+    
 # -------------------------
 # Page configuration
 # -------------------------
