@@ -1,3 +1,10 @@
+# At the very top of streamlit_dash.py
+import sys
+import types
+sys.modules['imghdr'] = types.SimpleNamespace(
+    what=lambda *args, **kwargs: None
+)
+
 # streamlit_dash_upgraded.py
 import streamlit as st
 import pandas as pd
@@ -7,13 +14,6 @@ from datetime import datetime, timedelta
 import re
 import numpy as np
 import os
-
-# At the very top of streamlit_dash.py
-import sys
-import types
-sys.modules['imghdr'] = types.SimpleNamespace(
-    what=lambda *args, **kwargs: None
-)
 
 # -------------------------
 # Page configuration
