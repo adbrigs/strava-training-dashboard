@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Mar 08, 2026 02:30 PM",Afternoon Weight Training - Pull + Abs,WeightTraining,0.0,79.01666666666667,,,0.0,130.9,159.0,0.5594246782740349,1,129.39992460190814,17653309831
 "Mar 07, 2026 10:38 AM",Morning Weight Training - Push,WeightTraining,0.0,68.2,,,0.0,119.2,157.0,0.47085541256623775,1,79.30353817155466,17638668134
 "Mar 05, 2026 01:34 PM",Afternoon Weight Training,WeightTraining,0.0,70.26666666666667,,,0.0,111.2,145.0,0.4102952308856927,1,63.382390355490124,17620908624
 "Mar 04, 2026 02:57 PM",Afternoon Weight Training,WeightTraining,0.0,73.63333333333334,,,0.0,116.0,150.0,0.4466313398940197,1,77.5256017316479,17608972061
