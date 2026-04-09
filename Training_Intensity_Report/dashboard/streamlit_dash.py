@@ -129,7 +129,7 @@ transparent_layout = dict(
     font=dict(color="white", family="Arial"),
     xaxis=dict(gridcolor="rgba(255,255,255,0.1)"),
     yaxis=dict(gridcolor="rgba(255,255,255,0.1)"),
-    legend=dict(font=dict(color="white"))
+    legend=dict(font=dict(color="black"), bgcolor="rgba(255,255,255,0.85)", bordercolor="rgba(0,0,0,0.15)", borderwidth=1)
 )
 
 # -------------------------
@@ -172,138 +172,234 @@ col7.metric("Current Streak", streak)
 col8.metric("Max Streak", max_streak)
 
 # -------------------------
-# Weekly Workout Count (stacked bar + total number on top)
+# Combined Bar Chart (Weekly/Monthly + TRIMP/Workout Count + Individual Activities)
 # -------------------------
-st.header("Weekly Workout Count")
+st.header("Training Volume & Intensity")
+
 if not df_filtered.empty:
-    df_weekly_count = df_filtered.groupby(['week','activity_type'], as_index=False, observed=False)['name'].count()
-    df_weekly_count.rename(columns={'name':'count'}, inplace=True)
-
-    # Total workouts per week
-    df_weekly_total_count = df_filtered.groupby('week', as_index=False, observed=False)['name'].count()
-    df_weekly_total_count.rename(columns={'name':'total'}, inplace=True)
-    total_dict = dict(zip(df_weekly_total_count['week'], df_weekly_total_count['total']))
-
     color_sequence = px.colors.qualitative.Set2
     color_map = {act: color_sequence[i % len(color_sequence)] for i, act in enumerate(df_filtered['activity_type'].unique())}
 
-    fig_count = px.bar(
-        df_weekly_count,
-        x='week',
-        y='count',
-        color='activity_type',
-        color_discrete_map=color_map,
-        title="Weekly Workout Count by Activity Type"
-    )
+    t_col1, t_col2, t_col3 = st.columns([1, 1, 2])
+    with t_col1:
+        time_view = st.radio("Time Period", ["Weekly", "Monthly"], horizontal=True, key="time_view")
+    with t_col2:
+        metric_view = st.radio("Metric", ["TRIMP", "Workout Count"], horizontal=True, key="metric_view")
+    with t_col3:
+        show_individual = st.toggle("Show individual activities", key="show_individual") if metric_view == "TRIMP" else False
 
-    # Add 3-month rolling average of weekly total workouts
-    if len(df_weekly_total_count) >= 1:
-        try:
-            df_weekly_total_count_sorted = df_weekly_total_count.sort_values('week')
-            s_total = df_weekly_total_count_sorted.set_index('week')['total']
-            rolling_3mo_avg = s_total.rolling('90D', min_periods=1).mean()
-            fig_count.add_trace(
-                go.Scatter(
+    if metric_view == "TRIMP":
+        if show_individual:
+            # Individual activities view — one bar per activity, positioned by date
+            df_ind = df_filtered.sort_values('date').copy()
+            if time_view == "Weekly":
+                title = "Individual Activity TRIMP (Weekly Context)"
+            else:
+                title = "Individual Activity TRIMP (Monthly Context)"
+
+            fig = px.bar(
+                df_ind,
+                x='date',
+                y='intensity',
+                color='activity_type',
+                color_discrete_map=color_map,
+                hover_data={'name': True, 'intensity': ':.1f', 'date': True},
+                title=title
+            )
+
+            # Vertical dashed lines at period boundaries for context
+            if time_view == "Weekly":
+                for ps in sorted(df_filtered['week'].unique()):
+                    fig.add_vline(x=str(ps), line_width=1, line_dash="dash",
+                                  line_color="rgba(255,255,255,0.25)")
+            else:
+                for ps in sorted(df_filtered['year_month'].unique()):
+                    fig.add_vline(x=str(ps), line_width=1, line_dash="dash",
+                                  line_color="rgba(255,255,255,0.25)")
+
+        else:
+            # Aggregated TRIMP view
+            if time_view == "Weekly":
+                df_agg = df_filtered.groupby(['week', 'activity_type'], as_index=False, observed=False)['intensity'].sum()
+                fig = px.bar(
+                    df_agg,
+                    x='week',
+                    y='intensity',
+                    color='activity_type',
+                    color_discrete_map=color_map,
+                    title="Total TRIMP by Week"
+                )
+                fig.add_trace(go.Scatter(
+                    x=df_weekly_total['week'],
+                    y=df_weekly_total['rolling_avg'],
+                    mode='lines+markers',
+                    name='8-Week Rolling Avg',
+                    line=dict(color='magenta', width=3, dash='dot')
+                ))
+            else:
+                df_monthly_type = df_filtered.groupby(['year_month', 'activity_type'], as_index=False, observed=False)['intensity'].sum()
+                df_monthly_type['month_label'] = df_monthly_type['year_month'].dt.strftime('%b %Y')
+                df_monthly_total['month_label'] = df_monthly_total['year_month'].dt.strftime('%b %Y')
+                month_order = df_monthly_type['month_label'].drop_duplicates().tolist()
+                df_monthly_type['month_label'] = pd.Categorical(df_monthly_type['month_label'], categories=month_order, ordered=True)
+                df_monthly_total['month_label'] = pd.Categorical(df_monthly_total['month_label'], categories=month_order, ordered=True)
+
+                fig = px.bar(
+                    df_monthly_type,
+                    x='month_label',
+                    y='intensity',
+                    color='activity_type',
+                    color_discrete_map=color_map,
+                    title="Total TRIMP by Month"
+                )
+                fig.add_trace(go.Scatter(
+                    x=df_monthly_total['month_label'],
+                    y=df_monthly_total['rolling_avg'],
+                    mode='lines+markers',
+                    name='2-Month Rolling Avg',
+                    line=dict(color='magenta', width=3, dash='dot')
+                ))
+
+    else:
+        # Workout Count view
+        current_avg = None
+        if time_view == "Weekly":
+            df_weekly_count = df_filtered.groupby(['week', 'activity_type'], as_index=False, observed=False)['name'].count()
+            df_weekly_count.rename(columns={'name': 'count'}, inplace=True)
+            df_weekly_total_count = df_filtered.groupby('week', as_index=False, observed=False)['name'].count()
+            df_weekly_total_count.rename(columns={'name': 'total'}, inplace=True)
+            total_dict = dict(zip(df_weekly_total_count['week'], df_weekly_total_count['total']))
+
+            fig = px.bar(
+                df_weekly_count,
+                x='week',
+                y='count',
+                color='activity_type',
+                color_discrete_map=color_map,
+                title="Weekly Workout Count by Activity Type"
+            )
+            try:
+                df_wc_sorted = df_weekly_total_count.sort_values('week')
+                rolling_3mo_avg = df_wc_sorted.set_index('week')['total'].rolling('90D', min_periods=1).mean()
+                fig.add_trace(go.Scatter(
                     x=rolling_3mo_avg.index,
                     y=rolling_3mo_avg.values,
                     mode='lines+markers',
                     name='3-Month Rolling Avg',
                     line=dict(color='magenta', width=3, dash='dot')
+                ))
+                current_avg = float(rolling_3mo_avg.iloc[-1])
+            except Exception:
+                pass
+            for week, total in total_dict.items():
+                fig.add_annotation(
+                    x=week, y=total + 0.3,
+                    text=str(total),
+                    showarrow=False,
+                    font=dict(color="white", size=12),
+                    align="center"
                 )
+        else:
+            df_monthly_count = df_filtered.groupby(['year_month', 'activity_type'], as_index=False, observed=False)['name'].count()
+            df_monthly_count.rename(columns={'name': 'count'}, inplace=True)
+            df_monthly_count['month_label'] = df_monthly_count['year_month'].dt.strftime('%b %Y')
+            month_order_c = df_monthly_count['month_label'].drop_duplicates().tolist()
+            df_monthly_count['month_label'] = pd.Categorical(df_monthly_count['month_label'], categories=month_order_c, ordered=True)
+
+            df_monthly_total_count = df_filtered.groupby('year_month', as_index=False, observed=False)['name'].count()
+            df_monthly_total_count.rename(columns={'name': 'total'}, inplace=True)
+            df_monthly_total_count['month_label'] = df_monthly_total_count['year_month'].dt.strftime('%b %Y')
+            total_dict_m = dict(zip(df_monthly_total_count['month_label'], df_monthly_total_count['total']))
+
+            fig = px.bar(
+                df_monthly_count,
+                x='month_label',
+                y='count',
+                color='activity_type',
+                color_discrete_map=color_map,
+                title="Monthly Workout Count by Activity Type"
             )
-        except Exception:
-            rolling_3mo_avg = None
+            for month_lbl, total in total_dict_m.items():
+                fig.add_annotation(
+                    x=month_lbl, y=total + 0.3,
+                    text=str(total),
+                    showarrow=False,
+                    font=dict(color="white", size=12),
+                    align="center"
+                )
 
-    # Add total number annotation on top of each stacked bar
-    for week, total in total_dict.items():
-        fig_count.add_annotation(
-            x=week,
-            y=total + 0.3,
-            text=str(total),
-            showarrow=False,
-            font=dict(color="white", size=12),
-            align="center"
-        )
+    fig.update_layout(**transparent_layout, bargap=0.2)
+    st.plotly_chart(fig, use_container_width=True)
 
-    fig_count.update_layout(**transparent_layout, bargap=0.2)
-    st.plotly_chart(fig_count, use_container_width=True)
+    if metric_view == "Workout Count" and time_view == "Weekly" and current_avg is not None:
+        st.caption(f"Current 3-month rolling workouts/week average: {current_avg:.2f}")
 
-    # Display current workouts/week average (latest 3-month rolling value)
-    try:
-        if 'rolling_3mo_avg' in locals() and rolling_3mo_avg is not None and len(rolling_3mo_avg) > 0:
-            current_avg = float(rolling_3mo_avg.iloc[-1])
-            st.caption(f"Current 3-month rolling workouts/week average: {current_avg:.2f}")
-    except Exception:
-        pass
+else:
+    st.info("No data available for the selected filters.")
 
 # -------------------------
-# Total TRIMP by Week (stacked + rolling average)
+# HR Training Zone Time
 # -------------------------
-st.header("Total Intensity by Week")
-if not df_filtered.empty:
-    df_weekly_type = df_filtered.groupby(['week','activity_type'], as_index=False, observed=False)['intensity'].sum()
-    fig_weekly = px.bar(
-        df_weekly_type,
-        x='week',
-        y='intensity',
-        color='activity_type',
-        color_discrete_map=color_map,
-        title="Total TRIMP by Week (Stacked + Rolling Average)"
+st.header("Time in HR Training Zones")
+
+zone_colors = {
+    1: '#4FC3F7',  # Zone 1 - Recovery (light blue)
+    2: '#81C784',  # Zone 2 - Aerobic (green)
+    3: '#FFD54F',  # Zone 3 - Tempo (yellow)
+    4: '#FF8A65',  # Zone 4 - Threshold (orange)
+    5: '#EF5350',  # Zone 5 - VO2 Max (red)
+}
+zone_labels = {
+    1: 'Zone 1 – Recovery',
+    2: 'Zone 2 – Aerobic',
+    3: 'Zone 3 – Tempo',
+    4: 'Zone 4 – Threshold',
+    5: 'Zone 5 – VO2 Max',
+}
+
+if not df_filtered.empty and 'hr_zone_1-5' in df_filtered.columns and 'moving_time_minutes' in df_filtered.columns:
+    zone_time_view = st.radio("Time Period", ["Daily", "Weekly"], horizontal=True, key="zone_time_view")
+
+    df_zones = df_filtered[['date', 'week', 'hr_zone_1-5', 'moving_time_minutes']].copy()
+    df_zones['hr_zone_1-5'] = pd.to_numeric(df_zones['hr_zone_1-5'], errors='coerce').dropna()
+    df_zones = df_zones[df_zones['hr_zone_1-5'].isin([1, 2, 3, 4, 5])]
+    df_zones['hr_zone_1-5'] = df_zones['hr_zone_1-5'].astype(int)
+    df_zones['zone_label'] = df_zones['hr_zone_1-5'].map(zone_labels)
+    df_zones['moving_time_minutes'] = pd.to_numeric(df_zones['moving_time_minutes'], errors='coerce').fillna(0)
+
+    # Ensure zone_label is ordered Z1→Z5
+    zone_order = list(zone_labels.values())
+    df_zones['zone_label'] = pd.Categorical(df_zones['zone_label'], categories=zone_order, ordered=True)
+
+    if zone_time_view == "Daily":
+        df_zones['period'] = df_zones['date'].dt.date
+        x_col = 'period'
+        x_label = 'Date'
+    else:
+        df_zones['period'] = df_zones['week']
+        x_col = 'period'
+        x_label = 'Week'
+
+    df_zone_agg = df_zones.groupby(
+        ['period', 'zone_label'], as_index=False, observed=True
+    )['moving_time_minutes'].sum()
+
+    fig_zones = px.bar(
+        df_zone_agg,
+        x=x_col,
+        y='moving_time_minutes',
+        color='zone_label',
+        color_discrete_map={v: zone_colors[k] for k, v in zone_labels.items()},
+        category_orders={'zone_label': zone_order},
+        labels={'moving_time_minutes': 'Time (min)', 'period': x_label, 'zone_label': 'HR Zone'},
+        title=f"Time in HR Zones by {'Day' if zone_time_view == 'Daily' else 'Week'}"
     )
-
-    # Add rolling average line
-    fig_weekly.add_trace(
-        go.Scatter(
-            x=df_weekly_total['week'],
-            y=df_weekly_total['rolling_avg'],
-            mode='lines+markers',
-            name='2-Month Rolling Avg',
-            line=dict(color='magenta', width=3, dash='dot')
-        )
-    )
-    fig_weekly.update_layout(**transparent_layout, bargap=0.2)
-    st.plotly_chart(fig_weekly, use_container_width=True)
-
-# -------------------------
-# Total TRIMP by Month
-# -------------------------
-st.header("Total Intensity by Month")
-if not df_filtered.empty:
-    # Aggregate intensity by month and activity type
-    df_monthly_type = df_filtered.groupby(['year_month','activity_type'], as_index=False, observed=False)['intensity'].sum()
-
-    # Convert year_month to string for x-axis
-    df_monthly_type['month_label'] = df_monthly_type['year_month'].dt.strftime('%b %Y')
-    df_monthly_total['month_label'] = df_monthly_total['year_month'].dt.strftime('%b %Y')
-
-    # Sort months chronologically
-    month_order = df_monthly_type['month_label'].drop_duplicates().tolist()
-    df_monthly_type['month_label'] = pd.Categorical(df_monthly_type['month_label'], categories=month_order, ordered=True)
-    df_monthly_total['month_label'] = pd.Categorical(df_monthly_total['month_label'], categories=month_order, ordered=True)
-
-    # Stacked bar chart by month
-    fig_monthly = px.bar(
-        df_monthly_type,
-        x='month_label',
-        y='intensity',
-        color='activity_type',
-        color_discrete_map=color_map,
-        title="Total TRIMP by Month (Stacked + 2-Month Rolling Average)"
-    )
-
-    # Add rolling average line
-    fig_monthly.add_trace(
-        go.Scatter(
-            x=df_monthly_total['month_label'],
-            y=df_monthly_total['rolling_avg'],
-            mode='lines+markers',
-            name='2-Month Rolling Avg',
-            line=dict(color='magenta', width=3, dash='dot')
-        )
-    )
-
-    fig_monthly.update_layout(**transparent_layout, bargap=0.2)
-    st.plotly_chart(fig_monthly, use_container_width=True)
+    fig_zones.update_layout(**transparent_layout, bargap=0.2)
+    fig_zones.update_layout(legend=dict(font=dict(color="black"), bgcolor="rgba(255,255,255,0.85)",
+                                        bordercolor="rgba(0,0,0,0.15)", borderwidth=1))
+    st.plotly_chart(fig_zones, use_container_width=True)
+else:
+    st.info("No HR zone data available for the selected filters.")
 
 # -------------------------
 # Daily TRIMP Heatmap
