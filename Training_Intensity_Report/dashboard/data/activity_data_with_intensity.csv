@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Apr 09, 2026 06:28 PM",Evening Run,Run,2.0141119594,19.133333333333333,9.499637417888684,9:30 /mi,30.183728,150.2,162.0,0.7055261165783496,3,52.31225519907175,18047168098
 "Apr 07, 2026 04:46 PM",Afternoon Stair-Stepper,StairStepper,0.0,21.333333333333332,,,0.0,131.7,148.0,0.5654806964420893,1,35.72728249510953,18021794503
 "Apr 07, 2026 12:51 PM",Lunch Weight Training - Pull,WeightTraining,0.0,67.85,,,0.0,118.0,153.0,0.46177138531415596,1,76.03662246253155,18016674701
 "Apr 06, 2026 06:18 PM",Evening Run,Run,2.0072768784,18.8,9.365922659850234,9:22 /mi,24.278216,153.3,169.0,0.7289931869795611,3,55.55829868030308,18005832507
