@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),trimp (score),id
+"Apr 24, 2026 12:28 PM",Lunch Weight Training - Push,WeightTraining,0.0,48.6,,,0.0,109.5,130.0,0.39742619227857684,1,41.42712162899261,18241582169
 "Apr 23, 2026 06:17 PM",Evening Tennis,Tennis,0.0,35.4,,,0.0,129.2,148.0,0.5465556396669189,1,55.25614095182839,18232542572
 "Apr 23, 2026 11:40 AM",Lunch Weight Training - Legs,WeightTraining,0.0,31.1,,,0.0,109.1,137.0,0.39439818319454956,1,26.155462720755732,18227590099
 "Apr 21, 2026 04:16 PM",Afternoon Weight Training - Pull,WeightTraining,0.0,55.11666666666667,,,0.0,109.5,137.0,0.39742619227857684,1,46.98199287622721,18203891321
