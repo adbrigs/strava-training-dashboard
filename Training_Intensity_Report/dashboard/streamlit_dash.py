@@ -15,6 +15,7 @@ import re
 import numpy as np
 import os
 
+
 # -------------------------
 # Page configuration
 # -------------------------
@@ -70,7 +71,11 @@ if os.path.exists(csv_path):
     st.sidebar.markdown(f"**Data last updated:** {last_modified_dt.strftime('%Y-%m-%d %H:%M:%S')}")
 else:
     st.sidebar.markdown("**Data last updated:** No data file found")
-    
+
+# -------------------------
+# Manual refresh button
+# -------------------------
+
 # -------------------------
 # Filter dataframe (include full end date)
 # -------------------------
