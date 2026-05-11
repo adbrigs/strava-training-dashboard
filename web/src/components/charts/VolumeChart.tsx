@@ -21,6 +21,8 @@ interface Props {
   showRollingAvg?: boolean;
   mutedTypes?: Set<string>;
   height?: number;
+  fmtVal?: (v: number) => string;
+  labels?: Record<string, string>;
 }
 
 interface HoverInfo {
@@ -35,6 +37,7 @@ export default function VolumeChart({
   chartStyle = 'bar', onChartStyle,
   showRollingAvg = true,
   mutedTypes = new Set(), height = 300,
+  fmtVal, labels,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(720);
@@ -226,13 +229,16 @@ export default function VolumeChart({
           {types.filter(t => (hover.b.byType[t] || 0) > 0 && !mutedTypes.has(t)).map(t => (
             <div key={t} className="tt-row" style={{ '--c': palette[t] } as React.CSSProperties}>
               <span className="sw" />
-              <span className="nm">{ACTIVITY_LABELS[t] || t}</span>
-              <span className="v">{fmt(hover.b.byType[t])}</span>
+              <span className="nm">{(labels && labels[t]) || ACTIVITY_LABELS[t] || t}</span>
+              <span className="v">{fmtVal ? fmtVal(hover.b.byType[t]) : fmt(hover.b.byType[t])}</span>
             </div>
           ))}
           <div className="tt-row total">
             <span className="nm">Total</span>
-            <span className="v">{fmt(types.reduce((s, t) => s + (!mutedTypes.has(t) ? (hover.b.byType[t] || 0) : 0), 0))}</span>
+            <span className="v">{fmtVal
+              ? fmtVal(types.reduce((s, t) => s + (!mutedTypes.has(t) ? (hover.b.byType[t] || 0) : 0), 0))
+              : fmt(types.reduce((s, t) => s + (!mutedTypes.has(t) ? (hover.b.byType[t] || 0) : 0), 0))
+            }</span>
           </div>
           {showRollingAvg && (
             <div className="tt-row">

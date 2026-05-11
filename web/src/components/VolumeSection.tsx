@@ -10,20 +10,34 @@ function weekStart(d: Date): Date {
   const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - x.getDay()); return x;
 }
 
+const ZONE_KEYS = ['z1', 'z2', 'z3', 'z4', 'z5'];
+const ZONE_COLORS: Record<string, string> = {
+  z1: 'var(--z1)', z2: 'var(--z2)', z3: 'var(--z3)', z4: 'var(--z4)', z5: 'var(--z5)',
+};
+const ZONE_LABELS: Record<string, string> = {
+  z1: 'Z1 Recovery', z2: 'Z2 Aerobic', z3: 'Z3 Tempo', z4: 'Z4 Threshold', z5: 'Z5 VO₂max',
+};
+
+function fmtMin(min: number): string {
+  if (min >= 60) return `${(min / 60).toFixed(1)}h`;
+  return `${Math.round(min)}m`;
+}
+
 interface Props {
   filtered: Activity[];
   from: Date;
   to: Date;
   period: 'weekly' | 'monthly';
   onPeriod: (p: 'weekly' | 'monthly') => void;
-  metric: 'trimp' | 'count';
-  onMetric: (m: 'trimp' | 'count') => void;
   selectedTypes: Set<string>;
 }
 
-export default function VolumeSection({ filtered, from, to, period, onPeriod, metric, onMetric, selectedTypes }: Props) {
+export default function VolumeSection({ filtered, from, to, period, onPeriod, selectedTypes }: Props) {
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [chartStyle, setChartStyle] = useState<'bar' | 'area' | 'line'>('bar');
+  const [metric, setMetric] = useState<'trimp' | 'count' | 'zones'>('trimp');
+
+  const isZones = metric === 'zones';
 
   const buckets: Bucket[] = useMemo(() => {
     const isWeekly = period === 'weekly';
@@ -43,29 +57,39 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, me
     filtered.forEach(a => {
       const b = bs.find(b => a.date >= b.start && a.date <= b.end);
       if (!b) return;
-      const val = metric === 'trimp' ? a.trimp : 1;
-      b.byType[a.type] = (b.byType[a.type] || 0) + val;
-      b.total += val;
+      if (isZones) {
+        const key = `z${a.zone}`;
+        b.byType[key] = (b.byType[key] || 0) + a.duration;
+        b.total += a.duration;
+      } else {
+        const val = metric === 'trimp' ? a.trimp : 1;
+        b.byType[a.type] = (b.byType[a.type] || 0) + val;
+        b.total += val;
+      }
     });
-    const win = 8;
-    for (let i = 0; i < bs.length; i++) {
-      const slice = bs.slice(Math.max(0, i - win + 1), i + 1);
-      bs[i].rolling = slice.reduce((s, b) => s + b.total, 0) / slice.length;
+    if (!isZones) {
+      const win = 8;
+      for (let i = 0; i < bs.length; i++) {
+        const slice = bs.slice(Math.max(0, i - win + 1), i + 1);
+        bs[i].rolling = slice.reduce((s, b) => s + b.total, 0) / slice.length;
+      }
     }
     return bs;
-  }, [filtered, period, metric, from, to]);
+  }, [filtered, period, metric, isZones, from, to]);
 
   const usedTypes = useMemo(() => {
+    if (isZones) return ZONE_KEYS.filter(k => buckets.some(b => (b.byType[k] || 0) > 0));
     const set = new Set<string>();
     filtered.forEach(a => set.add(a.type));
     return Array.from(selectedTypes).filter(t => set.has(t));
-  }, [filtered, selectedTypes]);
+  }, [filtered, selectedTypes, isZones, buckets]);
 
   const palette = useMemo(() => {
+    if (isZones) return { ...ZONE_COLORS };
     const out: Record<string, string> = {};
     usedTypes.forEach(t => out[t] = ACTIVITY_COLORS[t] || '#94a3b8');
     return out;
-  }, [usedTypes]);
+  }, [usedTypes, isZones]);
 
   const toggle = (t: string) => setMuted(m => { const n = new Set(m); n.has(t) ? n.delete(t) : n.add(t); return n; });
 
@@ -78,36 +102,53 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, me
         </div>
         <Seg
           value={metric}
-          onChange={v => onMetric(v as 'trimp' | 'count')}
-          options={[{ value: 'trimp', label: 'TRIMP' }, { value: 'count', label: 'Workouts' }]}
+          onChange={v => setMetric(v as 'trimp' | 'count' | 'zones')}
+          options={[
+            { value: 'trimp', label: 'TRIMP' },
+            { value: 'count', label: 'Workouts' },
+            { value: 'zones', label: 'Zones' },
+          ]}
         />
       </div>
       <VolumeChart
         buckets={buckets}
         types={usedTypes}
         palette={palette}
-        chartStyle={chartStyle}
-        onChartStyle={setChartStyle}
-        mutedTypes={muted}
+        chartStyle={isZones ? 'bar' : chartStyle}
+        onChartStyle={isZones ? undefined : setChartStyle}
+        mutedTypes={isZones ? new Set() : muted}
         showRollingAvg={metric === 'trimp'}
+        fmtVal={isZones ? fmtMin : undefined}
+        labels={isZones ? ZONE_LABELS : undefined}
       />
       <div className="legend">
-        {usedTypes.map(t => (
-          <span
-            key={t}
-            className={`legend-item ${muted.has(t) ? 'muted' : ''}`}
-            style={{ '--c': palette[t] } as React.CSSProperties}
-            onClick={() => toggle(t)}
-          >
-            <span className="sw" />
-            {ACTIVITY_LABELS[t] || t}
-          </span>
-        ))}
-        {metric === 'trimp' && (
-          <span className="legend-item" style={{ '--c': 'var(--text)' } as React.CSSProperties}>
-            <span className="sw line" style={{ background: 'var(--text)', opacity: 0.7 }} />
-            8-{period === 'weekly' ? 'wk' : 'mo'} rolling avg
-          </span>
+        {isZones ? (
+          usedTypes.map(k => (
+            <span key={k} className="legend-item" style={{ '--c': ZONE_COLORS[k] } as React.CSSProperties}>
+              <span className="sw" />
+              {ZONE_LABELS[k]}
+            </span>
+          ))
+        ) : (
+          <>
+            {usedTypes.map(t => (
+              <span
+                key={t}
+                className={`legend-item ${muted.has(t) ? 'muted' : ''}`}
+                style={{ '--c': palette[t] } as React.CSSProperties}
+                onClick={() => toggle(t)}
+              >
+                <span className="sw" />
+                {ACTIVITY_LABELS[t] || t}
+              </span>
+            ))}
+            {metric === 'trimp' && (
+              <span className="legend-item" style={{ '--c': 'var(--text)' } as React.CSSProperties}>
+                <span className="sw line" style={{ background: 'var(--text)', opacity: 0.7 }} />
+                8-{period === 'weekly' ? 'wk' : 'mo'} rolling avg
+              </span>
+            )}
+          </>
         )}
       </div>
     </div>

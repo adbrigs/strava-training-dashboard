@@ -43,7 +43,6 @@ export default function Dashboard() {
   const [rangePreset, setRangePreset] = useState('60d');
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
-  const [metric, setMetric] = useState<'trimp' | 'count'>('trimp');
 
   // activities is already sorted desc by date from the load effect
   const today = useMemo(() => activities.length > 0 ? activities[0].date : new Date(), [activities]);
@@ -221,8 +220,6 @@ export default function Dashboard() {
             to={to}
             period={period}
             onPeriod={setPeriod}
-            metric={metric}
-            onMetric={setMetric}
             selectedTypes={selectedTypes}
           />
           <HRZonesSection filtered={filtered} />
