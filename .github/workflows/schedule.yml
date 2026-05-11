@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r Training_Intensity_Report/requirements.txt
 
       # 4️⃣ Set up credentials from GitHub Secrets (written to config folder)
       - name: Setup credentials
