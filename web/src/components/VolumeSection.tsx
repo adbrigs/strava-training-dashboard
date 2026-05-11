@@ -18,13 +18,12 @@ interface Props {
   onPeriod: (p: 'weekly' | 'monthly') => void;
   metric: 'trimp' | 'count';
   onMetric: (m: 'trimp' | 'count') => void;
-  chartStyle: 'bar' | 'area' | 'line';
   selectedTypes: Set<string>;
 }
 
-export default function VolumeSection({ filtered, from, to, period, onPeriod, metric, onMetric, chartStyle, selectedTypes }: Props) {
+export default function VolumeSection({ filtered, from, to, period, onPeriod, metric, onMetric, selectedTypes }: Props) {
   const [muted, setMuted] = useState<Set<string>>(new Set());
-  const [stacked, setStacked] = useState(false);
+  const [chartStyle, setChartStyle] = useState<'bar' | 'area' | 'line'>('bar');
 
   const buckets: Bucket[] = useMemo(() => {
     const isWeekly = period === 'weekly';
@@ -77,35 +76,20 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, me
           Training Volume & Intensity
           <span className="info" title="TRIMP = Training Impulse. duration × heart-rate intensity × workout-type scaling.">i</span>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Seg
-            value={metric}
-            onChange={v => { onMetric(v as 'trimp' | 'count'); setStacked(false); }}
-            options={[{ value: 'trimp', label: 'TRIMP' }, { value: 'count', label: 'Workouts' }]}
-          />
-          <button
-            onClick={() => setStacked(s => !s)}
-            style={{
-              fontSize: 11.5, fontWeight: 500,
-              padding: '4px 10px', borderRadius: 'var(--radius-pill)',
-              background: stacked ? 'var(--accent-soft)' : 'var(--surface-2)',
-              color: stacked ? 'var(--accent)' : 'var(--text-muted)',
-              border: stacked ? '1px solid var(--accent)' : '1px solid var(--border)',
-              lineHeight: 1.4,
-            }}
-          >
-            Stack
-          </button>
-        </div>
+        <Seg
+          value={metric}
+          onChange={v => onMetric(v as 'trimp' | 'count')}
+          options={[{ value: 'trimp', label: 'TRIMP' }, { value: 'count', label: 'Workouts' }]}
+        />
       </div>
       <VolumeChart
         buckets={buckets}
         types={usedTypes}
         palette={palette}
-        chartStyle={stacked ? 'bar' : chartStyle}
+        chartStyle={chartStyle}
+        onChartStyle={setChartStyle}
         mutedTypes={muted}
-        showRollingAvg={!stacked && metric === 'trimp'}
-        forceStack={stacked}
+        showRollingAvg={metric === 'trimp'}
       />
       <div className="legend">
         {usedTypes.map(t => (
@@ -113,13 +97,13 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, me
             key={t}
             className={`legend-item ${muted.has(t) ? 'muted' : ''}`}
             style={{ '--c': palette[t] } as React.CSSProperties}
-            onClick={() => !stacked && toggle(t)}
+            onClick={() => toggle(t)}
           >
             <span className="sw" />
             {ACTIVITY_LABELS[t] || t}
           </span>
         ))}
-        {!stacked && metric === 'trimp' && (
+        {metric === 'trimp' && (
           <span className="legend-item" style={{ '--c': 'var(--text)' } as React.CSSProperties}>
             <span className="sw line" style={{ background: 'var(--text)', opacity: 0.7 }} />
             8-{period === 'weekly' ? 'wk' : 'mo'} rolling avg

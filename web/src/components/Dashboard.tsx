@@ -36,7 +36,6 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [chartStyle, setChartStyle] = useState<'bar' | 'area' | 'line'>('bar');
 
   const [from, setFrom] = useState<Date>(new Date());
   const [to, setTo] = useState<Date>(new Date());
@@ -178,7 +177,6 @@ export default function Dashboard() {
             onPeriod={setPeriod}
             metric={metric}
             onMetric={setMetric}
-            chartStyle={chartStyle}
             selectedTypes={selectedTypes}
           />
           <HRZonesSection filtered={filtered} />
@@ -224,29 +222,6 @@ export default function Dashboard() {
         <ActivityTable filtered={filtered} />
       </div>
 
-      {/* Chart style switcher (bottom-right) */}
-      <div style={{
-        position: 'fixed', bottom: 20, right: 20, zIndex: 50,
-        display: 'flex', alignItems: 'center', gap: 8,
-        background: 'var(--surface-3)', borderRadius: 'var(--radius-pill)',
-        padding: '6px 12px', boxShadow: '0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px var(--border-strong)',
-      }}>
-        <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-subtle)' }}>Chart</span>
-        {(['bar', 'area', 'line'] as const).map(s => (
-          <button
-            key={s}
-            onClick={() => setChartStyle(s)}
-            style={{
-              fontSize: 11.5, fontWeight: 500, padding: '3px 10px', borderRadius: 'var(--radius-pill)',
-              background: chartStyle === s ? 'var(--surface)' : 'transparent',
-              color: chartStyle === s ? 'var(--text)' : 'var(--text-muted)',
-              boxShadow: chartStyle === s ? '0 0 0 1px var(--border-strong)' : 'none',
-            }}
-          >
-            {s[0].toUpperCase() + s.slice(1)}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

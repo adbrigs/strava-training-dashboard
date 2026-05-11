@@ -17,10 +17,10 @@ interface Props {
   types: string[];
   palette: Record<string, string>;
   chartStyle?: 'bar' | 'area' | 'line';
+  onChartStyle?: (s: 'bar' | 'area' | 'line') => void;
   showRollingAvg?: boolean;
   mutedTypes?: Set<string>;
   height?: number;
-  forceStack?: boolean;
 }
 
 interface HoverInfo {
@@ -32,8 +32,9 @@ interface HoverInfo {
 
 export default function VolumeChart({
   buckets, types, palette,
-  chartStyle = 'bar', showRollingAvg = true,
-  mutedTypes = new Set(), height = 300, forceStack = false,
+  chartStyle = 'bar', onChartStyle,
+  showRollingAvg = true,
+  mutedTypes = new Set(), height = 300,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(720);
@@ -85,8 +86,38 @@ export default function VolumeChart({
     return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
   }
 
+  const STYLES: Array<'bar' | 'area' | 'line'> = ['bar', 'area', 'line'];
+
   return (
     <div className="chart-wrap" ref={wrapRef}>
+      {/* Chart style overlay */}
+      {onChartStyle && (
+        <div style={{
+          position: 'absolute', top: 6, right: 6, zIndex: 10,
+          display: 'flex', background: 'var(--surface-2)',
+          border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)',
+          padding: '2px',
+        }}>
+          {STYLES.map(s => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onChartStyle(s)}
+              style={{
+                fontSize: 10.5, fontWeight: 500,
+                padding: '2px 9px', borderRadius: 'var(--radius-pill)',
+                background: chartStyle === s ? 'var(--surface)' : 'transparent',
+                color: chartStyle === s ? 'var(--text)' : 'var(--text-subtle)',
+                border: chartStyle === s ? '1px solid var(--border-strong)' : '1px solid transparent',
+                lineHeight: 1.6,
+              }}
+            >
+              {s[0].toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
       <svg
         className="chart-svg"
         viewBox={`0 0 ${w} ${H}`}
@@ -107,11 +138,10 @@ export default function VolumeChart({
         {chartStyle === 'bar' && buckets.map((b, i) => {
           let y0 = padT + innerH;
           const barW = Math.min(38, xBand * 0.7);
-          const activeMuted = forceStack ? new Set<string>() : mutedTypes;
           return (
             <g key={i} className="bar-stack" transform={`translate(${xPos(i) - barW / 2}, 0)`}>
               {types.map(t => {
-                if (activeMuted.has(t)) return null;
+                if (mutedTypes.has(t)) return null;
                 const v = b.byType[t] || 0;
                 if (!v) return null;
                 const h = (v / maxVal) * innerH;
@@ -185,15 +215,15 @@ export default function VolumeChart({
             y={padT}
             width={innerW / Math.max(1, n)}
             height={innerH}
-            onMouseEnter={() => setHover({ i, x: xPos(i), y: padT + 4, b })}
+            onMouseEnter={() => setHover({ i, x: xPos(i), y: padT + innerH * 0.35, b })}
           />
         ))}
       </svg>
 
       {hover && (
         <div className="tt" style={{ left: hover.x, top: hover.y }}>
-          <h5>{hover.b.fullLabel || hover.b.label}</h5>
-          {types.filter(t => (hover.b.byType[t] || 0) > 0 && (forceStack || !mutedTypes.has(t))).map(t => (
+          <div className="tt-head">{hover.b.fullLabel || hover.b.label}</div>
+          {types.filter(t => (hover.b.byType[t] || 0) > 0 && !mutedTypes.has(t)).map(t => (
             <div key={t} className="tt-row" style={{ '--c': palette[t] } as React.CSSProperties}>
               <span className="sw" />
               <span className="nm">{ACTIVITY_LABELS[t] || t}</span>
@@ -202,12 +232,12 @@ export default function VolumeChart({
           ))}
           <div className="tt-row total">
             <span className="nm">Total</span>
-            <span className="v">{fmt(types.reduce((s, t) => s + ((forceStack || !mutedTypes.has(t)) ? (hover.b.byType[t] || 0) : 0), 0))}</span>
+            <span className="v">{fmt(types.reduce((s, t) => s + (!mutedTypes.has(t) ? (hover.b.byType[t] || 0) : 0), 0))}</span>
           </div>
           {showRollingAvg && (
-            <div className="tt-row" style={{ '--c': 'var(--text)' } as React.CSSProperties}>
-              <span className="sw" style={{ background: 'var(--text)', opacity: 0.7 }} />
-              <span className="nm">8-wk rolling</span>
+            <div className="tt-row">
+              <span className="sw" style={{ background: 'var(--text-muted)' }} />
+              <span className="nm">8-wk avg</span>
               <span className="v">{fmt(hover.b.rolling)}</span>
             </div>
           )}

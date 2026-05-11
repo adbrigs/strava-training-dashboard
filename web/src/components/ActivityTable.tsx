@@ -4,7 +4,7 @@ import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, fmtDateTime, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
-type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'elevation' | 'avgHr' | 'maxHr' | 'hrRatio' | 'zone' | 'trimp';
+type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'elevation' | 'avgHr' | 'maxHr' | 'zone' | 'trimp';
 
 const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'date',      l: 'Date' },
@@ -16,7 +16,6 @@ const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'elevation', l: 'Elev (ft)',  num: true },
   { k: 'avgHr',     l: 'Avg HR',    num: true },
   { k: 'maxHr',     l: 'Max HR',    num: true },
-  { k: 'hrRatio',   l: 'HR Ratio',  num: true },
   { k: 'zone',      l: 'Zone' },
   { k: 'trimp',     l: 'TRIMP',     num: true },
 ];
@@ -97,7 +96,6 @@ export default function ActivityTable({ filtered }: Props) {
                 <td className="num">{a.elevation ? fmtNum(a.elevation) : '—'}</td>
                 <td className="num">{a.avgHr ? fmtNum(a.avgHr) : '—'}</td>
                 <td className="num">{a.maxHr ? fmtNum(a.maxHr) : '—'}</td>
-                <td className="num">{a.hrRatio ? a.hrRatio.toFixed(3) : '—'}</td>
                 <td>
                   <span className="zone-pip" style={{ '--zc': `var(--z${a.zone})` } as React.CSSProperties}>{a.zone}</span>
                 </td>

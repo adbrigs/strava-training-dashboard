@@ -9,15 +9,14 @@ interface Props {
   today: Date;
 }
 
-const ZONE_COLORS = ['#4f8cff', '#3ec9a8', '#f5b942', '#ff7a3d', '#ff4d6d'];
-
+// Blue sequential scale — safe for all types of color blindness
 function lerpColor(t: number): string {
-  // 0 → surface-3, 0.25+ → lime with increasing opacity
   if (t <= 0) return 'var(--surface-3)';
+  // low → muted navy, mid → bright blue, high → light sky
   const bands = [
-    { r: 106, g: 161, b: 36 },  // low (#6aa124 — muted lime)
-    { r: 162, g: 214, b: 52 },  // mid
-    { r: 196, g: 242, b: 78 },  // high = accent
+    { r: 30,  g: 64,  b: 130 }, // #1e4082 dark navy
+    { r: 59,  g: 130, b: 246 }, // #3b82f6 blue
+    { r: 147, g: 197, b: 253 }, // #93c5fd light sky
   ];
   const idx = t < 0.5 ? 0 : 1;
   const tt = t < 0.5 ? t * 2 : (t - 0.5) * 2;
