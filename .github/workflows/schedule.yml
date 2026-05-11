@@ -53,8 +53,12 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # Stage ALL CSVs in the data folder
+          # Sync CSV to Next.js public folder so Vercel picks up fresh data
+          cp Training_Intensity_Report/dashboard/data/activity_data_with_intensity.csv web/public/data/activity_data_with_intensity.csv
+
+          # Stage all updated data files
           git add Training_Intensity_Report/dashboard/data/*.csv
+          git add web/public/data/activity_data_with_intensity.csv
 
           # Commit only if there are changes
           git diff --cached --quiet || git commit -m "Automated data refresh"
