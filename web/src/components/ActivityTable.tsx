@@ -35,8 +35,16 @@ export default function ActivityTable({ filtered }: Props) {
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     const f = q ? filtered.filter(a => a.name.toLowerCase().includes(q) || a.type.toLowerCase().includes(q)) : filtered;
+    const getVal = (a: Activity, k: SortKey): number | string | Date | null => {
+      if (k === 'top1' || k === 'top2' || k === 'top3') {
+        const idx = parseInt(k[3]) - 1;
+        const sorted = [...(a.zoneTimes || [])].sort((x, y) => y - x);
+        return sorted[idx] ?? null;
+      }
+      return (a as unknown as Record<string, number | string | Date | null>)[k] ?? null;
+    };
     return [...f].sort((a, b) => {
-      const av = a[sort.k], bv = b[sort.k];
+      const av = getVal(a, sort.k), bv = getVal(b, sort.k);
       if (av == null) return 1; if (bv == null) return -1;
       const av2 = av instanceof Date ? av.getTime() : av;
       const bv2 = bv instanceof Date ? bv.getTime() : bv;
