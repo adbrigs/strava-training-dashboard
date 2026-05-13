@@ -20,7 +20,7 @@ def load_credentials():
         try:
             creds = json.loads(creds_json)
             print("✅ Loaded credentials from environment variable.")
-            return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+            return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
         except Exception as e:
             print(f"⚠ Error parsing CREDENTIALS_JSON env var: {e}")
 
@@ -31,7 +31,7 @@ def load_credentials():
             with open(local_path, "r") as f:
                 creds = json.load(f)
             print(f"✅ Loaded credentials from local file: {local_path}")
-            return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+            return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
         except Exception as e:
             print(f"⚠ Error reading local credentials file: {e}")
 
@@ -46,6 +46,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"
 API_PULL = SRC_DIR / "activities_api_pull.py"
 COMPUTE_INTENSITY = SRC_DIR / "compute_intensity.py"
+HR_STREAMS_PULL = SRC_DIR / "hr_streams_api_pull.py"
 DASHBOARD = BASE_DIR / "streamlit_dash.py"
 REFRESH_INTERVAL_HOURS = 4
 
@@ -59,13 +60,14 @@ print("CWD:", os.getcwd())
 print("BASE_DIR:", BASE_DIR)
 print("SRC_DIR:", SRC_DIR)
 print("API_PULL exists:", API_PULL.exists())
+print("HR_STREAMS_PULL exists:", HR_STREAMS_PULL.exists())
 print("COMPUTE_INTENSITY exists:", COMPUTE_INTENSITY.exists())
 
 # ---------------------------------------
 # Step 3: Validate Credentials Early
 # ---------------------------------------
 try:
-    client_id, client_secret, refresh_token = load_credentials()
+    client_id, client_secret, refresh_token, access_token = load_credentials()
     print("✅ Credentials loaded successfully.")
 except Exception as e:
     print(e)
@@ -85,7 +87,10 @@ def run_script(script_path):
 # Step 1: Pull new Strava activities
 run_script(API_PULL)
 
-# Step 2: Recompute intensity metrics
+# Step 2: Pull HR stream data for heart-rate activities
+run_script(HR_STREAMS_PULL)
+
+# Step 3: Recompute intensity metrics
 run_script(COMPUTE_INTENSITY)
 
 print("\n✅ Data updated successfully.")

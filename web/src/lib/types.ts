@@ -12,7 +12,8 @@ export interface Activity {
   avgHr: number;
   maxHr: number;
   hrRatio: number;  // 0-1
-  zone: number;     // 1-5
+  zone: number;     // 1-5 based on average HR
+  zoneTimes: number[]; // time in minutes for zones 1-5
   trimp: number;
 }
 

@@ -7,10 +7,33 @@ import time
 # ----------------------
 # Load credentials
 # ----------------------
-def load_credentials(path=r"D:\OneDrive\Strava Training Report\Training_Intensity_Report\config\credentials.json"):
+def load_credentials(path=None):
+    """
+    Load client_id, client_secret, refresh_token from config/credentials.json
+    or from environment variable CREDENTIALS_JSON (for GitHub Actions).
+    """
+    import os, json
+    from pathlib import Path
+
+    # 1️⃣ If running on GitHub Actions, use the secret environment variable
+    creds_json = os.environ.get("CREDENTIALS_JSON")
+    if creds_json:
+        creds = json.loads(creds_json)
+        return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
+
+    # 2️⃣ Otherwise, use local file
+    if path is None:
+        from pathlib import Path
+        repo_root = Path(__file__).parent.parent.parent  # one more .parent to go up to repo root
+        path = repo_root / "config" / "credentials.json"
+
+    if not path.exists():
+        raise FileNotFoundError(f"Credentials file not found at {path}")
+
     with open(path, "r") as f:
         creds = json.load(f)
-    return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+
+    return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
 
 # ----------------------
 # Refresh access token
@@ -101,8 +124,15 @@ def load_existing_csv(path):
 # Main
 # ----------------------
 if __name__ == "__main__":
-    CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN = load_credentials()
-    access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
+    CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, ACCESS_TOKEN = load_credentials()
+    
+    # Use provided access token if available, otherwise refresh
+    if ACCESS_TOKEN:
+        print("Using provided access token...")
+        access_token = ACCESS_TOKEN
+    else:
+        print("Refreshing access token...")
+        access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
     # CSV path
     csv_file = os.path.join(os.path.dirname(__file__),'..', "data", "all_hr_activities.csv")
@@ -115,18 +145,15 @@ if __name__ == "__main__":
     activities = get_all_activities(access_token)
     print(f"Found {len(activities)} total activities")
 
-    # Define types likely to have heart rate + Yoga and Tennis
-    valid_types = ['Run', 'Ride', 'Hike', 'Walk', 'Elliptical', 'Rowing', 'Nordic Ski', 'Yoga', 'Tennis']
-    
-    # Filter out manual and invalid activities
+# Filter to activities with heart rate and skip manual entries
     filtered_activities = [
-        a for a in activities 
-        if a.get('type') in valid_types and not a.get('manual', False)
+        a for a in activities
+        if a.get('has_heartrate') and not a.get('manual', False)
     ]
 
     # Only new ones
     new_activities = [a for a in filtered_activities if a['id'] not in existing_ids]
-    print(f"Processing {len(new_activities)} new activities with likely heart rate")
+    print(f"Processing {len(new_activities)} new heart rate activities")
 
     all_streams = []
     for idx, activity in enumerate(new_activities):

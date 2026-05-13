@@ -18,7 +18,7 @@ def load_credentials(path=None):
     creds_json = os.environ.get("CREDENTIALS_JSON")
     if creds_json:
         creds = json.loads(creds_json)
-        return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+        return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
 
     # 2️⃣ Otherwise, use local file
     if path is None:
@@ -32,7 +32,7 @@ def load_credentials(path=None):
     with open(path, "r") as f:
         creds = json.load(f)
 
-    return creds["client_id"], creds["client_secret"], creds["refresh_token"]
+    return creds["client_id"], creds["client_secret"], creds["refresh_token"], creds.get("access_token")
 
 # ----------------------
 # Refresh Strava access token
@@ -47,12 +47,36 @@ def refresh_access_token(client_id, client_secret, refresh_token):
             'refresh_token': refresh_token
         }
     )
+    print(f"Token refresh response status: {response.status_code}")
+    if response.status_code != 200:
+        print(f"Token refresh failed: {response.text}")
     response.raise_for_status()
-    return response.json()['access_token']
+    token_data = response.json()
+    print(f"Token refresh successful. Access token: {token_data.get('access_token', 'N/A')[:20]}...")
+    return token_data['access_token']
 
 # ----------------------
-# Fetch activities from Strava API
+# Fetch HR streams for activities with HR
 # ----------------------
+def get_hr_streams(access_token, activity_ids):
+    headers = {'Authorization': f'Bearer {access_token}'}
+    streams_data = {}
+    
+    for activity_id in activity_ids:
+        try:
+            url = f"https://www.strava.com/api/v3/activities/{activity_id}/streams?keys=heartrate,time&key_by_type=true"
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            if 'heartrate' in data and 'time' in data:
+                streams_data[activity_id] = {
+                    'heartrate': data['heartrate']['data'],
+                    'time': data['time']['data']
+                }
+        except Exception as e:
+            print(f"Failed to get streams for activity {activity_id}: {e}")
+    
+    return streams_data
 def get_all_activities(access_token, per_page=175):
     headers = {'Authorization': f'Bearer {access_token}'}
     activities = []
@@ -60,7 +84,11 @@ def get_all_activities(access_token, per_page=175):
 
     while True:
         url = f"https://www.strava.com/api/v3/athlete/activities?per_page={per_page}&page={page}"
+        print(f"Fetching activities page {page}...")
         response = requests.get(url, headers=headers)
+        print(f"Activities API response status: {response.status_code}")
+        if response.status_code != 200:
+            print(f"Activities API failed: {response.text}")
         response.raise_for_status()
         data = response.json()
 
@@ -115,14 +143,33 @@ def save_new_activities(new_df, existing_df, path):
 # ----------------------
 if __name__ == "__main__":
     print("Processing... please wait.")
-    CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN = load_credentials()
-    access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
+    CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, ACCESS_TOKEN = load_credentials()
+    
+    # Use provided access token if available, otherwise refresh
+    if ACCESS_TOKEN:
+        print("Using provided access token...")
+        access_token = ACCESS_TOKEN
+    else:
+        print("Refreshing access token...")
+        access_token = refresh_access_token(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
 
     csv_path = os.path.join(os.path.dirname(__file__), "..", "data", "all_activities_rawdata.csv")
     existing_df = load_existing_activities(csv_path)
 
     # Fetch new data
     all_activities_df = get_all_activities(access_token)
+    
+    # Get HR streams for activities with HR
+    hr_activity_ids = all_activities_df[all_activities_df['has_heartrate'] == True]['id'].tolist()
+    if hr_activity_ids:
+        print(f"Fetching HR streams for {len(hr_activity_ids)} activities...")
+        streams = get_hr_streams(access_token, hr_activity_ids)
+        # Save streams to a JSON file
+        streams_path = os.path.join(os.path.dirname(csv_path), "hr_streams.json")
+        with open(streams_path, 'w') as f:
+            json.dump(streams, f)
+        print(f"Saved HR streams to {streams_path}")
+    
     save_new_activities(all_activities_df, existing_df, csv_path)
 
     print("All done!")

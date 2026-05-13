@@ -72,6 +72,13 @@ export function parseActivities(csvText: string): Activity[] {
       const duration = parseFloat(r.moving_time_minutes) || 0;
       const paceRaw = parseFloat(r.pace_min_per_mile);
       const distanceMiles = parseFloat(r.distance_miles) || 0;
+      const zoneTimes = [
+        parseFloat(r.zone_1_time_minutes) || 0,
+        parseFloat(r.zone_2_time_minutes) || 0,
+        parseFloat(r.zone_3_time_minutes) || 0,
+        parseFloat(r.zone_4_time_minutes) || 0,
+        parseFloat(r.zone_5_time_minutes) || 0,
+      ];
 
       return {
         id: r.id || String(date.getTime()),
@@ -88,6 +95,7 @@ export function parseActivities(csvText: string): Activity[] {
         maxHr: parseFloat(r.max_heartrate) || 0,
         hrRatio: parseFloat(r['hr_ratio_0-1']) || 0,
         zone: isNaN(hrZoneRaw) ? 1 : Math.max(1, Math.min(5, hrZoneRaw)),
+        zoneTimes,
         trimp: parseFloat(r.trimp_score) || 0,
       } as Activity;
     })

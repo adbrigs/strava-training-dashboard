@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import json
 
 # ----------------------
 # Compute personalized intensity and TRIMP
@@ -12,6 +13,7 @@ def compute_personalized_intensity(
 ):
     data_dir = os.path.join(base_path, "data")
     input_csv = os.path.join(data_dir, "all_activities_rawdata.csv")
+    hr_samples_csv = os.path.join(data_dir, "all_hr_activities.csv")
     output_csv = os.path.join(data_dir, "activity_data_with_intensity.csv")
 
     # Estimate HR max using Tanaka formula
@@ -81,7 +83,49 @@ def compute_personalized_intensity(
         elif hr_ratio < 0.9: return 4
         else: return 5
 
+    zone_samples = {}
+    if os.path.exists(hr_samples_csv):
+        hr_samples = pd.read_csv(hr_samples_csv, usecols=['activity_id', 'time', 'heartrate'])
+        hr_samples['activity_id'] = hr_samples['activity_id'].astype(str)
+        hr_samples['time'] = pd.to_numeric(hr_samples['time'], errors='coerce')
+        hr_samples['heartrate'] = pd.to_numeric(hr_samples['heartrate'], errors='coerce')
+        hr_samples = hr_samples.dropna(subset=['activity_id', 'time', 'heartrate'])
+        hr_samples = hr_samples.sort_values(['activity_id', 'time'])
+
+        def _zone_times_for_group(group):
+            times = group['time'].to_numpy()
+            hrs = group['heartrate'].to_numpy()
+            if len(times) == 0:
+                return [np.nan] * 5
+            deltas = np.diff(times)
+            deltas = np.concatenate([deltas, [deltas[-1] if len(deltas) > 0 else 1.0]])
+            zone_times = [0.0] * 5
+            for sec, hr_val in zip(deltas, hrs):
+                zone = get_hr_zone(hr_val)
+                if not pd.isna(zone):
+                    zone_times[int(zone) - 1] += sec
+            return zone_times
+
+        zone_samples = {
+            activity_id: _zone_times_for_group(group)
+            for activity_id, group in hr_samples.groupby('activity_id')
+        }
+        print(f"Loaded HR samples and computed zone times for {len(zone_samples)} activities.")
+
     df["hr_zone (1-5)"] = df["average_heartrate"].apply(get_hr_zone)
+
+    # Calculate detailed zone times from HR samples if available
+    zone_columns = [f"zone_{i}_time_minutes" for i in range(1, 6)]
+    for col in zone_columns:
+        df[col] = np.nan
+    
+    for idx, row in df.iterrows():
+        activity_id = str(row['id'])
+        zone_times_seconds = zone_samples.get(activity_id)
+        if zone_times_seconds is None:
+            continue
+        for i, time_sec in enumerate(zone_times_seconds):
+            df.at[idx, f"zone_{i+1}_time_minutes"] = time_sec / 60 if not pd.isna(time_sec) else np.nan
 
     # --- Sort by date and format ---
     if "start_date_local" in df.columns:
@@ -94,6 +138,7 @@ def compute_personalized_intensity(
         "start_date_local_formatted", "name", "sport_type",
         "distance (miles)", "moving_time (minutes)", "pace (min_per_mile)", "pace_formatted", "elevation_gain (feet)",
         "average_heartrate", "max_heartrate", "hr_ratio (0-1)", "hr_zone (1-5)",
+        "zone_1_time_minutes", "zone_2_time_minutes", "zone_3_time_minutes", "zone_4_time_minutes", "zone_5_time_minutes",
         "trimp (score)", "id"
     ]
     df = df[[c for c in columns_order if c in df.columns]]

@@ -58,8 +58,18 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
       const b = bs.find(b => a.date >= b.start && a.date <= b.end);
       if (!b) return;
       if (isZones) {
-        const key = `z${a.zone}`;
-        b.byType[key] = (b.byType[key] || 0) + a.duration;
+        const hasZoneTimes = a.zoneTimes && a.zoneTimes.length >= 5 && a.zoneTimes.some((minutes) => minutes > 0);
+        if (hasZoneTimes) {
+          // Use detailed zone times if available
+          for (let z = 1; z <= 5; z++) {
+            const key = `z${z}`;
+            b.byType[key] = (b.byType[key] || 0) + (a.zoneTimes[z - 1] || 0);
+          }
+        } else {
+          // Fallback to average zone when detailed zone times are missing or all zero
+          const key = `z${a.zone}`;
+          b.byType[key] = (b.byType[key] || 0) + a.duration;
+        }
         b.total += a.duration;
       } else {
         const val = metric === 'trimp' ? a.trimp : 1;

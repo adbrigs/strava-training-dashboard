@@ -4,7 +4,7 @@ import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, fmtDateTime, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
-type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'elevation' | 'avgHr' | 'maxHr' | 'zone' | 'trimp';
+type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'zone' | 'trimp' | 'top1' | 'top2' | 'top3';
 
 const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'date',      l: 'Date' },
@@ -13,7 +13,9 @@ const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'distance',  l: 'Dist (mi)', num: true },
   { k: 'duration',  l: 'Time (min)', num: true },
   { k: 'pace',      l: 'Pace (/mi)', num: true },
-  { k: 'elevation', l: 'Elev (ft)',  num: true },
+  { k: 'top1',      l: 'Top Zone 1' },
+  { k: 'top2',      l: 'Top Zone 2' },
+  { k: 'top3',      l: 'Top Zone 3' },
   { k: 'avgHr',     l: 'Avg HR',    num: true },
   { k: 'maxHr',     l: 'Max HR',    num: true },
   { k: 'zone',      l: 'Zone' },
@@ -93,7 +95,30 @@ export default function ActivityTable({ filtered }: Props) {
                 <td className="num">{a.distance ? fmtNum(a.distance, 2) : '—'}</td>
                 <td className="num">{fmtNum(a.duration, 1)}</td>
                 <td className="num">{a.pace ? fmtPace(a.pace) : '—'}</td>
-                <td className="num">{a.elevation ? fmtNum(a.elevation) : '—'}</td>
+                {
+                  /* Compute top 3 zones (zone number + minutes) */
+                }
+                {(() => {
+                  const fmtMin = (min?: number) => {
+                    if (min == null || isNaN(min) || min <= 0) return '—';
+                    if (min >= 60) return `${(min / 60).toFixed(1)}h`;
+                    return `${Math.round(min)}m`;
+                  };
+                  const zt = a.zoneTimes || [0,0,0,0,0];
+                  const pairs = zt.map((m, i) => ({ zone: i + 1, minutes: Number(m) || 0 }))
+                    .filter(p => p.minutes > 0)
+                    .sort((x, y) => y.minutes - x.minutes)
+                    .slice(0, 3);
+                  const cells = [0,1,2].map(i => {
+                    const p = pairs[i];
+                    return (
+                      <td key={i} className="num">
+                        {p ? `Z${p.zone} ${fmtMin(p.minutes)}` : '—'}
+                      </td>
+                    );
+                  });
+                  return cells;
+                })()}
                 <td className="num">{a.avgHr ? fmtNum(a.avgHr) : '—'}</td>
                 <td className="num">{a.maxHr ? fmtNum(a.maxHr) : '—'}</td>
                 <td>
