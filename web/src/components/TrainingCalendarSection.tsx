@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { Activity } from '@/lib/types';
 import { ACTIVITY_LABELS, dateKey } from '@/lib/dataUtils';
 
@@ -33,17 +33,25 @@ const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 interface DayData {
   date: Date;
   trimp: number;
+  ctl: number;
+  atl: number;
+  tsb: number;
   acts: string[];
   key: string;
 }
 
 interface Tooltip {
   day: DayData;
-  col: number;
-  row: number;
+  x: number;
+  y: number;
+  placement: 'above' | 'below';
 }
 
+type CalendarMode = 'load' | 'form';
+
 export default function TrainingCalendarSection({ activities, selectedTypes, today }: Props) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<CalendarMode>('load');
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
 
   // Build 52-week grid ending at today
@@ -66,6 +74,26 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
       dayMap.set(k, e);
     });
 
+    const dailyForm = new Map<string, { ctl: number; atl: number; tsb: number }>();
+    const firstActivity = activities
+      .filter(a => selectedTypes.has(a.type) && a.date <= today)
+      .reduce<Date | null>((earliest, a) => !earliest || a.date < earliest ? a.date : earliest, null);
+    const formStart = new Date(firstActivity ?? startSunday);
+    formStart.setHours(0, 0, 0, 0);
+    if (formStart > startSunday) formStart.setTime(startSunday.getTime());
+
+    let ctl = 30;
+    let atl = 30;
+    const ctlA = 2 / (42 + 1);
+    const atlA = 2 / (7 + 1);
+    for (let d = new Date(formStart); d <= today; d.setDate(d.getDate() + 1)) {
+      const k = dateKey(d);
+      const t = dayMap.get(k)?.trimp || 0;
+      ctl = ctl + ctlA * (t - ctl);
+      atl = atl + atlA * (t - atl);
+      dailyForm.set(k, { ctl, atl, tsb: ctl - atl });
+    }
+
     let maxTrimp = 0;
     const weeks: DayData[][] = [];
     for (let w = 0; w < 53; w++) {
@@ -76,8 +104,9 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
         const k = dateKey(date);
         const data = dayMap.get(k);
         const trimp = data?.trimp ?? 0;
+        const form = dailyForm.get(k) ?? { ctl: 0, atl: 0, tsb: 0 };
         maxTrimp = Math.max(maxTrimp, trimp);
-        week.push({ date, trimp, acts: data?.acts ?? [], key: k });
+        week.push({ date, trimp, acts: data?.acts ?? [], key: k, ...form });
       }
       weeks.push(week);
     }
@@ -95,41 +124,91 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
     return labels;
   }, [weeks]);
 
-  const cellSize = 12;
+  const mobileWeeks = useMemo(() => weeks.slice(-20), [weeks]);
+  const mobileMonthLabels = useMemo(() => {
+    const labels: { col: number; label: string }[] = [];
+    let lastMonth = -1;
+    mobileWeeks.forEach((week, col) => {
+      const m = week[0].date.getMonth();
+      if (m !== lastMonth) { labels.push({ col, label: MONTHS[m] }); lastMonth = m; }
+    });
+    return labels;
+  }, [mobileWeeks]);
+
+  const cellSize = 10;
   const gap = 3;
   const stride = cellSize + gap;
-  const padLeft = 22;
-  const padTop = 22;
+  const padLeft = 20;
+  const padTop = 18;
+  const formColor = (tsb: number) => {
+    if (tsb < -30) return 'var(--hot)';
+    if (tsb < -10) return 'var(--warn)';
+    if (tsb <= 5) return 'var(--accent)';
+    if (tsb <= 25) return 'var(--z2)';
+    return '#93c5fd';
+  };
+  const modeTitle = mode === 'load'
+    ? 'Daily TRIMP totals across the past 12 months. Darker = higher training load.'
+    : 'Daily training form. Negative = fatigued, near zero = productive, positive = fresh.';
 
   return (
-    <div className="card fade-in">
+    <div ref={cardRef} className="card calendar-card fade-in">
       <div className="card-head">
-        <div className="card-title">
-          Training Calendar
-          <span className="info" title="Daily TRIMP totals across the past 12 months. Darker = higher training load.">i</span>
+        <div className="calendar-title-group">
+          <div className="card-title">
+            Training Calendar
+            <span className="info" title={modeTitle}>i</span>
+          </div>
+          <div className="seg calendar-mode" aria-label="Calendar metric">
+            {(['load', 'form'] as CalendarMode[]).map(m => (
+              <button
+                key={m}
+                className={mode === m ? 'on' : ''}
+                onClick={() => { setMode(m); setTooltip(null); }}
+              >
+                {m === 'load' ? 'Load' : 'Form'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-subtle)' }}>
-          <span>Less</span>
-          {[0, 0.25, 0.5, 0.75, 1].map(t => (
-            <span key={t} style={{
-              width: cellSize, height: cellSize, borderRadius: 3,
-              background: t === 0 ? 'var(--surface-3)' : lerpColor(t),
-              display: 'inline-block', flexShrink: 0,
-            }} />
-          ))}
-          <span>More</span>
+        <div className="calendar-scale">
+          {mode === 'load' ? (
+            <>
+              <span>Less</span>
+              {[0, 0.25, 0.5, 0.75, 1].map(t => (
+                <span key={t} style={{
+                  width: cellSize, height: cellSize, borderRadius: 3,
+                  background: t === 0 ? 'var(--surface-3)' : lerpColor(t),
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+              ))}
+              <span>More</span>
+            </>
+          ) : (
+            <>
+              <span>Fatigued</span>
+              {[-35, -18, 0, 12, 30].map(v => (
+                <span key={v} style={{
+                  width: cellSize, height: cellSize, borderRadius: 3,
+                  background: formColor(v),
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+              ))}
+              <span>Fresh</span>
+            </>
+          )}
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
-        <div style={{ position: 'relative', width: padLeft + weeks.length * stride, height: padTop + 7 * stride + 4, minWidth: 200 }}>
+      <div className="calendar-scroll calendar-desktop-scroll" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+        <div className="calendar-grid" style={{ position: 'relative', width: padLeft + weeks.length * stride, height: padTop + 7 * stride + 4, minWidth: 200 }}>
           {/* Month labels */}
           {monthLabels.map(({ col, label }) => (
             <span key={col} style={{
               position: 'absolute',
               left: padLeft + col * stride,
               top: 0,
-              fontSize: 10,
+              fontSize: 9,
               color: 'var(--text-subtle)',
               fontFamily: 'var(--font-mono)',
             }}>{label}</span>
@@ -140,7 +219,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
             <span key={d} style={{
               position: 'absolute',
               left: 0, top: padTop + d * stride + (cellSize - 10) / 2,
-              fontSize: 9, color: 'var(--text-subtle)',
+              fontSize: 8, color: 'var(--text-subtle)',
               fontFamily: 'var(--font-mono)',
               lineHeight: 1,
             }}>{DAYS[d]}</span>
@@ -151,11 +230,24 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
             week.map((day, row) => {
               const isFuture = day.date > today;
               const t = isFuture || maxTrimp === 0 ? 0 : Math.min(1, day.trimp / (maxTrimp * 0.8));
-              const bg = day.trimp > 0 ? lerpColor(Math.max(0.15, t)) : 'var(--surface-3)';
+              const bg = mode === 'form'
+                ? formColor(day.tsb)
+                : day.trimp > 0 ? lerpColor(Math.max(0.15, t)) : 'var(--surface-3)';
               return (
                 <div
                   key={day.key}
-                  onMouseEnter={() => !isFuture ? setTooltip({ day, col, row }) : undefined}
+                  onMouseEnter={(event) => {
+                    if (isFuture) return;
+                    const cardRect = cardRef.current?.getBoundingClientRect();
+                    const cellRect = event.currentTarget.getBoundingClientRect();
+                    if (!cardRect) return;
+                    setTooltip({
+                      day,
+                      x: cellRect.left - cardRect.left + cellRect.width / 2,
+                      y: row <= 1 ? cellRect.bottom - cardRect.top + 12 : cellRect.top - cardRect.top - 12,
+                      placement: row <= 1 ? 'below' : 'above',
+                    });
+                  }}
                   onMouseLeave={() => setTooltip(null)}
                   style={{
                     position: 'absolute',
@@ -165,7 +257,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
                     borderRadius: 3,
                     background: isFuture ? 'var(--surface-2)' : bg,
                     opacity: isFuture ? 0.3 : 1,
-                    cursor: day.trimp > 0 ? 'default' : undefined,
+                    cursor: mode === 'form' || day.trimp > 0 ? 'default' : undefined,
                     transition: 'opacity 0.1s',
                   }}
                 />
@@ -173,19 +265,102 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
             })
           )}
 
-          {/* Tooltip */}
-          {tooltip && tooltip.day.trimp > 0 && (
-            <div className="tt" style={{
+        </div>
+      </div>
+
+      <div className="calendar-mobile-view">
+        <div className="calendar-mobile-caption">Recent 20 weeks</div>
+        <div className="calendar-mobile-grid" style={{ position: 'relative', width: padLeft + mobileWeeks.length * stride, height: padTop + 7 * stride + 4 }}>
+          {mobileMonthLabels.map(({ col, label }) => (
+            <span key={col} style={{
               position: 'absolute',
-              left: padLeft + tooltip.col * stride + cellSize / 2,
-              top: padTop + tooltip.row * stride - 8,
-              transform: 'translate(-50%, -100%)',
-              pointerEvents: 'none',
-              zIndex: 20,
-            }}>
-              <h5 style={{ marginBottom: 4 }}>
-                {tooltip.day.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-              </h5>
+              left: padLeft + col * stride,
+              top: 0,
+              fontSize: 9,
+              color: 'var(--text-subtle)',
+              fontFamily: 'var(--font-mono)',
+            }}>{label}</span>
+          ))}
+
+          {[1, 3, 5].map(d => (
+            <span key={d} style={{
+              position: 'absolute',
+              left: 0, top: padTop + d * stride + (cellSize - 10) / 2,
+              fontSize: 8, color: 'var(--text-subtle)',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1,
+            }}>{DAYS[d]}</span>
+          ))}
+
+          {mobileWeeks.map((week, col) =>
+            week.map((day, row) => {
+              const isFuture = day.date > today;
+              const t = isFuture || maxTrimp === 0 ? 0 : Math.min(1, day.trimp / (maxTrimp * 0.8));
+              const bg = mode === 'form'
+                ? formColor(day.tsb)
+                : day.trimp > 0 ? lerpColor(Math.max(0.15, t)) : 'var(--surface-3)';
+              return (
+                <div
+                  key={`mobile-${day.key}`}
+                  onMouseEnter={(event) => {
+                    if (isFuture) return;
+                    const cardRect = cardRef.current?.getBoundingClientRect();
+                    const cellRect = event.currentTarget.getBoundingClientRect();
+                    if (!cardRect) return;
+                    setTooltip({
+                      day,
+                      x: cellRect.left - cardRect.left + cellRect.width / 2,
+                      y: row <= 1 ? cellRect.bottom - cardRect.top + 12 : cellRect.top - cardRect.top - 12,
+                      placement: row <= 1 ? 'below' : 'above',
+                    });
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                  style={{
+                    position: 'absolute',
+                    left: padLeft + col * stride,
+                    top: padTop + row * stride,
+                    width: cellSize, height: cellSize,
+                    borderRadius: 3,
+                    background: isFuture ? 'var(--surface-2)' : bg,
+                    opacity: isFuture ? 0.3 : 1,
+                    cursor: mode === 'form' || day.trimp > 0 ? 'default' : undefined,
+                    transition: 'opacity 0.1s',
+                  }}
+                />
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Tooltip */}
+      {tooltip && (mode === 'form' || tooltip.day.trimp > 0) && (
+        <div className="tt" style={{
+          position: 'absolute',
+          left: tooltip.x,
+          top: tooltip.y,
+          transform: tooltip.placement === 'below' ? 'translateX(-50%)' : 'translate(-50%, -100%)',
+          pointerEvents: 'none',
+          zIndex: 40,
+        }}>
+          <h5 style={{ marginBottom: 4 }}>
+            {tooltip.day.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+          </h5>
+          {mode === 'form' ? (
+            <>
+              <div style={{ fontSize: 11, color: formColor(tooltip.day.tsb), fontWeight: 600, marginBottom: 3 }}>
+                Form {tooltip.day.tsb > 0 ? '+' : ''}{tooltip.day.tsb.toFixed(1)}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Fitness {tooltip.day.ctl.toFixed(1)}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Fatigue {tooltip.day.atl.toFixed(1)}</div>
+              {tooltip.day.trimp > 0 && (
+                <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 3 }}>
+                  TRIMP {Math.round(tooltip.day.trimp)}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
               <div style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600, marginBottom: 3 }}>
                 TRIMP {Math.round(tooltip.day.trimp)}
               </div>
@@ -195,10 +370,10 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
               {tooltip.day.acts.length > 4 && (
                 <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>+{tooltip.day.acts.length - 4} more</div>
               )}
-            </div>
+            </>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import TrainingCalendarSection from './TrainingCalendarSection';
 import RunEfficiencySection from './RunEfficiencySection';
 import WeekPatternSection from './WeekPatternSection';
 import LiftSplitSection from './LiftSplitSection';
+import WorkoutSuggestionSection from './WorkoutSuggestionSection';
 
 function Loading() {
   return (
@@ -211,6 +212,14 @@ export default function Dashboard() {
         <SummaryRow filtered={filtered} today={today} />
       </div>
 
+      {/* Daily training */}
+      <div className="stack">
+        <div className="grid-layout row-daily">
+          <WorkoutSuggestionSection activities={activities} selectedTypes={selectedTypes} today={today} />
+          <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} />
+        </div>
+      </div>
+
       {/* Volume + HR Zones */}
       <div className="stack">
         <div className="grid-layout row-middle">
@@ -245,11 +254,6 @@ export default function Dashboard() {
           filtered={activities.filter(a => selectedTypes.has(a.type))}
           today={today}
         />
-      </div>
-
-      {/* Training Calendar */}
-      <div className="stack">
-        <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} />
       </div>
 
       {/* Run Efficiency + Day Pattern */}
