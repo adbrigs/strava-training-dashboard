@@ -3,7 +3,7 @@
 export type IconName =
   | 'search' | 'cal' | 'chev' | 'bell' | 'moon' | 'sun' | 'info'
   | 'arrowU' | 'arrowD' | 'arrowR' | 'settings' | 'bolt' | 'trophy'
-  | 'heart' | 'flame' | 'weight' | 'chart' | 'grip' | 'x' | 'refresh';
+  | 'heart' | 'flame' | 'weight' | 'chart' | 'grip' | 'x' | 'refresh' | 'check';
 
 const PATHS: Record<IconName, React.ReactNode> = {
   search:   <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
@@ -26,6 +26,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   grip:     <><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"></circle></>,
   x:        <path d="M6 6l12 12M18 6 6 18"/>,
   refresh:  <><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></>,
+  check:    <path d="M20 6 9 17l-5-5" />,
 };
 
 interface Props {

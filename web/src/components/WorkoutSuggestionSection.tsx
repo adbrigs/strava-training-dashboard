@@ -23,6 +23,7 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
   }, [activities, selectedTypes, today]);
 
   const iconName = suggestion.status === 'recover' ? 'heart' : suggestion.status === 'push' ? 'bolt' : 'chart';
+  const title = suggestion.workedOutToday ? "Tomorrow's Workout" : "Today's Workout";
 
   return (
     <>
@@ -32,7 +33,7 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
             <Icon name={iconName} size={18} />
           </div>
           <div className="workout-copy">
-            <div className="card-title">Today&apos;s Workout</div>
+            <div className="card-title">{title}</div>
             <h2>{suggestion.title}</h2>
             <div className="workout-prescription">
               <span>{suggestion.type}</span>
@@ -66,7 +67,7 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
             <Icon name={iconName} size={16} />
           </div>
           <div className="workout-mobile-title">
-            <div className="card-title">Today&apos;s Workout</div>
+            <div className="card-title">{title}</div>
             <h2>{suggestion.title}</h2>
           </div>
           <div className={`workout-badge ${suggestion.status}`}>

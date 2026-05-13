@@ -500,6 +500,8 @@ input { font: inherit; color: inherit; }
   max-width: 100%;
   padding-top: 16px;
   padding-bottom: 14px;
+  display: flex;
+  flex-direction: column;
 }
 .calendar-card .card-head {
   align-items: flex-start;
@@ -807,7 +809,6 @@ table.tbl {
   .workout-mobile-card .workout-alt {
     margin-top: 10px;
   }
-
   .workout-card {
     grid-template-columns: 1fr;
     gap: 12px;

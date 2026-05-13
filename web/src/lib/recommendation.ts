@@ -12,6 +12,8 @@ export interface WorkoutRecommendation {
   confidence: 'low' | 'medium' | 'high';
   reason: string;
   alternative: string;
+  workedOutToday: boolean;
+  todaySummary: string;
   metrics: {
     form: number;
     fitness: number;
@@ -89,6 +91,8 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
       confidence: 'low',
       reason: 'There is not enough history yet to estimate fatigue well, so the safest useful suggestion is a controlled aerobic session.',
       alternative: 'Full rest if you feel sore or under-slept.',
+      workedOutToday: false,
+      todaySummary: '',
       metrics: { form: 0, fitness: 0, fatigue: 0, sevenDayTrimp: 0, weeklyBaseline: 0, daysSinceWorkout: null },
     };
   }
@@ -99,6 +103,14 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
   const weeklyBaseline = twentyEightDayTrimp / 4;
   const latest = usable[0];
   const daysSinceWorkout = daysBetween(today, latest.date);
+  const todayKey = dateKey(today);
+  const todayActivities = usable.filter(a => dateKey(a.date) === todayKey);
+  const workedOutToday = todayActivities.length > 0;
+  const todaySummary = workedOutToday
+    ? todayActivities.map(a => activityLabel(a.type)).join(', ') +
+      ` · ${Math.round(todayActivities.reduce((s, a) => s + a.duration, 0))} min` +
+      ` · ${Math.round(todayActivities.reduce((s, a) => s + a.trimp, 0))} TRIMP`
+    : '';
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayKey = dateKey(yesterday);
@@ -131,7 +143,7 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
       confidence: 'high',
       reason: `Form is ${tsb.toFixed(1)} and recent load is ${Math.round(loadRatio * 100)}% of baseline, so another hard session would stack fatigue.`,
       alternative: 'Easy walk, yoga, mobility, or complete rest.',
-      metrics,
+      workedOutToday, todaySummary, metrics,
     };
   }
 
@@ -147,7 +159,7 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
         ? 'Yesterday already carried a hard training load, so today should add aerobic volume without another intensity spike.'
         : `Form is ${tsb.toFixed(1)}, which suggests useful training is fine but intensity should stay controlled.`,
       alternative: 'Technique work, mobility, or an easy spin if your legs feel flat.',
-      metrics,
+      workedOutToday, todaySummary, metrics,
     };
   }
 
@@ -161,7 +173,7 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
       confidence: 'medium',
       reason: `You have had ${daysSinceWorkout} days since the last logged workout and this week is below baseline, so a steady build session fits.`,
       alternative: 'Strength training if you want lower impact today.',
-      metrics,
+      workedOutToday, todaySummary, metrics,
     };
   }
 
@@ -175,7 +187,7 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
       confidence: 'medium',
       reason: `Form is positive at ${tsb.toFixed(1)} and weekly load is not above baseline, so you look fresh enough for quality work.`,
       alternative: 'If sleep or soreness is poor, swap to 35-45 min Zone 2.',
-      metrics,
+      workedOutToday, todaySummary, metrics,
     };
   }
 
@@ -188,6 +200,6 @@ export function recommendWorkout(activities: Activity[], today: Date): WorkoutRe
     confidence: 'medium',
     reason: `Form is balanced at ${tsb.toFixed(1)} and weekly load is near baseline, so a moderate session keeps momentum without forcing recovery debt.`,
     alternative: 'Short strength session or mobility if you want a lighter day.',
-    metrics,
+    workedOutToday, todaySummary, metrics,
   };
 }

@@ -12,7 +12,6 @@ export default function PRsSection({ prs }: Props) {
     <div className="card fade-in">
       <div className="card-head">
         <div className="card-title">Recent PRs & Milestones</div>
-        <span style={{ fontSize: 11, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)' }}>all time</span>
       </div>
       <div className="pr-list">
         {prs.map((p, i) => (

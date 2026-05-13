@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [rangePreset, setRangePreset] = useState('60d');
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
 
   // activities is already sorted desc by date from the load effect
   const today = useMemo(() => activities.length > 0 ? activities[0].date : new Date(), [activities]);
@@ -104,6 +105,7 @@ export default function Dashboard() {
   }
 
   function handlePreset(id: string, newFrom: Date, newTo: Date) {
+    setSelectedBucket(null);
     if (id === 'custom') {
       setRangePreset('custom');
       return;
@@ -122,6 +124,7 @@ export default function Dashboard() {
     setFrom(newFrom);
     setTo(newTo);
     setRangePreset('custom');
+    setSelectedBucket(null);
   }
 
   function handleSelectAll() {
@@ -144,7 +147,16 @@ export default function Dashboard() {
     return activities.filter(a => a.date >= from && a.date <= to && selectedTypes.has(a.type));
   }, [activities, from, to, selectedTypes]);
 
-  const prs = useMemo<PR[]>(() => computePRs(activities, today), [activities, today]);
+  const hrActivities = useMemo(() => {
+    if (!selectedBucket) return filtered;
+    return filtered.filter(a => a.date >= selectedBucket.start && a.date <= selectedBucket.end);
+  }, [filtered, selectedBucket]);
+
+  function handleBucketClick(start: Date, end: Date, label: string) {
+    setSelectedBucket(prev => prev && prev.start.getTime() === start.getTime() ? null : { start, end, label });
+  }
+
+  const prs = useMemo<PR[]>(() => computePRs(filtered, today), [filtered, today]);
 
   if (loading) return <Loading />;
 
@@ -230,8 +242,10 @@ export default function Dashboard() {
             period={period}
             onPeriod={setPeriod}
             selectedTypes={selectedTypes}
+            selectedBucketStart={selectedBucket?.start ?? null}
+            onBucketClick={handleBucketClick}
           />
-          <HRZonesSection filtered={filtered} />
+          <HRZonesSection filtered={hrActivities} label={selectedBucket?.label} />
         </div>
       </div>
 

@@ -200,7 +200,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
         </div>
       </div>
 
-      <div className="calendar-scroll calendar-desktop-scroll" style={{ overflowX: 'auto', paddingBottom: 4 }}>
+      <div className="calendar-scroll calendar-desktop-scroll" style={{ overflowX: 'auto', paddingBottom: 4, flex: 1, display: 'flex', alignItems: 'center' }}>
         <div className="calendar-grid" style={{ position: 'relative', width: padLeft + weeks.length * stride, height: padTop + 7 * stride + 4, minWidth: 200 }}>
           {/* Month labels */}
           {monthLabels.map(({ col, label }) => (

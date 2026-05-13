@@ -12,26 +12,37 @@ const ZONES = [
 
 interface Props {
   filtered: Activity[];
+  label?: string;
 }
 
-export default function HRZonesSection({ filtered }: Props) {
+export default function HRZonesSection({ filtered, label }: Props) {
   const byZone = useMemo(() => {
     const out: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    filtered.forEach(a => { out[a.zone] = (out[a.zone] || 0) + a.duration; });
+    filtered.forEach(a => {
+      const hasZoneTimes = a.zoneTimes && a.zoneTimes.length >= 5 && a.zoneTimes.some(m => m > 0);
+      if (hasZoneTimes) {
+        a.zoneTimes.forEach((mins, idx) => { out[idx + 1] = (out[idx + 1] || 0) + mins; });
+      } else {
+        out[a.zone] = (out[a.zone] || 0) + a.duration;
+      }
+    });
     return out;
   }, [filtered]);
 
   const totalMin = Object.values(byZone).reduce((s, v) => s + v, 0);
 
   return (
-    <div className="card fade-in">
+    <div className="card fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
       <div className="card-head">
         <div className="card-title">
           Time in HR Zones
           <span className="info" title="Time spent in each heart-rate zone, summed across all sessions in range.">i</span>
         </div>
+        {label && (
+          <span style={{ fontSize: 11, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)' }}>{label}</span>
+        )}
       </div>
-      <div className="zones">
+      <div className="zones" style={{ flex: 1, justifyContent: 'space-evenly' }}>
         {ZONES.map(z => {
           const min = byZone[z.z] || 0;
           const pct = totalMin ? (min / totalMin) * 100 : 0;

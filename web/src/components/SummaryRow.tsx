@@ -73,7 +73,7 @@ export default function SummaryRow({ filtered, today }: Props) {
     { label: 'Total TRIMP',  value: fmtNum(sumTrimp, 0),        sub: 'cumulative',     spark: weeklyBins, color: 'var(--z2)' },
     { label: 'Max TRIMP',    value: fmtNum(maxTrimp, 1),        sub: 'single session', spark: bins,       color: 'var(--hot)' },
     { label: 'Longest',      value: fmtNum(longestDist, 1),     sub: 'miles',          spark: bins,       color: 'var(--act-run)', unit: 'mi' },
-    { label: 'Streak',       value: fmtNum(currentStreak),      sub: `max ${maxStreak}d`, color: 'var(--warn)', unit: 'd' },
+    { label: 'Streak',       value: fmtNum(currentStreak),      sub: `max ${maxStreak}d`, spark: countBins,  color: 'var(--warn)', unit: 'd' },
   ];
 
   return (

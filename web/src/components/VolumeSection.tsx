@@ -30,9 +30,11 @@ interface Props {
   period: 'weekly' | 'monthly';
   onPeriod: (p: 'weekly' | 'monthly') => void;
   selectedTypes: Set<string>;
+  selectedBucketStart?: Date | null;
+  onBucketClick?: (start: Date, end: Date, label: string) => void;
 }
 
-export default function VolumeSection({ filtered, from, to, period, onPeriod, selectedTypes }: Props) {
+export default function VolumeSection({ filtered, from, to, period, onPeriod, selectedTypes, selectedBucketStart, onBucketClick }: Props) {
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [chartStyle, setChartStyle] = useState<'bar' | 'area' | 'line'>('bar');
   const [metric, setMetric] = useState<'trimp' | 'count' | 'zones'>('trimp');
@@ -103,6 +105,17 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
 
   const toggle = (t: string) => setMuted(m => { const n = new Set(m); n.has(t) ? n.delete(t) : n.add(t); return n; });
 
+  const selectedBucketIdx = useMemo(() => {
+    if (!selectedBucketStart) return null;
+    const idx = buckets.findIndex(b => b.start.getTime() === selectedBucketStart.getTime());
+    return idx === -1 ? null : idx;
+  }, [buckets, selectedBucketStart]);
+
+  function handleBarClick(i: number) {
+    const b = buckets[i];
+    if (b) onBucketClick?.(b.start, b.end, b.fullLabel || b.label);
+  }
+
   return (
     <div className="card fade-in">
       <div className="card-head">
@@ -130,6 +143,8 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
         showRollingAvg={metric === 'trimp'}
         fmtVal={isZones ? fmtMin : undefined}
         labels={isZones ? ZONE_LABELS : undefined}
+        selectedBucketIdx={selectedBucketIdx}
+        onBarClick={onBucketClick ? handleBarClick : undefined}
       />
       <div className="legend">
         {isZones ? (

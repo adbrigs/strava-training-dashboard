@@ -23,6 +23,8 @@ interface Props {
   height?: number;
   fmtVal?: (v: number) => string;
   labels?: Record<string, string>;
+  selectedBucketIdx?: number | null;
+  onBarClick?: (i: number) => void;
 }
 
 interface HoverInfo {
@@ -38,6 +40,7 @@ export default function VolumeChart({
   showRollingAvg = true,
   mutedTypes = new Set(), height = 300,
   fmtVal, labels,
+  selectedBucketIdx = null, onBarClick,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(720);
@@ -137,12 +140,26 @@ export default function VolumeChart({
         ))}
         <line className="ax-line" x1={padL} x2={w - padR} y1={padT + innerH} y2={padT + innerH} />
 
+        {/* Selected bucket highlight */}
+        {selectedBucketIdx != null && (
+          <rect
+            x={padL + (innerW / Math.max(1, n)) * selectedBucketIdx}
+            y={padT}
+            width={innerW / Math.max(1, n)}
+            height={innerH}
+            fill="var(--accent)"
+            opacity={0.1}
+            rx={4}
+          />
+        )}
+
         {/* Bars */}
         {chartStyle === 'bar' && buckets.map((b, i) => {
           let y0 = padT + innerH;
           const barW = Math.min(38, xBand * 0.7);
+          const dimmed = selectedBucketIdx != null && selectedBucketIdx !== i;
           return (
-            <g key={i} className="bar-stack" transform={`translate(${xPos(i) - barW / 2}, 0)`}>
+            <g key={i} className="bar-stack" transform={`translate(${xPos(i) - barW / 2}, 0)`} opacity={dimmed ? 0.3 : 1}>
               {types.map(t => {
                 if (mutedTypes.has(t)) return null;
                 const v = b.byType[t] || 0;
@@ -218,7 +235,9 @@ export default function VolumeChart({
             y={padT}
             width={innerW / Math.max(1, n)}
             height={innerH}
+            style={{ cursor: onBarClick ? 'pointer' : undefined }}
             onMouseEnter={() => setHover({ i, x: xPos(i), y: padT + innerH * 0.35, b })}
+            onClick={() => onBarClick?.(i)}
           />
         ))}
       </svg>
