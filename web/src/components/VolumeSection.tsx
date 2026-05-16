@@ -47,8 +47,12 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
     const bs: Bucket[] = [];
     for (let d = new Date(start); d <= to; isWeekly ? d.setDate(d.getDate() + 7) : d.setMonth(d.getMonth() + 1)) {
       const periodEnd = new Date(d);
-      if (isWeekly) periodEnd.setDate(periodEnd.getDate() + 6);
-      else periodEnd.setMonth(periodEnd.getMonth() + 1);
+      if (isWeekly) {
+        periodEnd.setDate(periodEnd.getDate() + 6);
+        periodEnd.setHours(23, 59, 59, 999);
+      } else {
+        periodEnd.setMonth(periodEnd.getMonth() + 1);
+      }
       bs.push({
         start: new Date(d), end: periodEnd,
         label: isWeekly ? fmtDate(d, { month: 'short', day: 'numeric' }) : d.toLocaleDateString(undefined, { month: 'short' }),
