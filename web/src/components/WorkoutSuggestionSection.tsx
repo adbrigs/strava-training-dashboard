@@ -2,12 +2,15 @@
 import { useMemo } from 'react';
 import type { Activity } from '@/lib/types';
 import { recommendWorkout } from '@/lib/recommendation';
+import { dateKey } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
 interface Props {
   activities: Activity[];
   selectedTypes: Set<string>;
   today: Date;
+  restDate: string | null;
+  onRestDateChange: (date: string | null) => void;
 }
 
 const STATUS_LABELS = {
@@ -17,13 +20,74 @@ const STATUS_LABELS = {
   push: 'Push',
 };
 
-export default function WorkoutSuggestionSection({ activities, selectedTypes, today }: Props) {
+function RestPlanner({
+  restDate,
+  onRestDateChange,
+  defaultDate,
+}: {
+  restDate: string | null;
+  onRestDateChange: (d: string | null) => void;
+  defaultDate: string;
+}) {
+  const isChecked = restDate !== null;
+
+  function handleCheck(e: React.ChangeEvent<HTMLInputElement>) {
+    onRestDateChange(e.target.checked ? defaultDate : null);
+  }
+
+  return (
+    <div className="workout-rest-planner">
+      <label className="workout-rest-label">
+        <input
+          type="checkbox"
+          className="workout-rest-check"
+          checked={isChecked}
+          onChange={handleCheck}
+        />
+        <span style={isChecked ? { color: 'var(--z2)' } : undefined}>Rest day</span>
+      </label>
+      {isChecked && (
+        <input
+          type="date"
+          className="workout-rest-date"
+          value={restDate ?? defaultDate}
+          onChange={e => onRestDateChange(e.target.value || null)}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function WorkoutSuggestionSection({ activities, selectedTypes, today, restDate, onRestDateChange }: Props) {
   const suggestion = useMemo(() => {
-    return recommendWorkout(activities.filter(a => selectedTypes.has(a.type)), today);
-  }, [activities, selectedTypes, today]);
+    return recommendWorkout(activities.filter(a => selectedTypes.has(a.type)), today, restDate);
+  }, [activities, selectedTypes, today, restDate]);
 
   const iconName = suggestion.status === 'recover' ? 'heart' : suggestion.status === 'push' ? 'bolt' : 'chart';
-  const title = suggestion.workedOutToday ? "Tomorrow's Workout" : "Today's Workout";
+
+  const todayKey = dateKey(today);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowKey = dateKey(tomorrow);
+  const dayAfterTomorrow = new Date(tomorrow);
+  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+
+  const isRestingToday = restDate === todayKey;
+  const isRestingTomorrow = restDate === tomorrowKey;
+
+  // Worked out today + rest tomorrow → show Monday (day after tomorrow)
+  // Worked out today / resting today → show tomorrow
+  // Otherwise → today
+  const targetDay =
+    suggestion.workedOutToday && isRestingTomorrow ? dayAfterTomorrow :
+    suggestion.workedOutToday || isRestingToday    ? tomorrow :
+    today;
+  const cardTitle = targetDay === today
+    ? "Today's Workout"
+    : `${targetDay.toLocaleDateString(undefined, { weekday: 'long' })}'s Workout`;
+
+  // Default the date picker to tomorrow if already worked out today, otherwise today
+  const defaultRestDate = suggestion.workedOutToday ? tomorrowKey : todayKey;
 
   return (
     <>
@@ -33,7 +97,7 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
             <Icon name={iconName} size={18} />
           </div>
           <div className="workout-copy">
-            <div className="card-title">{title}</div>
+            <div className="card-title">{cardTitle}</div>
             <h2>{suggestion.title}</h2>
             <div className="workout-prescription">
               <span>{suggestion.type}</span>
@@ -45,6 +109,11 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
               <span>Alternative</span>
               {suggestion.alternative}
             </div>
+            <RestPlanner
+              restDate={restDate}
+              onRestDateChange={onRestDateChange}
+              defaultDate={defaultRestDate}
+            />
           </div>
         </div>
 
@@ -67,7 +136,7 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
             <Icon name={iconName} size={16} />
           </div>
           <div className="workout-mobile-title">
-            <div className="card-title">{title}</div>
+            <div className="card-title">{cardTitle}</div>
             <h2>{suggestion.title}</h2>
           </div>
           <div className={`workout-badge ${suggestion.status}`}>
@@ -89,6 +158,11 @@ export default function WorkoutSuggestionSection({ activities, selectedTypes, to
           <span>Alt</span>
           {suggestion.alternative}
         </div>
+        <RestPlanner
+          restDate={restDate}
+          onRestDateChange={onRestDateChange}
+          defaultDate={defaultRestDate}
+        />
       </div>
     </>
   );

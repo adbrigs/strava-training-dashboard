@@ -16,6 +16,7 @@ import RunEfficiencySection from './RunEfficiencySection';
 import WeekPatternSection from './WeekPatternSection';
 import LiftSplitSection from './LiftSplitSection';
 import WorkoutSuggestionSection from './WorkoutSuggestionSection';
+import ChatBot from './ChatBot';
 
 function Loading() {
   return (
@@ -38,6 +39,45 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [refreshStatus, setRefreshStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const [restDate, setRestDate] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem('rest_day');
+      if (!stored) return null;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      if (stored < todayStr) {
+        localStorage.removeItem('rest_day');
+        return null;
+      }
+      return stored;
+    } catch { return null; }
+  });
+
+  function handleRestDateChange(date: string | null) {
+    setRestDate(date);
+    try {
+      if (date) localStorage.setItem('rest_day', date);
+      else localStorage.removeItem('rest_day');
+    } catch {}
+  }
+
+  // Clear expired rest date at midnight
+  useEffect(() => {
+    if (!restDate) return;
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5);
+    const ms = midnight.getTime() - now.getTime();
+    const t = setTimeout(() => {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      if (restDate < todayStr) handleRestDateChange(null);
+    }, ms);
+    return () => clearTimeout(t);
+  }, [restDate]);
 
   const [from, setFrom] = useState<Date>(new Date());
   const [to, setTo] = useState<Date>(new Date());
@@ -52,6 +92,22 @@ export default function Dashboard() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const token = process.env.NEXT_PUBLIC_GITHUB_REFRESH_TOKEN;
+    const headers: Record<string, string> = { Accept: 'application/vnd.github.v3+json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    fetch(
+      'https://api.github.com/repos/adbrigs/strava-training-dashboard/actions/workflows/schedule.yml/runs?status=success&per_page=1',
+      { headers }
+    )
+      .then(r => r.json())
+      .then(d => {
+        const ts = d.workflow_runs?.[0]?.updated_at;
+        if (ts) setLastSync(new Date(ts));
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -170,7 +226,7 @@ export default function Dashboard() {
             <h1>Andrew&apos;s Training</h1>
             <small>
               <span className="dot" />
-              Synced {fmtDateTime(today)}
+              Synced {fmtDateTime(lastSync ?? today)}
               <button
                 className="refresh-btn"
                 onClick={handleRefresh}
@@ -198,6 +254,14 @@ export default function Dashboard() {
         <div className="hdr-r">
           <button className="icon-btn" title="Toggle theme" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
+          </button>
+          <button
+            className="chat-toggle"
+            title="Coach AI"
+            onClick={() => setIsChatOpen(o => !o)}
+            data-active={isChatOpen ? 'true' : 'false'}
+          >
+            <Icon name="chat" size={14} />
           </button>
           <div className="avatar">AB</div>
         </div>
@@ -227,7 +291,7 @@ export default function Dashboard() {
       {/* Daily training */}
       <div className="stack">
         <div className="grid-layout row-daily">
-          <WorkoutSuggestionSection activities={activities} selectedTypes={selectedTypes} today={today} />
+          <WorkoutSuggestionSection activities={activities} selectedTypes={selectedTypes} today={today} restDate={restDate} onRestDateChange={handleRestDateChange} />
           <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} />
         </div>
       </div>
@@ -283,6 +347,17 @@ export default function Dashboard() {
         <ActivityTable filtered={filtered} />
       </div>
 
+      <ChatBot
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        activities={activities}
+        filtered={filtered}
+        today={today}
+        from={from}
+        to={to}
+        selectedTypes={selectedTypes}
+        restDate={restDate}
+      />
     </div>
   );
 }
