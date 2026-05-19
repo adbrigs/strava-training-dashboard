@@ -1,4 +1,8 @@
 {
-  "buildCommand": "cd web && npm ci && npm run build",
-  "installCommand": "echo skip"
+  "builds": [
+    {
+      "src": "web/package.json",
+      "use": "@vercel/next"
+    }
+  ]
 }
