@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { Activity } from '@/lib/types';
 import { recommendWorkout } from '@/lib/recommendation';
 import { ACTIVITY_LABELS } from '@/lib/dataUtils';
@@ -49,7 +51,6 @@ function persistNotes(notes: string[]) {
   try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch {}
 }
 
-// Matches "remember [that] [: ] ..." and "note [that] [: ] ..."
 const REMEMBER_RE = /^(?:please\s+)?(?:remember|note|keep in mind)(?:\s+that)?\s*[:\-]?\s*(.+)/i;
 const FORGET_RE   = /^(?:please\s+)?(?:forget|clear|delete|remove)\s+(?:everything|all|your\s+(?:notes?|memory))/i;
 
@@ -57,7 +58,7 @@ function activityLabel(type: string): string {
   return ACTIVITY_LABELS[type] || type.replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
-function buildSystemPrompt(
+function buildDashboardContext(
   activities: Activity[],
   filtered: Activity[],
   today: Date,
@@ -72,24 +73,13 @@ function buildSystemPrompt(
     restDate,
   );
 
-  const typeCounts: Record<string, number> = {};
-  filtered.forEach(a => { typeCounts[a.type] = (typeCounts[a.type] || 0) + 1; });
-  const breakdown = Object.entries(typeCounts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([t, n]) => `${activityLabel(t)}: ${n}`)
-    .join(', ');
-
-  const totalDist = filtered.reduce((s, a) => s + a.distance, 0);
-  const totalTime = filtered.reduce((s, a) => s + a.duration, 0);
-  const totalTrimp = filtered.reduce((s, a) => s + a.trimp, 0);
-
   const recent = [...activities]
     .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 12);
+    .slice(0, 20);
 
   const recentStr = recent.map(a => {
     const parts: string[] = [
-      a.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      a.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
       activityLabel(a.type),
     ];
     if (a.distance > 0.1) parts.push(`${a.distance.toFixed(1)} mi`);
@@ -104,50 +94,29 @@ function buildSystemPrompt(
     return parts.join(' · ');
   }).join('\n');
 
-  return `You are a personal fitness coach AI embedded in Andrew's Strava training dashboard. You have full access to his training data and can give specific, data-backed advice.
+  // Note the current dashboard filter for reference only — does not limit data access
+  const filterNote = `Dashboard currently filtered to ${from.toLocaleDateString()} – ${to.toLocaleDateString()} (${filtered.length} activities shown), but you have full all-time access via the CSV data.`;
 
-=== ABOUT ANDREW ===
-- Follows a push/pull/legs split for weight training
-- Primary goal: improve cardiovascular health while continuing to weight train
+  return `=== CURRENT DASHBOARD FILTER (for reference only) ===
+${filterNote}
 
 ${rec.chatContext}
 
-=== DASHBOARD VIEW (${from.toLocaleDateString()} – ${to.toLocaleDateString()}) ===
-Activities: ${filtered.length} | Breakdown: ${breakdown || 'none'}
-Distance: ${totalDist.toFixed(1)} mi | Time: ${(totalTime / 60).toFixed(1)} hrs | Load: ${Math.round(totalTrimp)} TRIMP
-
-=== RECENT ACTIVITIES (last 12) ===
-${recentStr}
-
-Be concise and specific. Reference Andrew's actual numbers. Keep replies under 200 words unless a detailed breakdown is clearly needed. Today is ${today.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
+=== MOST RECENT 20 ACTIVITIES (all-time) ===
+${recentStr}`;
 }
 
-function renderContent(text: string) {
-  return text.split('\n').map((line, i, arr) => {
-    const parts = line.split(/(\*\*[^*]+\*\*)/g);
-    return (
-      <span key={i}>
-        {parts.map((p, j) =>
-          p.startsWith('**') && p.endsWith('**')
-            ? <strong key={j}>{p.slice(2, -2)}</strong>
-            : p
-        )}
-        {i < arr.length - 1 && <br />}
-      </span>
-    );
-  });
-}
 
 export default function ChatBot({ isOpen, onClose, activities, filtered, today, from, to, selectedTypes, restDate }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [messages, setMessages]   = useState<Message[]>([]);
+  const [input, setInput]         = useState('');
   const [streaming, setStreaming] = useState(false);
-  const [model, setModel] = useState<ModelId>('gpt-5.4-mini');
-  const [notes, setNotes] = useState<string[]>(() =>
+  const [model, setModel]         = useState<ModelId>('gpt-5.4-mini');
+  const [notes, setNotes]         = useState<string[]>(() =>
     typeof window !== 'undefined' ? loadNotes() : []
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef    = useRef<HTMLTextAreaElement>(null);
 
   function addNote(note: string) {
     const updated = [...notes, note.trim()];
@@ -160,15 +129,10 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
     persistNotes([]);
   }
 
-  const systemPrompt = useMemo(() => {
-    const base = buildSystemPrompt(activities, filtered, today, from, to, selectedTypes, restDate);
-    const noteBlock = notes.length > 0
-      ? `\n\n=== REMEMBERED PREFERENCES ===\n${notes.map(n => `- ${n}`).join('\n')}\n(These were saved by Andrew in previous sessions.)`
-      : '';
-    const memoryInstruction = `\n\nMemory: When the user says "remember [X]", confirm you've saved it with a brief reply. When asked to forget everything, confirm it's cleared.`;
-    return base + noteBlock + memoryInstruction;
+  const dashboardContext = useMemo(() =>
+    buildDashboardContext(activities, filtered, today, from, to, selectedTypes, restDate),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activities.length, filtered.length, today.getTime(), from.getTime(), to.getTime(), restDate, notes]);
+  [activities.length, today.getTime(), from.getTime(), to.getTime(), filtered.length, restDate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -188,53 +152,34 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
     if (!trimmed || streaming) return;
 
     setInput('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
-    // Handle memory commands client-side before sending to OpenAI
     const rememberMatch = REMEMBER_RE.exec(trimmed);
     if (rememberMatch) addNote(rememberMatch[1]);
     if (FORGET_RE.test(trimmed)) clearNotes();
 
-    const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     const nextMessages: Message[] = [...messages, { role: 'user', content: trimmed }];
     setMessages([...nextMessages, { role: 'assistant', content: '' }]);
     setStreaming(true);
 
-    if (!apiKey) {
-      setMessages([...nextMessages, {
-        role: 'assistant',
-        content: 'No OpenAI API key found. Add NEXT_PUBLIC_OPENAI_API_KEY to your environment variables to enable the coach.',
-      }]);
-      setStreaming(false);
-      return;
-    }
-
     try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model,
-          stream: true,
-          max_completion_tokens: 1000,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            // Keep last 10 messages for context window efficiency
-            ...nextMessages.slice(-10).map(m => ({ role: m.role, content: m.content })),
-          ],
+          messages: nextMessages.slice(-14).map(m => ({ role: m.role, content: m.content })),
+          dashboardContext,
+          notes,
         }),
       });
 
       if (!res.ok) {
-        throw new Error(`${res.status}`);
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error ?? res.statusText);
       }
 
-      const reader = res.body!.getReader();
+      const reader  = res.body!.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
@@ -264,7 +209,7 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
         const updated = [...prev];
         updated[updated.length - 1] = {
           ...updated[updated.length - 1],
-          content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}. Check your API key and try again.`,
+          content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
         };
         return updated;
       });
@@ -291,16 +236,13 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
 
   return (
     <>
-      {/* Backdrop (mobile only) */}
       <div
         className={`chat-backdrop${isOpen ? ' open' : ''}`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Panel */}
       <div className={`chat-panel${isOpen ? ' open' : ''}`} role="dialog" aria-label="Coach AI">
-        {/* Header */}
         <div className="chat-header">
           <div className="chat-header-title">
             <div className="chat-avatar">
@@ -331,7 +273,6 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
           </button>
         </div>
 
-        {/* Messages */}
         <div className="chat-messages">
           {isEmpty ? (
             <div className="chat-empty">
@@ -348,7 +289,18 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
             messages.map((msg, i) => (
               <div key={i} className={`chat-msg chat-msg-${msg.role}`}>
                 {msg.content
-                  ? renderContent(msg.content)
+                  ? (
+                    <div className="chat-md">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          table: ({ children }) => (
+                            <div className="table-wrap"><table>{children}</table></div>
+                          ),
+                        }}
+                      >{msg.content}</ReactMarkdown>
+                    </div>
+                  )
                   : streaming && i === messages.length - 1
                     ? <span className="chat-cursor" />
                     : null}
@@ -358,7 +310,6 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="chat-input-row">
           <textarea
             ref={textareaRef}

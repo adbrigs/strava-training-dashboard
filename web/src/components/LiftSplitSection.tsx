@@ -80,11 +80,14 @@ export default function LiftSplitSection({ filtered }: Props) {
       maxCount = Math.max(maxCount, total);
     });
     return {
-      months: sorted.map(([key, byType]) => ({
-        key,
-        label: new Date(key + '-01').toLocaleDateString(undefined, { month: 'short' }),
-        byType,
-      })),
+      months: sorted.map(([key, byType]) => {
+        const [y, m] = key.split('-').map(Number);
+        return {
+          key,
+          label: new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short' }),
+          byType,
+        };
+      }),
       maxCount: Math.max(maxCount, 1),
     };
   }, [lifts]);
