@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),zone_1_time_minutes,zone_2_time_minutes,zone_3_time_minutes,zone_4_time_minutes,zone_5_time_minutes,trimp (score),id
+"Jun 02, 2026 03:53 PM",Afternoon Weight Training - Push and 10 min walk/run,WeightTraining,0.0,64.41666666666667,,,0.0,112.3,145.0,0.4186222558667676,1,60.75,3.8,0.0,0.0,0.0,60.24025563331888,18761534758
 "May 31, 2026 11:40 AM",Lunch Run,Run,3.0063171721999997,28.616666666666667,9.518844828247184,9:31 /mi,82.021,153.3,174.0,0.7289931869795611,3,2.5,2.6166666666666667,24.6,3.1,0.0,84.56879329262446,18731706197
 "May 30, 2026 06:55 PM",Evening Walk,Walk,1.6833561761,36.016666666666666,21.395749264490235,21:24 /mi,0.0,102.8,128.0,0.34670704012112036,1,36.06666666666667,0.0,0.0,0.0,0.0,24.29776062886462,18721592600
 "May 29, 2026 01:40 PM",Stretches and Bike,WeightTraining,0.0,39.5,,,0.0,97.0,119.0,0.3028009084027252,1,39.56666666666667,0.0,0.0,0.0,0.0,21.391607209400522,18705507799
