@@ -154,16 +154,6 @@ input { font: inherit; color: inherit; }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
 .hdr-r { display: flex; align-items: center; gap: 10px; }
-.refresh-btn {
-  display: inline-grid; place-items: center;
-  width: 18px; height: 18px; border-radius: 50%;
-  color: var(--text-subtle);
-  margin-left: 6px;
-  vertical-align: middle;
-  transition: color 140ms, background 140ms;
-}
-.refresh-btn:hover:not(:disabled) { color: var(--text); background: var(--surface-3); }
-.refresh-btn:disabled { opacity: 0.6; }
 .icon-btn {
   width: 36px; height: 36px;
   border-radius: 10px;

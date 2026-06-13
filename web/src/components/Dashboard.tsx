@@ -38,7 +38,6 @@ export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [refreshStatus, setRefreshStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -94,12 +93,9 @@ export default function Dashboard() {
   }, [theme]);
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_GITHUB_REFRESH_TOKEN;
-    const headers: Record<string, string> = { Accept: 'application/vnd.github.v3+json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
     fetch(
       'https://api.github.com/repos/adbrigs/strava-training-dashboard/actions/workflows/schedule.yml/runs?status=success&per_page=1',
-      { headers }
+      { headers: { Accept: 'application/vnd.github.v3+json' } }
     )
       .then(r => r.json())
       .then(d => {
@@ -135,30 +131,6 @@ export default function Dashboard() {
     }
     load();
   }, []);
-
-  async function handleRefresh() {
-    if (refreshStatus === 'loading') return;
-    setRefreshStatus('loading');
-    try {
-      const token = process.env.NEXT_PUBLIC_GITHUB_REFRESH_TOKEN;
-      const res = await fetch(
-        'https://api.github.com/repos/adbrigs/strava-training-dashboard/actions/workflows/schedule.yml/dispatches',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ref: 'main' }),
-        }
-      );
-      setRefreshStatus(res.status === 204 ? 'success' : 'error');
-    } catch {
-      setRefreshStatus('error');
-    }
-    setTimeout(() => setRefreshStatus('idle'), 3500);
-  }
 
   function handlePreset(id: string, newFrom: Date, newTo: Date) {
     setSelectedBucket(null);
@@ -227,27 +199,6 @@ export default function Dashboard() {
             <small>
               <span className="dot" />
               Synced {fmtDateTime(lastSync ?? today)}
-              <button
-                className="refresh-btn"
-                onClick={handleRefresh}
-                disabled={refreshStatus === 'loading'}
-                title={
-                  refreshStatus === 'loading' ? 'Refreshing data…' :
-                  refreshStatus === 'success' ? 'Refresh queued!' :
-                  refreshStatus === 'error'   ? 'Failed — check GitHub token' :
-                  'Refresh training data'
-                }
-              >
-                <Icon
-                  name="refresh"
-                  size={12}
-                  style={{
-                    animation: refreshStatus === 'loading' ? 'spin 0.8s linear infinite' : undefined,
-                    color: refreshStatus === 'success' ? 'var(--accent)' : refreshStatus === 'error' ? 'var(--hot)' : undefined,
-                    transition: 'color 200ms',
-                  }}
-                />
-              </button>
             </small>
           </div>
         </div>
