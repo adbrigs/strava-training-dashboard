@@ -19,32 +19,6 @@ export async function GET(request: NextRequest) {
   const token = params.get('hub.verify_token');
   const challenge = params.get('hub.challenge');
 
-  // TEMPORARY DIAGNOSTIC — guarded by the verify token. Reports whether the
-  // GitHub token is present in this deployment and what the live dispatch call
-  // returns. Remove once instant sync is confirmed working.
-  if (mode === 'debug' && token === process.env.STRAVA_VERIFY_TOKEN) {
-    const ghToken = process.env.GITHUB_DISPATCH_TOKEN;
-    const res = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/dispatches`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${ghToken}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-        body: JSON.stringify({ event_type: 'strava-activity' }),
-      },
-    );
-    return NextResponse.json({
-      githubTokenPresent: Boolean(ghToken),
-      githubTokenLength: ghToken ? ghToken.length : 0,
-      verifyTokenPresent: Boolean(process.env.STRAVA_VERIFY_TOKEN),
-      dispatchStatus: res.status,
-      dispatchBody: await res.text(),
-    });
-  }
-
   if (mode === 'subscribe' && token === process.env.STRAVA_VERIFY_TOKEN) {
     return NextResponse.json({ 'hub.challenge': challenge });
   }
