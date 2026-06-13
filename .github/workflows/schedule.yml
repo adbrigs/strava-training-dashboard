@@ -2,9 +2,12 @@ name: 4-Hour Data Refresh
 
 on:
   schedule:
-    # Run every 4 hours
+    # Safety net: run every 4 hours in case a webhook event is missed
     - cron: "0 */4 * * *"
   workflow_dispatch:  # Allows manual triggering
+  repository_dispatch:
+    # Fired instantly by the Strava webhook (web/src/app/api/strava-webhook)
+    types: [strava-activity]
 
 jobs:
   run-refresh:
