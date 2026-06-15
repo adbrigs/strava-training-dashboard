@@ -133,7 +133,7 @@ export default function Dashboard() {
           initFrom.setDate(initFrom.getDate() - 59);
           initFrom.setHours(0, 0, 0, 0);
           setFrom(initFrom);
-          setTo(maxDate);
+          setTo(new Date(Math.max(maxDate.getTime(), Date.now())));
           const allTypes = [...new Set(parsed.map(a => a.type))];
           setSelectedTypes(new Set(allTypes));
         }
