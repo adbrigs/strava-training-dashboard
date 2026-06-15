@@ -3,6 +3,7 @@ Fetch WHOOP historical data and write to web/public/data/whoop_history.json.
 Runs in GitHub Actions using WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN secrets.
 """
 import json, os, sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -14,6 +15,7 @@ REFRESH_TOKEN = os.environ.get("WHOOP_REFRESH_TOKEN", "")
 API       = "https://api.prod.whoop.com/developer/v2"
 TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token"
 OUT_PATH  = Path(__file__).parents[2] / "web" / "public" / "data" / "whoop_history.json"
+BODY_OUT_PATH = Path(__file__).parents[2] / "web" / "public" / "data" / "whoop_body_measurement.json"
 
 
 def get_access_token() -> str:
@@ -23,6 +25,10 @@ def get_access_token() -> str:
         "client_id":     CLIENT_ID,
         "client_secret": CLIENT_SECRET,
     })
+    if r.status_code == 400:
+        print("WHOOP refresh token is invalid or expired (HTTP 400).")
+        print("Go to Settings in the dashboard → copy the refresh token → update WHOOP_REFRESH_TOKEN in GitHub Secrets.")
+        sys.exit(0)
     r.raise_for_status()
     return r.json()["access_token"]
 
@@ -44,6 +50,13 @@ def paginate(endpoint: str, token: str, params: dict | None = None) -> list:
     return records
 
 
+def get_json(endpoint: str, token: str) -> dict:
+    headers = {"Authorization": f"Bearer {token}"}
+    r = requests.get(f"{API}{endpoint}", headers=headers)
+    r.raise_for_status()
+    return r.json()
+
+
 def main():
     if not REFRESH_TOKEN:
         print("WHOOP_REFRESH_TOKEN not set — skipping WHOOP fetch.")
@@ -63,6 +76,13 @@ def main():
     print("Fetching cycle (strain) records…")
     cycles = paginate("/cycle", token)
     print(f"  {len(cycles)} records")
+
+    print("Fetching body measurement…")
+    try:
+        body_measurement = get_json("/user/measurement/body", token)
+    except requests.HTTPError as exc:
+        print(f"  body measurement unavailable: {exc}")
+        body_measurement = {}
 
     # Map by date: YYYY-MM-DD
     rec_by_date: dict[str, dict] = {}
@@ -111,6 +131,14 @@ def main():
 
     OUT_PATH.write_text(json.dumps(history, indent=2))
     print(f"Wrote {len(history)} WHOOP records → {OUT_PATH}")
+
+    BODY_OUT_PATH.write_text(json.dumps({
+        "weightKg": body_measurement.get("weight_kilogram"),
+        "heightM": body_measurement.get("height_meter"),
+        "maxHeartRate": body_measurement.get("max_heart_rate"),
+        "fetchedAt": datetime.now(timezone.utc).isoformat(),
+    }, indent=2))
+    print(f"Wrote WHOOP body measurement → {BODY_OUT_PATH}")
 
 
 if __name__ == "__main__":

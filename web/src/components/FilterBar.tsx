@@ -134,29 +134,19 @@ export default function FilterBar({
 
       {/* Custom date inputs — shown inline when custom selected */}
       {rangePreset === 'custom' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="custom-date-row">
           <input
             type="date"
+            className="custom-date-input"
             value={customFrom}
             onChange={e => handleCustomFrom(e.target.value)}
-            style={{
-              background: 'var(--surface-2)', border: '1px solid var(--border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 12.5,
-              padding: '5px 8px', outline: 'none', fontFamily: 'var(--font-mono)',
-              colorScheme: 'dark',
-            }}
           />
-          <span style={{ color: 'var(--text-subtle)', fontSize: 13 }}>→</span>
+          <span className="custom-date-arrow">→</span>
           <input
             type="date"
+            className="custom-date-input"
             value={customTo}
             onChange={e => handleCustomTo(e.target.value)}
-            style={{
-              background: 'var(--surface-2)', border: '1px solid var(--border)',
-              borderRadius: 8, color: 'var(--text)', fontSize: 12.5,
-              padding: '5px 8px', outline: 'none', fontFamily: 'var(--font-mono)',
-              colorScheme: 'dark',
-            }}
           />
         </div>
       )}
@@ -168,13 +158,13 @@ export default function FilterBar({
         options={[{ value: 'weekly', label: 'Weekly' }, { value: 'monthly', label: 'Monthly' }]}
       />
 
-      {/* Activity dropdown — pushed to far right */}
-      <div ref={actRef} style={{ marginLeft: 'auto', position: 'relative' }}>
+      {/* Activity dropdown */}
+      <div ref={actRef} className="activity-filter">
         <button
           type="button"
           className="date-pill"
           onClick={() => setActOpen(o => !o)}
-          style={{ gap: 6, maxWidth: 260 }}
+          style={{ gap: 6 }}
         >
           {/* Color dots for first 4 selected */}
           <span style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
@@ -199,17 +189,7 @@ export default function FilterBar({
         </button>
 
         {actOpen && (
-          <div style={{
-            position: 'absolute', top: 'calc(100% + 6px)', right: 0,
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '6px',
-            minWidth: 220,
-            zIndex: 50,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px var(--border)',
-            display: 'flex', flexDirection: 'column', gap: 2,
-          }}>
+          <div className="activity-menu">
             {/* Select All row */}
             <button
               type="button"

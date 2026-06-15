@@ -50,8 +50,9 @@ jobs:
       - name: Run Strava refresh script
         run: python Training_Intensity_Report/dashboard/refresh_app_daily.py
 
-      # 7️⃣ Run WHOOP history fetch (script exits cleanly if secret is missing)
+      # 7️⃣ Run WHOOP history fetch (exits cleanly if secret missing or token expired)
       - name: Run WHOOP fetch script
+        continue-on-error: true
         env:
           WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
           WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
@@ -60,7 +61,7 @@ jobs:
 
       # 8️⃣ Commit and push any updated data files
       - name: Commit and push changes
-        if: success()
+        if: always()
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"

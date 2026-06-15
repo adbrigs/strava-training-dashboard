@@ -89,7 +89,8 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
       />
 
       <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: 380,
+        position: 'fixed', top: 0, right: 0, bottom: 0,
+        width: 'min(380px, 100vw)',
         background: 'var(--surface)', borderLeft: '1px solid var(--border)',
         zIndex: 201,
         transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
