@@ -92,7 +92,10 @@ export default function Dashboard() {
   const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
 
   // activities is already sorted desc by date from the load effect
-  const today = useMemo(() => activities.length > 0 ? activities[0].date : new Date(), [activities]);
+  const today = useMemo(() => {
+    const activityDate = activities.length > 0 ? activities[0].date : new Date();
+    return new Date(Math.max(activityDate.getTime(), Date.now()));
+  }, [activities]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
