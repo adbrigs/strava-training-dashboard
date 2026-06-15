@@ -31,12 +31,9 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
 
 export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }: Props) {
   const [whoopConnected, setWhoopConnected] = useState<boolean | null>(null);
-  const [webhookStatus, setWebhookStatus] = useState<'unknown' | 'registered' | 'unregistered'>('unknown');
-  const [registering, setRegistering] = useState(false);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillMsg, setBackfillMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -44,11 +41,6 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
       .then(r => r.json())
       .then(d => setWhoopConnected(d.connected))
       .catch(() => setWhoopConnected(false));
-
-    fetch('/api/whoop/register-webhook')
-      .then(r => r.json())
-      .then(d => setWebhookStatus(d.registered ? 'registered' : 'unregistered'))
-      .catch(() => setWebhookStatus('unregistered'));
 
     fetch('/api/whoop/get-refresh-token')
       .then(r => r.json())
@@ -63,35 +55,12 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  async function registerWebhook() {
-    setRegistering(true);
-    try {
-      const res = await fetch('/api/whoop/register-webhook', { method: 'PUT' });
-      const d = await res.json();
-      setWebhookStatus(d.ok ? 'registered' : 'unregistered');
-    } catch { /* ignore */ } finally { setRegistering(false); }
-  }
-
-  async function runBackfill() {
-    setBackfilling(true);
-    setBackfillMsg(null);
-    try {
-      const res = await fetch('/api/whoop/backfill', { method: 'POST' });
-      const d = await res.json();
-      if (d.ok) {
-        const db = d.debug ?? {};
-        setBackfillMsg(
-          `✓ ${d.count} days — ` +
-          `recovery: ${db.recovery?.scored ?? '?'}, ` +
-          `sleep: ${db.sleep?.scored ?? '?'}, ` +
-          `strain: ${db.cycle?.scored ?? '?'}`
-        );
-      } else {
-        setBackfillMsg(`Error: ${d.error}`);
-      }
-    } catch (e) {
-      setBackfillMsg(`Error: ${String(e)}`);
-    } finally { setBackfilling(false); }
+  function copyWebhookUrl() {
+    const url = `${window.location.origin}/api/whoop/webhook`;
+    navigator.clipboard.writeText(url).then(() => {
+      setWebhookUrlCopied(true);
+      setTimeout(() => setWebhookUrlCopied(false), 2000);
+    });
   }
 
   function copyToken() {
@@ -185,55 +154,31 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
 
               <div style={{ height: 1, background: 'var(--border)' }} />
 
-              {/* Backfill */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>Load History</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Fetches your full WHOOP history and saves it to the data file.
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 2 }}>
-                  <button onClick={runBackfill} disabled={backfilling} style={{ ...btnBase, opacity: backfilling ? 0.6 : 1, cursor: backfilling ? 'default' : 'pointer' }}>
-                    {backfilling ? 'Fetching…' : 'Run Backfill'}
-                  </button>
-                  {backfillMsg && (
-                    <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: backfillMsg.startsWith('✓') ? 'var(--z2)' : 'var(--hot)' }}>
-                      {backfillMsg}
-                    </span>
-                  )}
-                </div>
-                {backfillMsg?.startsWith('✓') && (
-                  <div style={{ fontSize: 11, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
-                    Commit <code>web/public/data/whoop_history.json</code> to deploy.
-                  </div>
-                )}
-              </div>
-
-              <div style={{ height: 1, background: 'var(--border)' }} />
-
               {/* Webhook */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500 }}>
-                  Webhook
-                  <span style={{
-                    fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600,
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    color: webhookStatus === 'registered' ? 'var(--z2)' : 'var(--text-subtle)',
-                  }}>
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
-                    {webhookStatus === 'registered' ? 'live' : webhookStatus === 'unknown' ? '…' : 'not registered'}
-                  </span>
-                </div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>Webhook</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  WHOOP pushes new recovery, sleep, and strain scores automatically.
+                  Register this URL in the{' '}
+                  <a href="https://developer.whoop.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
+                    WHOOP Developer Portal
+                  </a>
+                  {' '}under your app's webhook settings. WHOOP will then push new scores automatically.
                 </div>
-                {webhookStatus !== 'registered' && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: 'var(--surface-2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '8px 12px',
+                }}>
+                  <code style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text)', flex: 1, wordBreak: 'break-all' }}>
+                    {typeof window !== 'undefined' ? `${window.location.origin}/api/whoop/webhook` : '/api/whoop/webhook'}
+                  </code>
                   <button
-                    onClick={registerWebhook} disabled={registering}
-                    style={{ ...btnBase, alignSelf: 'flex-start', opacity: registering ? 0.6 : 1, cursor: registering ? 'default' : 'pointer' }}
+                    onClick={copyWebhookUrl}
+                    style={{ ...btnBase, padding: '4px 10px', fontSize: 11, flexShrink: 0 }}
                   >
-                    {registering ? 'Registering…' : 'Register Webhook'}
+                    {webhookUrlCopied ? '✓' : 'Copy'}
                   </button>
-                )}
+                </div>
               </div>
 
               <div style={{ height: 1, background: 'var(--border)' }} />
