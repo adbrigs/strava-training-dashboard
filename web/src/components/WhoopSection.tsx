@@ -182,9 +182,7 @@ export default function WhoopSection() {
               label="HRV"
               value={recovery?.hrv ?? '—'}
               unit=" ms"
-              sub={avgHrv != null
-                ? `${avgHrv}ms 30d avg · ${90 - avgHrv > 0 ? `+${90 - avgHrv} to 90` : 'goal reached'}`
-                : undefined}
+              sub={avgHrv != null ? `${avgHrv}ms 30d avg` : undefined}
             />
             <MetricBlock
               label="Resting HR"
