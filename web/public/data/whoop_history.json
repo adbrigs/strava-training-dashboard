@@ -2117,39 +2117,39 @@
   },
   {
     "date": "2023-01-29",
-    "recovery": 42,
-    "hrv": 56,
-    "restingHr": 56
+    "recovery": 50,
+    "hrv": 58,
+    "restingHr": 53
   },
   {
     "date": "2023-01-30",
-    "recovery": 41,
-    "hrv": 58,
-    "restingHr": 56
+    "recovery": 86,
+    "hrv": 70,
+    "restingHr": 52
   },
   {
     "date": "2023-01-31",
-    "recovery": 92,
-    "hrv": 85,
-    "restingHr": 50
+    "recovery": 67,
+    "hrv": 51,
+    "restingHr": 61
   },
   {
     "date": "2023-02-01",
-    "recovery": 42,
-    "hrv": 53,
-    "restingHr": 57
+    "recovery": 81,
+    "hrv": 69,
+    "restingHr": 52
   },
   {
     "date": "2023-02-02",
-    "recovery": 45,
-    "hrv": 44,
-    "restingHr": 65
+    "recovery": 51,
+    "hrv": 53,
+    "restingHr": 55
   },
   {
     "date": "2023-02-03",
-    "recovery": 68,
-    "hrv": 60,
-    "restingHr": 54
+    "recovery": 52,
+    "hrv": 57,
+    "restingHr": 57
   },
   {
     "date": "2024-12-27",
@@ -2193,6 +2193,7 @@
     "restingHr": 52,
     "sleepMs": 23272450,
     "sleepPerformance": 78,
-    "strain": 12.9
+    "strain": 12.9,
+    "weightKg": 69.12748
   }
 ]
