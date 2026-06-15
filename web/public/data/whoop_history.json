@@ -51,7 +51,7 @@
     "date": "2021-09-11",
     "sleepMs": 29433093,
     "sleepPerformance": 86,
-    "strain": 16
+    "strain": 16.0
   },
   {
     "date": "2021-09-12",
@@ -75,13 +75,13 @@
     "date": "2021-09-15",
     "sleepMs": 25787742,
     "sleepPerformance": 75,
-    "strain": 10
+    "strain": 10.0
   },
   {
     "date": "2021-09-16",
     "sleepMs": 20408814,
     "sleepPerformance": 61,
-    "strain": 7
+    "strain": 7.0
   },
   {
     "date": "2021-09-17",
@@ -111,7 +111,7 @@
     "date": "2021-09-21",
     "sleepMs": 22111610,
     "sleepPerformance": 61,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2021-09-22",
@@ -159,7 +159,7 @@
     "date": "2021-09-29",
     "sleepMs": 19124726,
     "sleepPerformance": 54,
-    "strain": 10
+    "strain": 10.0
   },
   {
     "date": "2021-09-30",
@@ -199,43 +199,43 @@
   },
   {
     "date": "2021-10-06",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-07",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-08",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-09",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-10",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-11",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-12",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-13",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-14",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-15",
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-10-16",
@@ -245,7 +245,7 @@
     "date": "2021-10-17",
     "sleepMs": 22942368,
     "sleepPerformance": 65,
-    "strain": 10
+    "strain": 10.0
   },
   {
     "date": "2021-10-18",
@@ -269,7 +269,7 @@
     "date": "2021-10-21",
     "sleepMs": 17400711,
     "sleepPerformance": 48,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2021-10-22",
@@ -311,7 +311,7 @@
     "date": "2021-10-28",
     "sleepMs": 23898214,
     "sleepPerformance": 69,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2021-10-29",
@@ -347,7 +347,7 @@
     "date": "2021-11-03",
     "sleepMs": 22252169,
     "sleepPerformance": 62,
-    "strain": 9
+    "strain": 9.0
   },
   {
     "date": "2021-11-04",
@@ -371,7 +371,7 @@
     "date": "2021-11-07",
     "sleepMs": 13320277,
     "sleepPerformance": 36,
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2021-11-08",
@@ -395,7 +395,7 @@
     "date": "2021-11-11",
     "sleepMs": 24225493,
     "sleepPerformance": 68,
-    "strain": 8
+    "strain": 8.0
   },
   {
     "date": "2021-11-12",
@@ -477,7 +477,7 @@
     "date": "2021-11-25",
     "sleepMs": 7004730,
     "sleepPerformance": 21,
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2021-11-27",
@@ -523,7 +523,7 @@
     "date": "2021-12-04",
     "sleepMs": 23006821,
     "sleepPerformance": 69,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2021-12-05",
@@ -551,7 +551,7 @@
     "date": "2021-12-09",
     "sleepMs": 15161748,
     "sleepPerformance": 73,
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2021-12-10",
@@ -731,7 +731,7 @@
     "date": "2022-01-08",
     "sleepMs": 26775663,
     "sleepPerformance": 87,
-    "strain": 9
+    "strain": 9.0
   },
   {
     "date": "2022-01-09",
@@ -1061,7 +1061,7 @@
     "date": "2022-03-04",
     "sleepMs": 18439523,
     "sleepPerformance": 54,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2022-03-05",
@@ -1115,7 +1115,7 @@
     "date": "2022-03-13",
     "sleepMs": 21393756,
     "sleepPerformance": 63,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2022-03-14",
@@ -1145,7 +1145,7 @@
     "date": "2022-03-18",
     "sleepMs": 22583536,
     "sleepPerformance": 68,
-    "strain": 8
+    "strain": 8.0
   },
   {
     "date": "2022-03-19",
@@ -1205,7 +1205,7 @@
     "date": "2022-03-28",
     "sleepMs": 19691954,
     "sleepPerformance": 61,
-    "strain": 8
+    "strain": 8.0
   },
   {
     "date": "2022-03-29",
@@ -1235,7 +1235,7 @@
     "date": "2022-04-02",
     "sleepMs": 20543859,
     "sleepPerformance": 61,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2022-04-03",
@@ -1559,7 +1559,7 @@
     "date": "2022-05-26",
     "sleepMs": 22451708,
     "sleepPerformance": 65,
-    "strain": 7
+    "strain": 7.0
   },
   {
     "date": "2022-05-27",
@@ -1583,7 +1583,7 @@
     "date": "2022-05-30",
     "sleepMs": 17871414,
     "sleepPerformance": 52,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2022-05-31",
@@ -1595,7 +1595,7 @@
     "date": "2022-06-01",
     "sleepMs": 14309989,
     "sleepPerformance": 41,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2022-06-02",
@@ -1719,7 +1719,7 @@
     "date": "2022-06-24",
     "sleepMs": 24447240,
     "sleepPerformance": 70,
-    "strain": 10
+    "strain": 10.0
   },
   {
     "date": "2022-06-25",
@@ -1773,7 +1773,7 @@
     "date": "2022-07-04",
     "sleepMs": 23050447,
     "sleepPerformance": 68,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2022-07-05",
@@ -1797,13 +1797,13 @@
     "date": "2022-07-08",
     "sleepMs": 23852365,
     "sleepPerformance": 69,
-    "strain": 8
+    "strain": 8.0
   },
   {
     "date": "2022-07-09",
     "sleepMs": 21166691,
     "sleepPerformance": 62,
-    "strain": 12
+    "strain": 12.0
   },
   {
     "date": "2022-07-10",
@@ -1815,7 +1815,7 @@
     "date": "2022-07-11",
     "sleepMs": 21195606,
     "sleepPerformance": 64,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2022-07-12",
@@ -1827,7 +1827,7 @@
     "date": "2022-07-13",
     "sleepMs": 23095701,
     "sleepPerformance": 68,
-    "strain": 6
+    "strain": 6.0
   },
   {
     "date": "2022-07-14",
@@ -1911,7 +1911,7 @@
     "date": "2022-07-27",
     "sleepMs": 21773115,
     "sleepPerformance": 63,
-    "strain": 14
+    "strain": 14.0
   },
   {
     "date": "2022-07-28",
@@ -1923,7 +1923,7 @@
     "date": "2022-07-29",
     "sleepMs": 28790559,
     "sleepPerformance": 82,
-    "strain": 11
+    "strain": 11.0
   },
   {
     "date": "2022-07-30",
@@ -1935,7 +1935,7 @@
     "date": "2022-07-31",
     "sleepMs": 18885347,
     "sleepPerformance": 50,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2022-08-01",
@@ -1947,7 +1947,7 @@
     "date": "2022-08-02",
     "sleepMs": 17787957,
     "sleepPerformance": 53,
-    "strain": 7
+    "strain": 7.0
   },
   {
     "date": "2022-08-03",
@@ -1971,7 +1971,7 @@
     "date": "2022-08-06",
     "sleepMs": 28097510,
     "sleepPerformance": 87,
-    "strain": 9
+    "strain": 9.0
   },
   {
     "date": "2022-08-07",
@@ -2035,7 +2035,7 @@
     "date": "2022-08-20",
     "sleepMs": 16084153,
     "sleepPerformance": 47,
-    "strain": 11
+    "strain": 11.0
   },
   {
     "date": "2022-08-22",
@@ -2047,7 +2047,7 @@
     "date": "2022-08-23",
     "sleepMs": 21166729,
     "sleepPerformance": 60,
-    "strain": 4
+    "strain": 4.0
   },
   {
     "date": "2022-08-27",
@@ -2057,7 +2057,7 @@
     "date": "2022-08-28",
     "sleepMs": 21917568,
     "sleepPerformance": 61,
-    "strain": 9
+    "strain": 9.0
   },
   {
     "date": "2022-08-29",
@@ -2073,7 +2073,7 @@
   },
   {
     "date": "2022-09-01",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-02",
@@ -2089,31 +2089,31 @@
     "date": "2022-09-04",
     "sleepMs": 25729483,
     "sleepPerformance": 84,
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-06",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-08",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-13",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-14",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-15",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2022-09-16",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2023-01-29",
@@ -2153,7 +2153,7 @@
   },
   {
     "date": "2024-12-27",
-    "strain": 0
+    "strain": 0.0
   },
   {
     "date": "2026-06-11",
@@ -2184,7 +2184,7 @@
     "restingHr": 59,
     "sleepMs": 21049400,
     "sleepPerformance": 81,
-    "strain": 5
+    "strain": 5.0
   },
   {
     "date": "2026-06-15",
