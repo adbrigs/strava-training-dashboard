@@ -837,23 +837,41 @@ table.tbl {
 .whoop-readiness-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   min-height: 0;
 }
 .whoop-readiness-col {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 20px;
+  justify-content: space-between;
   min-width: 0;
 }
 .whoop-readiness-primary {
-  padding-right: 24px;
+  padding-right: 20px;
   border-right: 1px solid var(--border);
 }
 .whoop-readiness-secondary {
-  padding-left: 24px;
+  padding-left: 20px;
+}
+
+/* WHOOP metric blocks */
+.whoop-metric { display: flex; flex-direction: column; gap: 2px; }
+.whoop-metric-label {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-subtle); font-weight: 600;
+}
+.whoop-metric-value {
+  display: flex; align-items: baseline; gap: 2px;
+  font-family: var(--font-mono); font-weight: 700;
+  font-size: 26px; letter-spacing: -0.04em; line-height: 1.1;
+  color: var(--text);
+}
+.whoop-metric-unit {
+  font-size: 11px; color: var(--text-muted);
+  font-weight: 400; letter-spacing: 0; margin-left: 2px;
+}
+.whoop-metric-delta {
+  font-size: 11px; font-family: var(--font-mono); line-height: 1;
 }
 
 ::-webkit-scrollbar { height: 10px; width: 10px; }
@@ -1047,14 +1065,15 @@ table.tbl {
 
   .whoop-readiness-grid {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 16px;
   }
   .whoop-readiness-col {
+    justify-content: flex-start;
     gap: 16px;
   }
   .whoop-readiness-primary {
     padding-right: 0;
-    padding-bottom: 18px;
+    padding-bottom: 16px;
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
