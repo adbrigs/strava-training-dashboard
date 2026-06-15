@@ -79,15 +79,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [recoveryRes, sleepRes, cycleRes] = await Promise.all([
+    const [recoveryRes, sleepRes, cycleRes, bodyMeasurementRes] = await Promise.all([
       getWithRefresh('/recovery?limit=1').catch(() => ({ records: [] })),
       getWithRefresh('/activity/sleep?limit=1').catch(() => ({ records: [] })),
       getWithRefresh('/cycle?limit=1').catch(() => ({ records: [] })),
+      getWithRefresh('/user/measurement/body').catch(() => null),
     ]);
 
     const rec = recoveryRes.records?.[0];
     const slp = sleepRes.records?.[0];
     const cyc = cycleRes.records?.[0];
+    const bodyMeasurement = bodyMeasurementRes as {
+      weight_kilogram?: number;
+      height_meter?: number;
+      max_heart_rate?: number;
+    } | null;
 
     const data = {
       connected: true,
@@ -109,6 +115,11 @@ export async function GET(req: NextRequest) {
         score: parseFloat(cyc.score.strain.toFixed(1)),
         avgHr: Math.round(cyc.score.average_heart_rate),
         date: cyc.start,
+      } : null,
+      bodyMeasurement: bodyMeasurement ? {
+        weightKg: bodyMeasurement.weight_kilogram ?? null,
+        heightM: bodyMeasurement.height_meter ?? null,
+        maxHeartRate: bodyMeasurement.max_heart_rate ?? null,
       } : null,
     };
 

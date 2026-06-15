@@ -8,11 +8,17 @@ const METRICS: { key: WhoopMetric; label: string }[] = [
   { key: 'restingHr',       label: 'Resting HR' },
   { key: 'sleepPerformance', label: 'Sleep' },
   { key: 'strain',          label: 'Strain' },
+  { key: 'weightKg',         label: 'Weight' },
 ];
 
 interface Props {
   from: Date;
   to: Date;
+}
+
+interface WhoopBodyMeasurement {
+  weightKg?: number | null;
+  fetchedAt?: string | null;
 }
 
 export default function WhoopTrendSection({ from, to }: Props) {
@@ -21,9 +27,28 @@ export default function WhoopTrendSection({ from, to }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/data/whoop_history.json')
-      .then(r => r.json())
-      .then((d: WhoopRecord[]) => { setAllRecords(d); setLoading(false); })
+    Promise.all([
+      fetch('/data/whoop_history.json').then(r => r.json() as Promise<WhoopRecord[]>),
+      fetch('/data/whoop_body_measurement.json')
+        .then(r => r.ok ? r.json() as Promise<WhoopBodyMeasurement> : null)
+        .catch(() => null),
+    ])
+      .then(([history, bodyMeasurement]) => {
+        if (bodyMeasurement?.weightKg == null) {
+          setAllRecords(history);
+          return;
+        }
+
+        const date = bodyMeasurement.fetchedAt
+          ? new Date(bodyMeasurement.fetchedAt).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10);
+        const existing = history.find(r => r.date === date);
+
+        setAllRecords(existing
+          ? history.map(r => r.date === date ? { ...r, weightKg: bodyMeasurement.weightKg! } : r)
+          : [...history, { date, weightKg: bodyMeasurement.weightKg }].sort((a, b) => a.date.localeCompare(b.date)));
+      })
+      .finally(() => setLoading(false))
       .catch(() => setLoading(false));
   }, []);
 

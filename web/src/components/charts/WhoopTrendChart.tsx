@@ -9,9 +9,10 @@ export interface WhoopRecord {
   sleepMs?: number;
   sleepPerformance?: number;
   strain?: number;
+  weightKg?: number;
 }
 
-export type WhoopMetric = 'recovery' | 'hrv' | 'restingHr' | 'sleepPerformance' | 'strain';
+export type WhoopMetric = 'recovery' | 'hrv' | 'restingHr' | 'sleepPerformance' | 'strain' | 'weightKg';
 
 const METRIC_META: Record<WhoopMetric, { label: string; unit: string; color: string; domain?: [number, number] }> = {
   recovery:         { label: 'Recovery',    unit: '%',   color: 'var(--z2)',   domain: [0, 100] },
@@ -19,10 +20,11 @@ const METRIC_META: Record<WhoopMetric, { label: string; unit: string; color: str
   restingHr:        { label: 'Resting HR',  unit: 'bpm', color: 'var(--hot)'                    },
   sleepPerformance: { label: 'Sleep Perf.', unit: '%',   color: 'var(--z1)',   domain: [0, 100] },
   strain:           { label: 'Strain',      unit: '/21', color: 'var(--warn)', domain: [0, 21]  },
+  weightKg:         { label: 'Weight',      unit: 'kg',  color: 'var(--act-weights)'            },
 };
 
 // Target ranges: what counts as "good" for each metric
-const TARGET_RANGES: Record<WhoopMetric, { lo: number; hi: number; label: string }> = {
+const TARGET_RANGES: Partial<Record<WhoopMetric, { lo: number; hi: number; label: string }>> = {
   recovery:         { lo: 67,  hi: 100, label: 'Green zone'    },
   hrv:              { lo: 70,  hi: 100, label: 'Optimal'       },
   restingHr:        { lo: 40,  hi: 60,  label: 'Athlete range' },
@@ -34,6 +36,11 @@ function recoveryFill(score: number) {
   if (score >= 67) return 'var(--z2)';
   if (score >= 34) return 'var(--warn)';
   return 'var(--hot)';
+}
+
+function formatMetric(metric: WhoopMetric, value: number) {
+  if (metric === 'strain' || metric === 'weightKg') return value.toFixed(1);
+  return Math.round(value).toString();
 }
 
 interface Props {
@@ -70,8 +77,8 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
     const target = TARGET_RANGES[metric];
     if (meta.domain) return { minV: meta.domain[0], maxV: meta.domain[1] };
     const vals = filtered.map(r => r[metric] as number);
-    const lo = Math.min(...vals, target.lo);
-    const hi = Math.max(...vals, target.hi);
+    const lo = target ? Math.min(...vals, target.lo) : Math.min(...vals);
+    const hi = target ? Math.max(...vals, target.hi) : Math.max(...vals);
     const pad = (hi - lo) * 0.15 || 5;
     return { minV: lo - pad, maxV: hi + pad };
   }, [filtered, metric]);
@@ -134,9 +141,9 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
   const target = TARGET_RANGES[metric];
 
   // Target band (clamped to chart area)
-  const bandTop = Math.max(padT, yPos(Math.min(target.hi, maxV)));
-  const bandBot = Math.min(padT + innerH, yPos(Math.max(target.lo, minV)));
-  const bandVisible = bandBot > bandTop;
+  const bandTop = target ? Math.max(padT, yPos(Math.min(target.hi, maxV))) : 0;
+  const bandBot = target ? Math.min(padT + innerH, yPos(Math.max(target.lo, minV))) : 0;
+  const bandVisible = target ? bandBot > bandTop : false;
 
   const hiX = hover != null ? xPos(hover) : null;
   const hiRatio = hiX != null ? (hiX - padL) / innerW : 0;
@@ -213,7 +220,7 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
               fontSize="9" fontFamily="var(--font-mono)"
               fill="var(--text-subtle)" opacity="0.85"
             >
-              avg {Math.round(avg)}{meta.unit}
+              avg {formatMetric(metric, avg)}{meta.unit}
             </text>
           </>
         )}
@@ -255,7 +262,7 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
           <div className="tt-row" style={{ '--c': metric === 'recovery' ? recoveryFill(filtered[hover].recovery!) : meta.color } as React.CSSProperties}>
             <span className="sw" />
             <span className="nm">{meta.label}</span>
-            <span className="v">{filtered[hover][metric]}{meta.unit}</span>
+            <span className="v">{formatMetric(metric, filtered[hover][metric] as number)}{meta.unit}</span>
           </div>
           {metric !== 'recovery' && filtered[hover].recovery != null && (
             <div className="tt-row" style={{ '--c': 'var(--z2)' } as React.CSSProperties}>
@@ -283,7 +290,7 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
           <svg width="18" height="8" style={{ flexShrink: 0 }}>
             <line x1="0" y1="4" x2="18" y2="4" stroke="var(--text-subtle)" strokeWidth="1" strokeDasharray="3 4" />
           </svg>
-          <span>avg {avg != null ? `${Math.round(avg)}${meta.unit}` : '—'}</span>
+          <span>avg {avg != null ? `${formatMetric(metric, avg)}${meta.unit}` : '—'}</span>
         </div>
         {/* trend */}
         {trend && (
@@ -296,13 +303,15 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
           </div>
         )}
         {/* target band */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{
-            width: 14, height: 8, borderRadius: 2,
-            background: meta.color, opacity: 0.3, flexShrink: 0,
-          }} />
-          <span>{target.label} {target.lo}–{target.hi}{meta.unit === '/21' ? '' : meta.unit}</span>
-        </div>
+        {target && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{
+              width: 14, height: 8, borderRadius: 2,
+              background: meta.color, opacity: 0.3, flexShrink: 0,
+            }} />
+            <span>{target.label} {target.lo}-{target.hi}{meta.unit === '/21' ? '' : meta.unit}</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -33,6 +33,11 @@ interface PaginateResult {
   firstStatus: number;
   firstBody: unknown;
 }
+interface FetchJsonResult {
+  status: number;
+  body: unknown;
+  error?: string;
+}
 
 async function paginate(endpoint: string, token: string): Promise<PaginateResult> {
   const records: unknown[] = [];
@@ -70,6 +75,21 @@ async function paginate(endpoint: string, token: string): Promise<PaginateResult
   return { records, firstStatus, firstBody };
 }
 
+async function fetchJson(endpoint: string, token: string): Promise<FetchJsonResult> {
+  const res = await fetch(`${API_BASE}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
+  const bodyText = await res.text();
+  let bodyJson: unknown;
+  try { bodyJson = JSON.parse(bodyText); } catch { bodyJson = bodyText; }
+
+  if (res.status === 404) return { status: res.status, body: null };
+  if (!res.ok) {
+    const err = Object.assign(new Error(`${endpoint} → ${res.status}: ${bodyText}`), { status: res.status });
+    throw err;
+  }
+
+  return { status: res.status, body: bodyJson };
+}
+
 interface RecoveryRecord {
   created_at: string; score_state: string;
   score?: { recovery_score: number; hrv_rmssd_milli: number; resting_heart_rate: number };
@@ -84,6 +104,11 @@ interface SleepRecord {
 interface CycleRecord {
   start: string; score_state: string;
   score?: { strain: number };
+}
+interface BodyMeasurement {
+  weight_kilogram?: number;
+  height_meter?: number;
+  max_heart_rate?: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -118,15 +143,31 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  async function fetchJson401Retry(endpoint: string): Promise<FetchJsonResult> {
+    try {
+      return await fetchJson(endpoint, accessToken!);
+    } catch (err) {
+      if ((err as { status?: number }).status === 401 && refreshToken) {
+        latestTokens = await refreshTokens(refreshToken);
+        accessToken  = latestTokens.access_token;
+        return fetchJson(endpoint, accessToken);
+      }
+      throw err;
+    }
+  }
+
   try {
     // Run sequentially for clean diagnostics
     const recoveryResult = await fetch401Retry('/recovery');
     const sleepResult    = await fetch401Retry('/activity/sleep');
     const cycleResult    = await fetch401Retry('/cycle');
+    const bodyMeasurementResult = await fetchJson401Retry('/user/measurement/body')
+      .catch((err) => ({ status: (err as { status?: number }).status ?? 0, body: null, error: String(err) }));
 
     const recoveries = recoveryResult.records as RecoveryRecord[];
     const sleeps     = sleepResult.records    as SleepRecord[];
     const cycles     = cycleResult.records    as CycleRecord[];
+    const bodyMeasurement = bodyMeasurementResult.body as BodyMeasurement | null;
 
     const recByDate: Record<string, object> = {};
     for (const r of recoveries) {
@@ -170,6 +211,14 @@ export async function POST(req: NextRequest) {
     const outPath = path.join(process.cwd(), 'public', 'data', 'whoop_history.json');
     fs.writeFileSync(outPath, JSON.stringify(history, null, 2));
 
+    const bodyMeasurementPath = path.join(process.cwd(), 'public', 'data', 'whoop_body_measurement.json');
+    fs.writeFileSync(bodyMeasurementPath, JSON.stringify({
+      weightKg: bodyMeasurement?.weight_kilogram ?? null,
+      heightM: bodyMeasurement?.height_meter ?? null,
+      maxHeartRate: bodyMeasurement?.max_heart_rate ?? null,
+      fetchedAt: new Date().toISOString(),
+    }, null, 2));
+
     const response = NextResponse.json({
       ok: true,
       count: history.length,
@@ -177,6 +226,7 @@ export async function POST(req: NextRequest) {
         recovery: { status: recoveryResult.firstStatus, raw: recoveryResult.records.length, scored: Object.keys(recByDate).length, sample: recoveryResult.firstBody },
         sleep:    { status: sleepResult.firstStatus,    raw: sleepResult.records.length,    scored: Object.keys(slpByDate).length,  sample: sleepResult.firstBody },
         cycle:    { status: cycleResult.firstStatus,    raw: cycleResult.records.length,    scored: Object.keys(strainByDate).length },
+        bodyMeasurement: { status: bodyMeasurementResult.status, sample: bodyMeasurementResult.body, error: bodyMeasurementResult.error },
       },
     });
     if (latestTokens) {
