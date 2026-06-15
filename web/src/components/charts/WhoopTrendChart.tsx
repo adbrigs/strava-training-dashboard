@@ -10,9 +10,10 @@ export interface WhoopRecord {
   sleepPerformance?: number;
   strain?: number;
   weightKg?: number;
+  weightLbs?: number;
 }
 
-export type WhoopMetric = 'recovery' | 'hrv' | 'restingHr' | 'sleepPerformance' | 'strain' | 'weightKg';
+export type WhoopMetric = 'recovery' | 'hrv' | 'restingHr' | 'sleepPerformance' | 'strain' | 'weightLbs';
 
 const METRIC_META: Record<WhoopMetric, { label: string; unit: string; color: string; domain?: [number, number] }> = {
   recovery:         { label: 'Recovery',    unit: '%',   color: 'var(--z2)',   domain: [0, 100] },
@@ -20,7 +21,7 @@ const METRIC_META: Record<WhoopMetric, { label: string; unit: string; color: str
   restingHr:        { label: 'Resting HR',  unit: 'bpm', color: 'var(--hot)'                    },
   sleepPerformance: { label: 'Sleep Perf.', unit: '%',   color: 'var(--z1)',   domain: [0, 100] },
   strain:           { label: 'Strain',      unit: '/21', color: 'var(--warn)', domain: [0, 21]  },
-  weightKg:         { label: 'Weight',      unit: 'kg',  color: 'var(--act-weights)'            },
+  weightLbs:        { label: 'Weight',      unit: 'lbs', color: 'var(--act-weights)'            },
 };
 
 // Target ranges: what counts as "good" for each metric
@@ -39,7 +40,7 @@ function recoveryFill(score: number) {
 }
 
 function formatMetric(metric: WhoopMetric, value: number) {
-  if (metric === 'strain' || metric === 'weightKg') return value.toFixed(1);
+  if (metric === 'strain' || metric === 'weightLbs') return value.toFixed(1);
   return Math.round(value).toString();
 }
 
@@ -274,6 +275,12 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
             <div className="tt-row" style={{ '--c': 'var(--text-subtle)' } as React.CSSProperties}>
               <span className="sw" /><span className="nm">HRV</span>
               <span className="v">{filtered[hover].hrv} ms</span>
+            </div>
+          )}
+          {metric === 'weightLbs' && filtered[hover].weightKg != null && (
+            <div className="tt-row" style={{ '--c': 'var(--text-subtle)' } as React.CSSProperties}>
+              <span className="sw" /><span className="nm">Weight</span>
+              <span className="v">{filtered[hover].weightKg?.toFixed(1)} kg</span>
             </div>
           )}
         </div>

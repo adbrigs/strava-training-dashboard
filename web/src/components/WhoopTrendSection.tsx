@@ -8,7 +8,7 @@ const METRICS: { key: WhoopMetric; label: string }[] = [
   { key: 'restingHr',       label: 'Resting HR' },
   { key: 'sleepPerformance', label: 'Sleep' },
   { key: 'strain',          label: 'Strain' },
-  { key: 'weightKg',         label: 'Weight' },
+  { key: 'weightLbs',        label: 'Weight' },
 ];
 
 interface Props {

@@ -129,7 +129,8 @@ def main():
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     weight_by_date: dict[str, dict] = {}
     if weight_kg is not None:
-        weight_by_date[today_str] = {"weightKg": weight_kg}
+        weight_lbs = round(weight_kg * 2.20462, 1)
+        weight_by_date[today_str] = {"weightKg": round(weight_kg, 2), "weightLbs": weight_lbs}
 
     all_dates = sorted(
         set(rec_by_date) | set(slp_by_date) | set(strain_by_date) | set(weight_by_date)
