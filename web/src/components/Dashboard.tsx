@@ -15,8 +15,10 @@ import TrainingCalendarSection from './TrainingCalendarSection';
 import RunEfficiencySection from './RunEfficiencySection';
 import WeekPatternSection from './WeekPatternSection';
 import LiftSplitSection from './LiftSplitSection';
-import WorkoutSuggestionSection from './WorkoutSuggestionSection';
 import ChatBot from './ChatBot';
+import WhoopSection from './WhoopSection';
+import WhoopTrendSection from './WhoopTrendSection';
+import SettingsDrawer from './SettingsDrawer';
 
 function Loading() {
   return (
@@ -37,7 +39,11 @@ function Loading() {
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return (localStorage.getItem('brig_theme') as 'dark' | 'light') ?? 'dark';
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -91,6 +97,11 @@ export default function Dashboard() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  function handleThemeChange(t: 'dark' | 'light') {
+    setTheme(t);
+    try { localStorage.setItem('brig_theme', t); } catch {}
+  }
 
   useEffect(() => {
     fetch(
@@ -203,8 +214,8 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="hdr-r">
-          <button className="icon-btn" title="Toggle theme" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>
-            <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
+          <button className="icon-btn" title="Settings" onClick={() => setIsSettingsOpen(o => !o)}>
+            <Icon name="settings" size={15} />
           </button>
           <button
             className="chat-toggle"
@@ -239,10 +250,10 @@ export default function Dashboard() {
         <SummaryRow filtered={filtered} today={today} />
       </div>
 
-      {/* Daily training */}
+      {/* Daily training + WHOOP readiness */}
       <div className="stack">
         <div className="grid-layout row-daily">
-          <WorkoutSuggestionSection activities={activities} selectedTypes={selectedTypes} today={today} restDate={restDate} onRestDateChange={handleRestDateChange} />
+          <WhoopSection />
           <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} />
         </div>
       </div>
@@ -270,6 +281,11 @@ export default function Dashboard() {
           <DistributionSection filtered={filtered} />
           <PRsSection prs={prs} />
         </div>
+      </div>
+
+      {/* WHOOP Trends */}
+      <div className="stack">
+        <WhoopTrendSection from={from} to={to} />
       </div>
 
       {/* Lift Split */}
@@ -308,6 +324,13 @@ export default function Dashboard() {
         to={to}
         selectedTypes={selectedTypes}
         restDate={restDate}
+      />
+
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        onThemeChange={handleThemeChange}
       />
     </div>
   );

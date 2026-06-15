@@ -1,0 +1,2198 @@
+[
+  {
+    "date": "2021-09-03",
+    "sleepMs": 17724126,
+    "sleepPerformance": 58,
+    "strain": 7.5
+  },
+  {
+    "date": "2021-09-04",
+    "sleepMs": 19280662,
+    "sleepPerformance": 56,
+    "strain": 6.9
+  },
+  {
+    "date": "2021-09-05",
+    "sleepMs": 17855049,
+    "sleepPerformance": 51,
+    "strain": 10.3
+  },
+  {
+    "date": "2021-09-06",
+    "sleepMs": 15281115,
+    "sleepPerformance": 43,
+    "strain": 5.6
+  },
+  {
+    "date": "2021-09-07",
+    "sleepMs": 21092254,
+    "sleepPerformance": 58,
+    "strain": 5.5
+  },
+  {
+    "date": "2021-09-08",
+    "sleepMs": 23439041,
+    "sleepPerformance": 65,
+    "strain": 8.9
+  },
+  {
+    "date": "2021-09-09",
+    "sleepMs": 26479866,
+    "sleepPerformance": 75,
+    "strain": 8.7
+  },
+  {
+    "date": "2021-09-10",
+    "sleepMs": 22769081,
+    "sleepPerformance": 68,
+    "strain": 6.3
+  },
+  {
+    "date": "2021-09-11",
+    "sleepMs": 29433093,
+    "sleepPerformance": 86,
+    "strain": 16
+  },
+  {
+    "date": "2021-09-12",
+    "sleepMs": 31153222,
+    "sleepPerformance": 93,
+    "strain": 5.5
+  },
+  {
+    "date": "2021-09-13",
+    "sleepMs": 24366974,
+    "sleepPerformance": 82,
+    "strain": 7.7
+  },
+  {
+    "date": "2021-09-14",
+    "sleepMs": 19019779,
+    "sleepPerformance": 60,
+    "strain": 6.7
+  },
+  {
+    "date": "2021-09-15",
+    "sleepMs": 25787742,
+    "sleepPerformance": 75,
+    "strain": 10
+  },
+  {
+    "date": "2021-09-16",
+    "sleepMs": 20408814,
+    "sleepPerformance": 61,
+    "strain": 7
+  },
+  {
+    "date": "2021-09-17",
+    "sleepMs": 20425193,
+    "sleepPerformance": 60,
+    "strain": 7.6
+  },
+  {
+    "date": "2021-09-18",
+    "sleepMs": 12039062,
+    "sleepPerformance": 35,
+    "strain": 7.3
+  },
+  {
+    "date": "2021-09-19",
+    "sleepMs": 25078354,
+    "sleepPerformance": 66,
+    "strain": 7.6
+  },
+  {
+    "date": "2021-09-20",
+    "sleepMs": 16060778,
+    "sleepPerformance": 46,
+    "strain": 5.2
+  },
+  {
+    "date": "2021-09-21",
+    "sleepMs": 22111610,
+    "sleepPerformance": 61,
+    "strain": 5
+  },
+  {
+    "date": "2021-09-22",
+    "sleepMs": 23006820,
+    "sleepPerformance": 68,
+    "strain": 5.4
+  },
+  {
+    "date": "2021-09-23",
+    "sleepMs": 24650002,
+    "sleepPerformance": 72,
+    "strain": 5.2
+  },
+  {
+    "date": "2021-09-24",
+    "sleepMs": 17046516,
+    "sleepPerformance": 51,
+    "strain": 8.4
+  },
+  {
+    "date": "2021-09-25",
+    "sleepMs": 26349898,
+    "sleepPerformance": 74,
+    "strain": 13.9
+  },
+  {
+    "date": "2021-09-26",
+    "sleepMs": 22690115,
+    "sleepPerformance": 65,
+    "strain": 13.2
+  },
+  {
+    "date": "2021-09-27",
+    "sleepMs": 23124272,
+    "sleepPerformance": 64,
+    "strain": 5.4
+  },
+  {
+    "date": "2021-09-28",
+    "sleepMs": 22483197,
+    "sleepPerformance": 64,
+    "strain": 7.1
+  },
+  {
+    "date": "2021-09-29",
+    "sleepMs": 19124726,
+    "sleepPerformance": 54,
+    "strain": 10
+  },
+  {
+    "date": "2021-09-30",
+    "sleepMs": 14385864,
+    "sleepPerformance": 41,
+    "strain": 11.3
+  },
+  {
+    "date": "2021-10-01",
+    "sleepMs": 17506597,
+    "sleepPerformance": 47,
+    "strain": 9.9
+  },
+  {
+    "date": "2021-10-02",
+    "sleepMs": 18874445,
+    "sleepPerformance": 52,
+    "strain": 17.3
+  },
+  {
+    "date": "2021-10-03",
+    "sleepMs": 16181113,
+    "sleepPerformance": 42,
+    "strain": 8.4
+  },
+  {
+    "date": "2021-10-04",
+    "sleepMs": 23697013,
+    "sleepPerformance": 64,
+    "strain": 5.4
+  },
+  {
+    "date": "2021-10-05",
+    "sleepMs": 21341537,
+    "sleepPerformance": 61,
+    "strain": 5.5
+  },
+  {
+    "date": "2021-10-06",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-07",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-08",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-09",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-10",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-11",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-12",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-13",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-14",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-15",
+    "strain": 4
+  },
+  {
+    "date": "2021-10-16",
+    "strain": 4.5
+  },
+  {
+    "date": "2021-10-17",
+    "sleepMs": 22942368,
+    "sleepPerformance": 65,
+    "strain": 10
+  },
+  {
+    "date": "2021-10-18",
+    "sleepMs": 22410971,
+    "sleepPerformance": 63,
+    "strain": 6.9
+  },
+  {
+    "date": "2021-10-19",
+    "sleepMs": 17298688,
+    "sleepPerformance": 51,
+    "strain": 5.4
+  },
+  {
+    "date": "2021-10-20",
+    "sleepMs": 21793006,
+    "sleepPerformance": 62,
+    "strain": 11.1
+  },
+  {
+    "date": "2021-10-21",
+    "sleepMs": 17400711,
+    "sleepPerformance": 48,
+    "strain": 6
+  },
+  {
+    "date": "2021-10-22",
+    "sleepMs": 19126597,
+    "sleepPerformance": 53,
+    "strain": 7.1
+  },
+  {
+    "date": "2021-10-23",
+    "sleepMs": 26545346,
+    "sleepPerformance": 75,
+    "strain": 8.8
+  },
+  {
+    "date": "2021-10-24",
+    "sleepMs": 17337192,
+    "sleepPerformance": 52,
+    "strain": 4.5
+  },
+  {
+    "date": "2021-10-25",
+    "sleepMs": 25755987,
+    "sleepPerformance": 73,
+    "strain": 5.2
+  },
+  {
+    "date": "2021-10-26",
+    "sleepMs": 14292513,
+    "sleepPerformance": 43,
+    "strain": 11.1
+  },
+  {
+    "date": "2021-10-27",
+    "sleepMs": 24798273,
+    "sleepPerformance": 67,
+    "strain": 7.3
+  },
+  {
+    "date": "2021-10-28",
+    "sleepMs": 23898214,
+    "sleepPerformance": 69,
+    "strain": 5
+  },
+  {
+    "date": "2021-10-29",
+    "sleepMs": 26479973,
+    "sleepPerformance": 78,
+    "strain": 13.5
+  },
+  {
+    "date": "2021-10-30",
+    "sleepMs": 12708100,
+    "sleepPerformance": 38,
+    "strain": 7.4
+  },
+  {
+    "date": "2021-10-31",
+    "sleepMs": 26683935,
+    "sleepPerformance": 71,
+    "strain": 8.8
+  },
+  {
+    "date": "2021-11-01",
+    "sleepMs": 6890220,
+    "sleepPerformance": 20,
+    "strain": 5.3
+  },
+  {
+    "date": "2021-11-02",
+    "sleepMs": 20052650,
+    "sleepPerformance": 50,
+    "strain": 7.6
+  },
+  {
+    "date": "2021-11-03",
+    "sleepMs": 22252169,
+    "sleepPerformance": 62,
+    "strain": 9
+  },
+  {
+    "date": "2021-11-04",
+    "sleepMs": 22806606,
+    "sleepPerformance": 64,
+    "strain": 5.6
+  },
+  {
+    "date": "2021-11-05",
+    "sleepMs": 24885819,
+    "sleepPerformance": 71,
+    "strain": 8.2
+  },
+  {
+    "date": "2021-11-06",
+    "sleepMs": 20700474,
+    "sleepPerformance": 61,
+    "strain": 13.2
+  },
+  {
+    "date": "2021-11-07",
+    "sleepMs": 13320277,
+    "sleepPerformance": 36,
+    "strain": 0
+  },
+  {
+    "date": "2021-11-08",
+    "sleepMs": 20309682,
+    "sleepPerformance": 55,
+    "strain": 8.5
+  },
+  {
+    "date": "2021-11-09",
+    "sleepMs": 21439756,
+    "sleepPerformance": 61,
+    "strain": 9.2
+  },
+  {
+    "date": "2021-11-10",
+    "sleepMs": 22425427,
+    "sleepPerformance": 62,
+    "strain": 7.2
+  },
+  {
+    "date": "2021-11-11",
+    "sleepMs": 24225493,
+    "sleepPerformance": 68,
+    "strain": 8
+  },
+  {
+    "date": "2021-11-12",
+    "sleepMs": 15745035,
+    "sleepPerformance": 46,
+    "strain": 6.2
+  },
+  {
+    "date": "2021-11-13",
+    "sleepMs": 27032392,
+    "sleepPerformance": 75,
+    "strain": 12.1
+  },
+  {
+    "date": "2021-11-14",
+    "strain": 5.9
+  },
+  {
+    "date": "2021-11-15",
+    "sleepMs": 25059085,
+    "sleepPerformance": 76,
+    "strain": 4.8
+  },
+  {
+    "date": "2021-11-16",
+    "sleepMs": 25472031,
+    "sleepPerformance": 78,
+    "strain": 7.3
+  },
+  {
+    "date": "2021-11-17",
+    "sleepMs": 21474405,
+    "sleepPerformance": 66,
+    "strain": 4.9
+  },
+  {
+    "date": "2021-11-18",
+    "sleepMs": 25787759,
+    "sleepPerformance": 75,
+    "strain": 6.7
+  },
+  {
+    "date": "2021-11-19",
+    "sleepMs": 22561145,
+    "sleepPerformance": 68,
+    "strain": 8.5
+  },
+  {
+    "date": "2021-11-20",
+    "sleepMs": 20058423,
+    "sleepPerformance": 58,
+    "strain": 5.5
+  },
+  {
+    "date": "2021-11-21",
+    "sleepMs": 20858351,
+    "sleepPerformance": 61,
+    "strain": 16.1
+  },
+  {
+    "date": "2021-11-22",
+    "sleepMs": 24943170,
+    "sleepPerformance": 69,
+    "strain": 8.4
+  },
+  {
+    "date": "2021-11-23",
+    "sleepMs": 21251057,
+    "sleepPerformance": 62,
+    "strain": 8.7
+  },
+  {
+    "date": "2021-11-24",
+    "sleepMs": 21103763,
+    "sleepPerformance": 62,
+    "strain": 7.9
+  },
+  {
+    "date": "2021-11-25",
+    "sleepMs": 7004730,
+    "sleepPerformance": 21,
+    "strain": 0
+  },
+  {
+    "date": "2021-11-27",
+    "strain": 7.7
+  },
+  {
+    "date": "2021-11-28",
+    "sleepMs": 21938359,
+    "sleepPerformance": 55,
+    "strain": 6.9
+  },
+  {
+    "date": "2021-11-29",
+    "sleepMs": 24222589,
+    "sleepPerformance": 69,
+    "strain": 5.4
+  },
+  {
+    "date": "2021-11-30",
+    "sleepMs": 23698012,
+    "sleepPerformance": 70,
+    "strain": 8.9
+  },
+  {
+    "date": "2021-12-01",
+    "sleepMs": 22771987,
+    "sleepPerformance": 67,
+    "strain": 5.3
+  },
+  {
+    "date": "2021-12-02",
+    "sleepMs": 22717198,
+    "sleepPerformance": 66,
+    "strain": 9.2
+  },
+  {
+    "date": "2021-12-03",
+    "sleepMs": 26075562,
+    "sleepPerformance": 75,
+    "strain": 8.3
+  },
+  {
+    "date": "2021-12-04",
+    "sleepMs": 23006821,
+    "sleepPerformance": 69,
+    "strain": 6
+  },
+  {
+    "date": "2021-12-05",
+    "sleepMs": 26977544,
+    "sleepPerformance": 79,
+    "strain": 4.6
+  },
+  {
+    "date": "2021-12-06",
+    "sleepMs": 21507124,
+    "sleepPerformance": 67,
+    "strain": 8.2
+  },
+  {
+    "date": "2021-12-07",
+    "sleepMs": 20857401,
+    "sleepPerformance": 63,
+    "strain": 8.2
+  },
+  {
+    "date": "2021-12-08",
+    "strain": 10.3
+  },
+  {
+    "date": "2021-12-09",
+    "sleepMs": 15161748,
+    "sleepPerformance": 73,
+    "strain": 4
+  },
+  {
+    "date": "2021-12-10",
+    "sleepMs": 23380347,
+    "sleepPerformance": 70,
+    "strain": 12.8
+  },
+  {
+    "date": "2021-12-11",
+    "sleepMs": 16215752,
+    "sleepPerformance": 46,
+    "strain": 6.2
+  },
+  {
+    "date": "2021-12-12",
+    "sleepMs": 31107985,
+    "sleepPerformance": 86,
+    "strain": 6.1
+  },
+  {
+    "date": "2021-12-13",
+    "sleepMs": 19966042,
+    "sleepPerformance": 64,
+    "strain": 7.4
+  },
+  {
+    "date": "2021-12-14",
+    "sleepMs": 24395848,
+    "sleepPerformance": 72,
+    "strain": 8.8
+  },
+  {
+    "date": "2021-12-15",
+    "sleepMs": 19052505,
+    "sleepPerformance": 63,
+    "strain": 5.9
+  },
+  {
+    "date": "2021-12-16",
+    "sleepMs": 23415928,
+    "sleepPerformance": 70,
+    "strain": 6.4
+  },
+  {
+    "date": "2021-12-17",
+    "sleepMs": 17283276,
+    "sleepPerformance": 51,
+    "strain": 11.4
+  },
+  {
+    "date": "2021-12-18",
+    "sleepMs": 31239856,
+    "sleepPerformance": 86,
+    "strain": 8.6
+  },
+  {
+    "date": "2021-12-19",
+    "sleepMs": 22374417,
+    "sleepPerformance": 72,
+    "strain": 7.8
+  },
+  {
+    "date": "2021-12-20",
+    "sleepMs": 23303311,
+    "sleepPerformance": 69,
+    "strain": 8.3
+  },
+  {
+    "date": "2021-12-21",
+    "sleepMs": 21056900,
+    "sleepPerformance": 61,
+    "strain": 7.5
+  },
+  {
+    "date": "2021-12-22",
+    "sleepMs": 28042512,
+    "sleepPerformance": 82,
+    "strain": 6.9
+  },
+  {
+    "date": "2021-12-23",
+    "sleepMs": 15056002,
+    "sleepPerformance": 47,
+    "strain": 5.2
+  },
+  {
+    "date": "2021-12-24",
+    "sleepMs": 22826174,
+    "sleepPerformance": 64,
+    "strain": 6.1
+  },
+  {
+    "date": "2021-12-25",
+    "sleepMs": 22925278,
+    "sleepPerformance": 68,
+    "strain": 5.2
+  },
+  {
+    "date": "2021-12-26",
+    "sleepMs": 13193376,
+    "sleepPerformance": 39,
+    "strain": 12.5
+  },
+  {
+    "date": "2021-12-27",
+    "sleepMs": 28895312,
+    "sleepPerformance": 76,
+    "strain": 4.5
+  },
+  {
+    "date": "2021-12-28",
+    "sleepMs": 22051521,
+    "sleepPerformance": 67,
+    "strain": 6.4
+  },
+  {
+    "date": "2021-12-29",
+    "sleepMs": 15048341,
+    "sleepPerformance": 44,
+    "strain": 7.6
+  },
+  {
+    "date": "2021-12-30",
+    "sleepMs": 21150276,
+    "sleepPerformance": 58,
+    "strain": 6.9
+  },
+  {
+    "date": "2021-12-31",
+    "sleepMs": 21981967,
+    "sleepPerformance": 64,
+    "strain": 9.9
+  },
+  {
+    "date": "2022-01-01",
+    "sleepMs": 15798196,
+    "sleepPerformance": 45,
+    "strain": 5.5
+  },
+  {
+    "date": "2022-01-02",
+    "sleepMs": 24855317,
+    "sleepPerformance": 69,
+    "strain": 5.2
+  },
+  {
+    "date": "2022-01-03",
+    "sleepMs": 25441386,
+    "sleepPerformance": 75,
+    "strain": 9.8
+  },
+  {
+    "date": "2022-01-04",
+    "sleepMs": 21382214,
+    "sleepPerformance": 64,
+    "strain": 7.1
+  },
+  {
+    "date": "2022-01-05",
+    "sleepMs": 19472425,
+    "sleepPerformance": 61,
+    "strain": 5.1
+  },
+  {
+    "date": "2022-01-06",
+    "sleepMs": 29943632,
+    "sleepPerformance": 88,
+    "strain": 4.3
+  },
+  {
+    "date": "2022-01-07",
+    "sleepMs": 27308886,
+    "sleepPerformance": 89,
+    "strain": 10.1
+  },
+  {
+    "date": "2022-01-08",
+    "sleepMs": 26775663,
+    "sleepPerformance": 87,
+    "strain": 9
+  },
+  {
+    "date": "2022-01-09",
+    "sleepMs": 23527848,
+    "sleepPerformance": 76,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-01-10",
+    "sleepMs": 23079998,
+    "sleepPerformance": 70,
+    "strain": 10.8
+  },
+  {
+    "date": "2022-01-11",
+    "sleepMs": 25316282,
+    "sleepPerformance": 76,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-01-12",
+    "sleepMs": 23829115,
+    "sleepPerformance": 73,
+    "strain": 7.1
+  },
+  {
+    "date": "2022-01-13",
+    "sleepMs": 26170109,
+    "sleepPerformance": 81,
+    "strain": 5.6
+  },
+  {
+    "date": "2022-01-14",
+    "sleepMs": 22061778,
+    "sleepPerformance": 69,
+    "strain": 4.8
+  },
+  {
+    "date": "2022-01-15",
+    "sleepMs": 30153483,
+    "sleepPerformance": 92,
+    "strain": 7.8
+  },
+  {
+    "date": "2022-01-16",
+    "sleepMs": 15716358,
+    "sleepPerformance": 52,
+    "strain": 6.3
+  },
+  {
+    "date": "2022-01-17",
+    "sleepMs": 26714106,
+    "sleepPerformance": 76,
+    "strain": 6.4
+  },
+  {
+    "date": "2022-01-18",
+    "sleepMs": 20710221,
+    "sleepPerformance": 63,
+    "strain": 5.6
+  },
+  {
+    "date": "2022-01-19",
+    "sleepMs": 20170295,
+    "sleepPerformance": 60,
+    "strain": 7.3
+  },
+  {
+    "date": "2022-01-20",
+    "sleepMs": 21224408,
+    "sleepPerformance": 68,
+    "strain": 4.3
+  },
+  {
+    "date": "2022-01-21",
+    "sleepMs": 22281293,
+    "sleepPerformance": 68,
+    "strain": 7.1
+  },
+  {
+    "date": "2022-01-22",
+    "sleepMs": 24194004,
+    "sleepPerformance": 73,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-01-23",
+    "sleepMs": 29987938,
+    "sleepPerformance": 90,
+    "strain": 4.2
+  },
+  {
+    "date": "2022-01-24",
+    "sleepMs": 22410301,
+    "sleepPerformance": 74,
+    "strain": 7.9
+  },
+  {
+    "date": "2022-01-25",
+    "sleepMs": 21097345,
+    "sleepPerformance": 63,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-01-26",
+    "sleepMs": 25740604,
+    "sleepPerformance": 76,
+    "strain": 7.1
+  },
+  {
+    "date": "2022-01-27",
+    "sleepMs": 25327951,
+    "sleepPerformance": 77,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-01-28",
+    "sleepMs": 18714852,
+    "sleepPerformance": 58,
+    "strain": 5.9
+  },
+  {
+    "date": "2022-01-29",
+    "sleepMs": 27117465,
+    "sleepPerformance": 79,
+    "strain": 9.2
+  },
+  {
+    "date": "2022-01-30",
+    "sleepMs": 24387513,
+    "sleepPerformance": 75,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-01-31",
+    "sleepMs": 27432184,
+    "sleepPerformance": 83,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-02-01",
+    "sleepMs": 19721684,
+    "sleepPerformance": 62,
+    "strain": 3.9
+  },
+  {
+    "date": "2022-02-02",
+    "sleepMs": 24455880,
+    "sleepPerformance": 73,
+    "strain": 6.7
+  },
+  {
+    "date": "2022-02-03",
+    "sleepMs": 17458687,
+    "sleepPerformance": 52,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-02-04",
+    "sleepMs": 17860047,
+    "sleepPerformance": 51,
+    "strain": 12.2
+  },
+  {
+    "date": "2022-02-05",
+    "sleepMs": 18106374,
+    "sleepPerformance": 50,
+    "strain": 14.5
+  },
+  {
+    "date": "2022-02-06",
+    "sleepMs": 22031003,
+    "sleepPerformance": 59,
+    "strain": 4.1
+  },
+  {
+    "date": "2022-02-07",
+    "sleepMs": 27255021,
+    "sleepPerformance": 93,
+    "strain": 5.9
+  },
+  {
+    "date": "2022-02-08",
+    "sleepMs": 25685015,
+    "sleepPerformance": 86,
+    "strain": 4.9
+  },
+  {
+    "date": "2022-02-09",
+    "sleepMs": 25431881,
+    "sleepPerformance": 82,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-02-10",
+    "sleepMs": 23035942,
+    "sleepPerformance": 73,
+    "strain": 7.9
+  },
+  {
+    "date": "2022-02-11",
+    "sleepMs": 22878115,
+    "sleepPerformance": 68,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-02-12",
+    "sleepMs": 20799791,
+    "sleepPerformance": 63,
+    "strain": 4.1
+  },
+  {
+    "date": "2022-02-13",
+    "sleepMs": 25258615,
+    "sleepPerformance": 75,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-02-14",
+    "sleepMs": 22795803,
+    "sleepPerformance": 69,
+    "strain": 5.3
+  },
+  {
+    "date": "2022-02-15",
+    "sleepMs": 21861582,
+    "sleepPerformance": 67,
+    "strain": 5.4
+  },
+  {
+    "date": "2022-02-16",
+    "sleepMs": 20650542,
+    "sleepPerformance": 62,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-02-17",
+    "sleepMs": 25820149,
+    "sleepPerformance": 76,
+    "strain": 5.5
+  },
+  {
+    "date": "2022-02-18",
+    "sleepMs": 21583447,
+    "sleepPerformance": 66,
+    "strain": 12.1
+  },
+  {
+    "date": "2022-02-19",
+    "sleepMs": 20174155,
+    "sleepPerformance": 59,
+    "strain": 12.8
+  },
+  {
+    "date": "2022-02-20",
+    "sleepMs": 14508049,
+    "sleepPerformance": 41,
+    "strain": 11.1
+  },
+  {
+    "date": "2022-02-21",
+    "sleepMs": 25104140,
+    "sleepPerformance": 67,
+    "strain": 5.5
+  },
+  {
+    "date": "2022-02-22",
+    "sleepMs": 22196600,
+    "sleepPerformance": 78,
+    "strain": 4.9
+  },
+  {
+    "date": "2022-02-23",
+    "sleepMs": 22332310,
+    "sleepPerformance": 69,
+    "strain": 5.1
+  },
+  {
+    "date": "2022-02-24",
+    "sleepMs": 25119068,
+    "sleepPerformance": 74,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-02-25",
+    "sleepMs": 24616539,
+    "sleepPerformance": 74,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-02-26",
+    "sleepMs": 18211437,
+    "sleepPerformance": 55,
+    "strain": 6.1
+  },
+  {
+    "date": "2022-02-27",
+    "sleepMs": 20193619,
+    "sleepPerformance": 56,
+    "strain": 4.5
+  },
+  {
+    "date": "2022-02-28",
+    "sleepMs": 28114696,
+    "sleepPerformance": 81,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-03-01",
+    "sleepMs": 23395028,
+    "sleepPerformance": 73,
+    "strain": 8.7
+  },
+  {
+    "date": "2022-03-02",
+    "sleepMs": 27905851,
+    "sleepPerformance": 83,
+    "strain": 11.3
+  },
+  {
+    "date": "2022-03-03",
+    "sleepMs": 19956667,
+    "sleepPerformance": 62,
+    "strain": 9.2
+  },
+  {
+    "date": "2022-03-04",
+    "sleepMs": 18439523,
+    "sleepPerformance": 54,
+    "strain": 5
+  },
+  {
+    "date": "2022-03-05",
+    "sleepMs": 28362979,
+    "sleepPerformance": 81,
+    "strain": 6.8
+  },
+  {
+    "date": "2022-03-06",
+    "sleepMs": 22289986,
+    "sleepPerformance": 70,
+    "strain": 4.2
+  },
+  {
+    "date": "2022-03-07",
+    "sleepMs": 23048513,
+    "sleepPerformance": 68,
+    "strain": 7.3
+  },
+  {
+    "date": "2022-03-08",
+    "sleepMs": 21962741,
+    "sleepPerformance": 66,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-03-09",
+    "sleepMs": 18675418,
+    "sleepPerformance": 56,
+    "strain": 5.2
+  },
+  {
+    "date": "2022-03-10",
+    "sleepMs": 24418326,
+    "sleepPerformance": 71,
+    "strain": 6.1
+  },
+  {
+    "date": "2022-03-11",
+    "sleepMs": 26918181,
+    "sleepPerformance": 80,
+    "strain": 10.5
+  },
+  {
+    "date": "2022-03-12",
+    "sleepMs": 20357031,
+    "sleepPerformance": 62,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-03-13",
+    "sleepMs": 21393756,
+    "sleepPerformance": 63,
+    "strain": 6
+  },
+  {
+    "date": "2022-03-14",
+    "sleepMs": 24028402,
+    "sleepPerformance": 71,
+    "strain": 7.4
+  },
+  {
+    "date": "2022-03-15",
+    "sleepMs": 22992676,
+    "sleepPerformance": 68,
+    "strain": 8.6
+  },
+  {
+    "date": "2022-03-16",
+    "sleepMs": 22932968,
+    "sleepPerformance": 67,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-03-17",
+    "sleepMs": 22128268,
+    "sleepPerformance": 67,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-03-18",
+    "sleepMs": 22583536,
+    "sleepPerformance": 68,
+    "strain": 8
+  },
+  {
+    "date": "2022-03-19",
+    "sleepMs": 22981948,
+    "sleepPerformance": 67,
+    "strain": 13.2
+  },
+  {
+    "date": "2022-03-20",
+    "sleepMs": 17672346,
+    "sleepPerformance": 51,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-03-21",
+    "sleepMs": 24512963,
+    "sleepPerformance": 69,
+    "strain": 5.7
+  },
+  {
+    "date": "2022-03-22",
+    "sleepMs": 26662569,
+    "sleepPerformance": 78,
+    "strain": 8.4
+  },
+  {
+    "date": "2022-03-23",
+    "sleepMs": 24447209,
+    "sleepPerformance": 75,
+    "strain": 10.6
+  },
+  {
+    "date": "2022-03-24",
+    "sleepMs": 27144353,
+    "sleepPerformance": 81,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-03-25",
+    "sleepMs": 27134828,
+    "sleepPerformance": 85,
+    "strain": 7.4
+  },
+  {
+    "date": "2022-03-26",
+    "sleepMs": 24472244,
+    "sleepPerformance": 78,
+    "strain": 8.2
+  },
+  {
+    "date": "2022-03-27",
+    "sleepMs": 23303687,
+    "sleepPerformance": 71,
+    "strain": 5.3
+  },
+  {
+    "date": "2022-03-28",
+    "sleepMs": 19691954,
+    "sleepPerformance": 61,
+    "strain": 8
+  },
+  {
+    "date": "2022-03-29",
+    "sleepMs": 20947179,
+    "sleepPerformance": 61,
+    "strain": 8.3
+  },
+  {
+    "date": "2022-03-30",
+    "sleepMs": 23925528,
+    "sleepPerformance": 70,
+    "strain": 10.6
+  },
+  {
+    "date": "2022-03-31",
+    "sleepMs": 21901112,
+    "sleepPerformance": 66,
+    "strain": 9.2
+  },
+  {
+    "date": "2022-04-01",
+    "sleepMs": 21730676,
+    "sleepPerformance": 65,
+    "strain": 8.3
+  },
+  {
+    "date": "2022-04-02",
+    "sleepMs": 20543859,
+    "sleepPerformance": 61,
+    "strain": 6
+  },
+  {
+    "date": "2022-04-03",
+    "sleepMs": 22208054,
+    "sleepPerformance": 65,
+    "strain": 4.6
+  },
+  {
+    "date": "2022-04-04",
+    "sleepMs": 18828556,
+    "sleepPerformance": 57,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-04-05",
+    "sleepMs": 25428072,
+    "sleepPerformance": 74,
+    "strain": 6.3
+  },
+  {
+    "date": "2022-04-06",
+    "sleepMs": 24877477,
+    "sleepPerformance": 75,
+    "strain": 7.1
+  },
+  {
+    "date": "2022-04-07",
+    "sleepMs": 21725008,
+    "sleepPerformance": 66,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-04-08",
+    "sleepMs": 18908343,
+    "sleepPerformance": 57,
+    "strain": 8.1
+  },
+  {
+    "date": "2022-04-09",
+    "sleepMs": 25217399,
+    "sleepPerformance": 73,
+    "strain": 7.9
+  },
+  {
+    "date": "2022-04-10",
+    "sleepMs": 23403813,
+    "sleepPerformance": 70,
+    "strain": 5.6
+  },
+  {
+    "date": "2022-04-11",
+    "sleepMs": 21618119,
+    "sleepPerformance": 64,
+    "strain": 8.3
+  },
+  {
+    "date": "2022-04-12",
+    "sleepMs": 22351698,
+    "sleepPerformance": 66,
+    "strain": 6.7
+  },
+  {
+    "date": "2022-04-13",
+    "sleepMs": 22307349,
+    "sleepPerformance": 67,
+    "strain": 6.1
+  },
+  {
+    "date": "2022-04-14",
+    "sleepMs": 23035071,
+    "sleepPerformance": 67,
+    "strain": 5.3
+  },
+  {
+    "date": "2022-04-15",
+    "sleepMs": 26246412,
+    "sleepPerformance": 76,
+    "strain": 9.1
+  },
+  {
+    "date": "2022-04-16",
+    "sleepMs": 22762675,
+    "sleepPerformance": 69,
+    "strain": 10.7
+  },
+  {
+    "date": "2022-04-17",
+    "sleepMs": 20576586,
+    "sleepPerformance": 59,
+    "strain": 7.5
+  },
+  {
+    "date": "2022-04-18",
+    "sleepMs": 23061045,
+    "sleepPerformance": 67,
+    "strain": 4.3
+  },
+  {
+    "date": "2022-04-19",
+    "sleepMs": 22467169,
+    "sleepPerformance": 68,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-04-20",
+    "sleepMs": 24903151,
+    "sleepPerformance": 73,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-04-21",
+    "sleepMs": 24923379,
+    "sleepPerformance": 75,
+    "strain": 5.7
+  },
+  {
+    "date": "2022-04-22",
+    "sleepMs": 25455128,
+    "sleepPerformance": 77,
+    "strain": 7.8
+  },
+  {
+    "date": "2022-04-23",
+    "sleepMs": 25325917,
+    "sleepPerformance": 77,
+    "strain": 14.7
+  },
+  {
+    "date": "2022-04-24",
+    "sleepMs": 12292432,
+    "sleepPerformance": 36,
+    "strain": 7.6
+  },
+  {
+    "date": "2022-04-25",
+    "sleepMs": 22912818,
+    "sleepPerformance": 61,
+    "strain": 5.1
+  },
+  {
+    "date": "2022-04-26",
+    "sleepMs": 25381975,
+    "sleepPerformance": 75,
+    "strain": 7.7
+  },
+  {
+    "date": "2022-04-27",
+    "sleepMs": 26818392,
+    "sleepPerformance": 81,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-04-28",
+    "sleepMs": 25976793,
+    "sleepPerformance": 82,
+    "strain": 5.3
+  },
+  {
+    "date": "2022-04-29",
+    "sleepMs": 22178340,
+    "sleepPerformance": 70,
+    "strain": 10.6
+  },
+  {
+    "date": "2022-04-30",
+    "sleepMs": 16471034,
+    "sleepPerformance": 50,
+    "strain": 12.9
+  },
+  {
+    "date": "2022-05-01",
+    "sleepMs": 21697939,
+    "sleepPerformance": 59,
+    "strain": 7.3
+  },
+  {
+    "date": "2022-05-02",
+    "sleepMs": 27847192,
+    "sleepPerformance": 81,
+    "strain": 5.4
+  },
+  {
+    "date": "2022-05-03",
+    "sleepMs": 20703667,
+    "sleepPerformance": 65,
+    "strain": 6.7
+  },
+  {
+    "date": "2022-05-04",
+    "sleepMs": 25478186,
+    "sleepPerformance": 76,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-05-05",
+    "sleepMs": 19482089,
+    "sleepPerformance": 59,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-05-06",
+    "sleepMs": 18730309,
+    "sleepPerformance": 55,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-05-07",
+    "sleepMs": 23078373,
+    "sleepPerformance": 66,
+    "strain": 4.7
+  },
+  {
+    "date": "2022-05-08",
+    "sleepMs": 19395461,
+    "sleepPerformance": 56,
+    "strain": 9.1
+  },
+  {
+    "date": "2022-05-09",
+    "sleepMs": 20791248,
+    "sleepPerformance": 60,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-05-10",
+    "sleepMs": 26829527,
+    "sleepPerformance": 79,
+    "strain": 5.9
+  },
+  {
+    "date": "2022-05-11",
+    "sleepMs": 20621770,
+    "sleepPerformance": 64,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-05-12",
+    "sleepMs": 22493118,
+    "sleepPerformance": 67,
+    "strain": 7.7
+  },
+  {
+    "date": "2022-05-13",
+    "sleepMs": 25668783,
+    "sleepPerformance": 74,
+    "strain": 9.4
+  },
+  {
+    "date": "2022-05-14",
+    "sleepMs": 20543733,
+    "sleepPerformance": 61,
+    "strain": 12.5
+  },
+  {
+    "date": "2022-05-15",
+    "sleepMs": 11666715,
+    "sleepPerformance": 33,
+    "strain": 5.7
+  },
+  {
+    "date": "2022-05-16",
+    "sleepMs": 24359627,
+    "sleepPerformance": 64,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-05-17",
+    "sleepMs": 21195544,
+    "sleepPerformance": 61,
+    "strain": 5.1
+  },
+  {
+    "date": "2022-05-18",
+    "sleepMs": 21030892,
+    "sleepPerformance": 62,
+    "strain": 6.4
+  },
+  {
+    "date": "2022-05-19",
+    "sleepMs": 17534784,
+    "sleepPerformance": 50,
+    "strain": 6.5
+  },
+  {
+    "date": "2022-05-20",
+    "sleepMs": 22674074,
+    "sleepPerformance": 64,
+    "strain": 9.2
+  },
+  {
+    "date": "2022-05-21",
+    "sleepMs": 19455153,
+    "sleepPerformance": 55,
+    "strain": 11.5
+  },
+  {
+    "date": "2022-05-22",
+    "sleepMs": 23452891,
+    "sleepPerformance": 66,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-05-23",
+    "sleepMs": 23173586,
+    "sleepPerformance": 67,
+    "strain": 4.5
+  },
+  {
+    "date": "2022-05-24",
+    "sleepMs": 23092876,
+    "sleepPerformance": 67,
+    "strain": 6.7
+  },
+  {
+    "date": "2022-05-25",
+    "sleepMs": 19547581,
+    "sleepPerformance": 57,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-05-26",
+    "sleepMs": 22451708,
+    "sleepPerformance": 65,
+    "strain": 7
+  },
+  {
+    "date": "2022-05-27",
+    "sleepMs": 25518617,
+    "sleepPerformance": 73,
+    "strain": 4.9
+  },
+  {
+    "date": "2022-05-28",
+    "sleepMs": 18504098,
+    "sleepPerformance": 56,
+    "strain": 5.7
+  },
+  {
+    "date": "2022-05-29",
+    "sleepMs": 23392772,
+    "sleepPerformance": 68,
+    "strain": 7.4
+  },
+  {
+    "date": "2022-05-30",
+    "sleepMs": 17871414,
+    "sleepPerformance": 52,
+    "strain": 6
+  },
+  {
+    "date": "2022-05-31",
+    "sleepMs": 22358356,
+    "sleepPerformance": 64,
+    "strain": 7.2
+  },
+  {
+    "date": "2022-06-01",
+    "sleepMs": 14309989,
+    "sleepPerformance": 41,
+    "strain": 5
+  },
+  {
+    "date": "2022-06-02",
+    "sleepMs": 22220692,
+    "sleepPerformance": 61,
+    "strain": 10.6
+  },
+  {
+    "date": "2022-06-03",
+    "sleepMs": 24060177,
+    "sleepPerformance": 67,
+    "strain": 13.1
+  },
+  {
+    "date": "2022-06-04",
+    "sleepMs": 23714650,
+    "sleepPerformance": 67,
+    "strain": 12.2
+  },
+  {
+    "date": "2022-06-05",
+    "sleepMs": 22364040,
+    "sleepPerformance": 63,
+    "strain": 5.1
+  },
+  {
+    "date": "2022-06-06",
+    "sleepMs": 20472606,
+    "sleepPerformance": 58,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-06-07",
+    "sleepMs": 23431640,
+    "sleepPerformance": 68,
+    "strain": 9.7
+  },
+  {
+    "date": "2022-06-08",
+    "sleepMs": 26565890,
+    "sleepPerformance": 77,
+    "strain": 7.9
+  },
+  {
+    "date": "2022-06-09",
+    "sleepMs": 15379435,
+    "sleepPerformance": 47,
+    "strain": 8.9
+  },
+  {
+    "date": "2022-06-10",
+    "sleepMs": 21566125,
+    "sleepPerformance": 60,
+    "strain": 9.5
+  },
+  {
+    "date": "2022-06-11",
+    "sleepMs": 19515834,
+    "sleepPerformance": 57,
+    "strain": 14.5
+  },
+  {
+    "date": "2022-06-12",
+    "sleepMs": 5764961,
+    "sleepPerformance": 16,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-06-13",
+    "strain": 5.4
+  },
+  {
+    "date": "2022-06-15",
+    "sleepMs": 16323818,
+    "sleepPerformance": 41,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-06-16",
+    "sleepMs": 15808815,
+    "sleepPerformance": 43,
+    "strain": 14.5
+  },
+  {
+    "date": "2022-06-17",
+    "sleepMs": 13438878,
+    "sleepPerformance": 35,
+    "strain": 10.5
+  },
+  {
+    "date": "2022-06-18",
+    "sleepMs": 24385514,
+    "sleepPerformance": 64,
+    "strain": 7.9
+  },
+  {
+    "date": "2022-06-20",
+    "sleepMs": 19762001,
+    "sleepPerformance": 56,
+    "strain": 7.6
+  },
+  {
+    "date": "2022-06-21",
+    "sleepMs": 24634963,
+    "sleepPerformance": 67,
+    "strain": 8.3
+  },
+  {
+    "date": "2022-06-22",
+    "sleepMs": 20839367,
+    "sleepPerformance": 60,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-06-23",
+    "sleepMs": 23031208,
+    "sleepPerformance": 65,
+    "strain": 5.9
+  },
+  {
+    "date": "2022-06-24",
+    "sleepMs": 24447240,
+    "sleepPerformance": 70,
+    "strain": 10
+  },
+  {
+    "date": "2022-06-25",
+    "sleepMs": 22409241,
+    "sleepPerformance": 65,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-06-26",
+    "sleepMs": 19981661,
+    "sleepPerformance": 69,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-06-27",
+    "sleepMs": 22905345,
+    "sleepPerformance": 67,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-06-28",
+    "sleepMs": 21892431,
+    "sleepPerformance": 64,
+    "strain": 7.7
+  },
+  {
+    "date": "2022-06-30",
+    "sleepMs": 23055791,
+    "sleepPerformance": 69,
+    "strain": 9.8
+  },
+  {
+    "date": "2022-07-01",
+    "sleepMs": 20716299,
+    "sleepPerformance": 60,
+    "strain": 14.8
+  },
+  {
+    "date": "2022-07-02",
+    "sleepMs": 20675748,
+    "sleepPerformance": 58,
+    "strain": 12.9
+  },
+  {
+    "date": "2022-07-03",
+    "sleepMs": 25373142,
+    "sleepPerformance": 71,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-07-04",
+    "sleepMs": 23050447,
+    "sleepPerformance": 68,
+    "strain": 5
+  },
+  {
+    "date": "2022-07-05",
+    "sleepMs": 25107434,
+    "sleepPerformance": 74,
+    "strain": 6.4
+  },
+  {
+    "date": "2022-07-06",
+    "sleepMs": 20738265,
+    "sleepPerformance": 63,
+    "strain": 7.3
+  },
+  {
+    "date": "2022-07-07",
+    "sleepMs": 22797320,
+    "sleepPerformance": 68,
+    "strain": 9.1
+  },
+  {
+    "date": "2022-07-08",
+    "sleepMs": 23852365,
+    "sleepPerformance": 69,
+    "strain": 8
+  },
+  {
+    "date": "2022-07-09",
+    "sleepMs": 21166691,
+    "sleepPerformance": 62,
+    "strain": 12
+  },
+  {
+    "date": "2022-07-10",
+    "sleepMs": 23043766,
+    "sleepPerformance": 66,
+    "strain": 5.8
+  },
+  {
+    "date": "2022-07-11",
+    "sleepMs": 21195606,
+    "sleepPerformance": 64,
+    "strain": 5
+  },
+  {
+    "date": "2022-07-12",
+    "sleepMs": 20560274,
+    "sleepPerformance": 62,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-07-13",
+    "sleepMs": 23095701,
+    "sleepPerformance": 68,
+    "strain": 6
+  },
+  {
+    "date": "2022-07-14",
+    "sleepMs": 25325188,
+    "sleepPerformance": 74,
+    "strain": 5.4
+  },
+  {
+    "date": "2022-07-15",
+    "sleepMs": 23448075,
+    "sleepPerformance": 71,
+    "strain": 5.9
+  },
+  {
+    "date": "2022-07-16",
+    "sleepMs": 23188156,
+    "sleepPerformance": 69,
+    "strain": 6.6
+  },
+  {
+    "date": "2022-07-17",
+    "sleepMs": 24545441,
+    "sleepPerformance": 72,
+    "strain": 7.5
+  },
+  {
+    "date": "2022-07-18",
+    "sleepMs": 23765720,
+    "sleepPerformance": 71,
+    "strain": 10.9
+  },
+  {
+    "date": "2022-07-19",
+    "sleepMs": 346536,
+    "sleepPerformance": 1,
+    "strain": 14.5
+  },
+  {
+    "date": "2022-07-20",
+    "sleepMs": 17412575,
+    "sleepPerformance": 40,
+    "strain": 13.7
+  },
+  {
+    "date": "2022-07-21",
+    "sleepMs": 23072646,
+    "sleepPerformance": 60,
+    "strain": 13.5
+  },
+  {
+    "date": "2022-07-22",
+    "sleepMs": 18076791,
+    "sleepPerformance": 49,
+    "strain": 16.6
+  },
+  {
+    "date": "2022-07-23",
+    "sleepMs": 20849015,
+    "sleepPerformance": 55,
+    "strain": 14.5
+  },
+  {
+    "date": "2022-07-24",
+    "sleepMs": 23910158,
+    "sleepPerformance": 62,
+    "strain": 10.6
+  },
+  {
+    "date": "2022-07-25",
+    "sleepMs": 17268141,
+    "sleepPerformance": 48,
+    "strain": 6.7
+  },
+  {
+    "date": "2022-07-26",
+    "sleepMs": 24430955,
+    "sleepPerformance": 68,
+    "strain": 9.4
+  },
+  {
+    "date": "2022-07-27",
+    "sleepMs": 21773115,
+    "sleepPerformance": 63,
+    "strain": 14
+  },
+  {
+    "date": "2022-07-28",
+    "sleepMs": 19388064,
+    "sleepPerformance": 53,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-07-29",
+    "sleepMs": 28790559,
+    "sleepPerformance": 82,
+    "strain": 11
+  },
+  {
+    "date": "2022-07-30",
+    "sleepMs": 21802077,
+    "sleepPerformance": 67,
+    "strain": 18.3
+  },
+  {
+    "date": "2022-07-31",
+    "sleepMs": 18885347,
+    "sleepPerformance": 50,
+    "strain": 5
+  },
+  {
+    "date": "2022-08-01",
+    "sleepMs": 24892001,
+    "sleepPerformance": 70,
+    "strain": 4.4
+  },
+  {
+    "date": "2022-08-02",
+    "sleepMs": 17787957,
+    "sleepPerformance": 53,
+    "strain": 7
+  },
+  {
+    "date": "2022-08-03",
+    "sleepMs": 17470280,
+    "sleepPerformance": 50,
+    "strain": 9.7
+  },
+  {
+    "date": "2022-08-04",
+    "sleepMs": 25151894,
+    "sleepPerformance": 70,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-08-05",
+    "sleepMs": 26566902,
+    "sleepPerformance": 79,
+    "strain": 6.3
+  },
+  {
+    "date": "2022-08-06",
+    "sleepMs": 28097510,
+    "sleepPerformance": 87,
+    "strain": 9
+  },
+  {
+    "date": "2022-08-07",
+    "sleepMs": 5890152,
+    "sleepPerformance": 19,
+    "strain": 0.1
+  },
+  {
+    "date": "2022-08-09",
+    "sleepMs": 22812761,
+    "sleepPerformance": 58,
+    "strain": 4.9
+  },
+  {
+    "date": "2022-08-10",
+    "sleepMs": 19462920,
+    "sleepPerformance": 57,
+    "strain": 8.4
+  },
+  {
+    "date": "2022-08-11",
+    "sleepMs": 23130423,
+    "sleepPerformance": 67,
+    "strain": 4.6
+  },
+  {
+    "date": "2022-08-12",
+    "sleepMs": 21888716,
+    "sleepPerformance": 64,
+    "strain": 10.2
+  },
+  {
+    "date": "2022-08-14",
+    "sleepMs": 21888701,
+    "sleepPerformance": 62,
+    "strain": 4.3
+  },
+  {
+    "date": "2022-08-15",
+    "sleepMs": 22292971,
+    "sleepPerformance": 63,
+    "strain": 4.2
+  },
+  {
+    "date": "2022-08-17",
+    "strain": 5.1
+  },
+  {
+    "date": "2022-08-18",
+    "sleepMs": 17730161,
+    "sleepPerformance": 51,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-08-19",
+    "sleepMs": 20011554,
+    "sleepPerformance": 57,
+    "strain": 6.9
+  },
+  {
+    "date": "2022-08-20",
+    "sleepMs": 16084153,
+    "sleepPerformance": 47,
+    "strain": 11
+  },
+  {
+    "date": "2022-08-22",
+    "sleepMs": 22957179,
+    "sleepPerformance": 63,
+    "strain": 6.2
+  },
+  {
+    "date": "2022-08-23",
+    "sleepMs": 21166729,
+    "sleepPerformance": 60,
+    "strain": 4
+  },
+  {
+    "date": "2022-08-27",
+    "strain": 6.7
+  },
+  {
+    "date": "2022-08-28",
+    "sleepMs": 21917568,
+    "sleepPerformance": 61,
+    "strain": 9
+  },
+  {
+    "date": "2022-08-29",
+    "sleepMs": 20618032,
+    "sleepPerformance": 58,
+    "strain": 4.5
+  },
+  {
+    "date": "2022-08-30",
+    "sleepMs": 18192261,
+    "sleepPerformance": 53,
+    "strain": 4.1
+  },
+  {
+    "date": "2022-09-01",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-02",
+    "strain": 9.7
+  },
+  {
+    "date": "2022-09-03",
+    "sleepMs": 24054567,
+    "sleepPerformance": 88,
+    "strain": 6.4
+  },
+  {
+    "date": "2022-09-04",
+    "sleepMs": 25729483,
+    "sleepPerformance": 84,
+    "strain": 0
+  },
+  {
+    "date": "2022-09-06",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-08",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-13",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-14",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-15",
+    "strain": 0
+  },
+  {
+    "date": "2022-09-16",
+    "strain": 0
+  },
+  {
+    "date": "2023-01-29",
+    "recovery": 42,
+    "hrv": 56,
+    "restingHr": 56
+  },
+  {
+    "date": "2023-01-30",
+    "recovery": 41,
+    "hrv": 58,
+    "restingHr": 56
+  },
+  {
+    "date": "2023-01-31",
+    "recovery": 92,
+    "hrv": 85,
+    "restingHr": 50
+  },
+  {
+    "date": "2023-02-01",
+    "recovery": 42,
+    "hrv": 53,
+    "restingHr": 57
+  },
+  {
+    "date": "2023-02-02",
+    "recovery": 45,
+    "hrv": 44,
+    "restingHr": 65
+  },
+  {
+    "date": "2023-02-03",
+    "recovery": 68,
+    "hrv": 60,
+    "restingHr": 54
+  },
+  {
+    "date": "2024-12-27",
+    "strain": 0
+  },
+  {
+    "date": "2026-06-11",
+    "strain": 4.4
+  },
+  {
+    "date": "2026-06-12",
+    "recovery": 49,
+    "hrv": 55,
+    "restingHr": 55,
+    "sleepMs": 21971180,
+    "sleepPerformance": 81,
+    "strain": 13.8
+  },
+  {
+    "date": "2026-06-13",
+    "recovery": 36,
+    "hrv": 37,
+    "restingHr": 68,
+    "sleepMs": 27996680,
+    "sleepPerformance": 73,
+    "strain": 11.1
+  },
+  {
+    "date": "2026-06-14",
+    "recovery": 55,
+    "hrv": 49,
+    "restingHr": 59,
+    "sleepMs": 21049400,
+    "sleepPerformance": 81,
+    "strain": 5
+  },
+  {
+    "date": "2026-06-15",
+    "recovery": 64,
+    "hrv": 53,
+    "restingHr": 52,
+    "sleepMs": 23272450,
+    "sleepPerformance": 78,
+    "strain": 0.1
+  }
+]
