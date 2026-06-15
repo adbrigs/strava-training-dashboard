@@ -92,12 +92,29 @@ function MetricBlock({
 export default function WhoopSection() {
   const [data, setData] = useState<WhoopData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [avgHrv, setAvgHrv] = useState<number | null>(null);
+  const [avgRestingHr, setAvgRestingHr] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('/api/whoop/data')
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+    fetch('/data/whoop_history.json')
+      .then(r => r.json())
+      .then((records: Array<{ date: string; hrv?: number; restingHr?: number }>) => {
+        const recent = records.filter(r => r.date >= cutoffStr);
+        const hrvVals = recent.filter(r => r.hrv != null).map(r => r.hrv!);
+        const rhrVals = recent.filter(r => r.restingHr != null).map(r => r.restingHr!);
+        if (hrvVals.length) setAvgHrv(Math.round(hrvVals.reduce((a, b) => a + b) / hrvVals.length));
+        if (rhrVals.length) setAvgRestingHr(Math.round(rhrVals.reduce((a, b) => a + b) / rhrVals.length));
+      })
+      .catch(() => {});
   }, []);
 
   if (loading) {
@@ -161,8 +178,20 @@ export default function WhoopSection() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <MetricBlock label="HRV" value={recovery?.hrv ?? '—'} unit=" ms" />
-            <MetricBlock label="Resting HR" value={recovery?.restingHr ?? '—'} unit=" bpm" />
+            <MetricBlock
+              label="HRV"
+              value={recovery?.hrv ?? '—'}
+              unit=" ms"
+              sub={avgHrv != null
+                ? `${avgHrv}ms 30d avg · ${90 - avgHrv > 0 ? `+${90 - avgHrv} to 90` : 'goal reached'}`
+                : undefined}
+            />
+            <MetricBlock
+              label="Resting HR"
+              value={recovery?.restingHr ?? '—'}
+              unit=" bpm"
+              sub={avgRestingHr != null ? `${avgRestingHr}bpm 30d avg` : undefined}
+            />
           </div>
         </div>
 
