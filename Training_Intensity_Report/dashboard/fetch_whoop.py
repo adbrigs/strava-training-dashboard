@@ -85,16 +85,19 @@ def main():
         body_measurement = {}
 
     # Map by date: YYYY-MM-DD
+    # API returns newest-first, so the first entry seen for a date is the most current.
     rec_by_date: dict[str, dict] = {}
     for r in recoveries:
         if r.get("score_state") != "SCORED" or not r.get("score"):
             continue
         date = r["created_at"][:10]
+        if date in rec_by_date:
+            continue
         s = r["score"]
         rec_by_date[date] = {
-            "recovery":   round(s["recovery_score"]),
-            "hrv":        round(s["hrv_rmssd_milli"]),
-            "restingHr":  round(s["resting_heart_rate"]),
+            "recovery":  round(s["recovery_score"]),
+            "hrv":       round(s["hrv_rmssd_milli"]),
+            "restingHr": round(s["resting_heart_rate"]),
         }
 
     slp_by_date: dict[str, dict] = {}
@@ -102,6 +105,8 @@ def main():
         if s.get("score_state") != "SCORED" or not s.get("score") or s.get("nap"):
             continue
         date = s["start"][:10]
+        if date in slp_by_date:
+            continue
         sc = s["score"]
         st = sc.get("stage_summary", {})
         duration_ms = st.get("total_in_bed_time_milli", 0) - st.get("total_awake_time_milli", 0)
@@ -115,6 +120,8 @@ def main():
         if c.get("score_state") != "SCORED" or not c.get("score"):
             continue
         date = c["start"][:10]
+        if date in strain_by_date:
+            continue
         strain_by_date[date] = {"strain": round(c["score"]["strain"], 1)}
 
     all_dates = sorted(

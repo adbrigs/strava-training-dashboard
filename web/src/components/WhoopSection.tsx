@@ -167,7 +167,7 @@ export default function WhoopSection() {
         </div>
         {recovery && (
           <span style={{ fontSize: 10, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)' }}>
-            {new Date(recovery.date + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {new Date(recovery.date.slice(0, 10) + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </span>
         )}
       </div>
