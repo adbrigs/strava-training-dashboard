@@ -124,8 +124,15 @@ def main():
             continue
         strain_by_date[date] = {"strain": round(c["score"]["strain"], 1)}
 
+    # Write today's weight snapshot into per-date history if available
+    weight_kg = body_measurement.get("weight_kilogram")
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    weight_by_date: dict[str, dict] = {}
+    if weight_kg is not None:
+        weight_by_date[today_str] = {"weightKg": weight_kg}
+
     all_dates = sorted(
-        set(rec_by_date) | set(slp_by_date) | set(strain_by_date)
+        set(rec_by_date) | set(slp_by_date) | set(strain_by_date) | set(weight_by_date)
     )
 
     history = []
@@ -134,6 +141,7 @@ def main():
         entry.update(rec_by_date.get(date, {}))
         entry.update(slp_by_date.get(date, {}))
         entry.update(strain_by_date.get(date, {}))
+        entry.update(weight_by_date.get(date, {}))
         history.append(entry)
 
     OUT_PATH.write_text(json.dumps(history, indent=2))

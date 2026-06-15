@@ -73,6 +73,7 @@ jobs:
           git add Training_Intensity_Report/dashboard/data/*.csv
           git add web/public/data/activity_data_with_intensity.csv
           git add web/public/data/whoop_history.json
+          git add web/public/data/whoop_body_measurement.json
 
           # Commit only if there are changes
           git diff --cached --quiet || git commit -m "Automated data refresh"
