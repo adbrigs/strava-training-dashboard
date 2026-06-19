@@ -2193,7 +2193,38 @@
     "restingHr": 52,
     "sleepMs": 23272450,
     "sleepPerformance": 78,
-    "strain": 12.9,
-    "weightKg": 69.12748
+    "strain": 14.5
+  },
+  {
+    "date": "2026-06-16",
+    "recovery": 35,
+    "hrv": 41,
+    "restingHr": 63,
+    "sleepMs": 18180380,
+    "sleepPerformance": 63,
+    "strain": 12.7
+  },
+  {
+    "date": "2026-06-17",
+    "recovery": 84,
+    "hrv": 84,
+    "restingHr": 49,
+    "sleepMs": 21787530,
+    "sleepPerformance": 72,
+    "strain": 12.4
+  },
+  {
+    "date": "2026-06-18",
+    "recovery": 80,
+    "hrv": 62,
+    "restingHr": 55,
+    "sleepMs": 25108550,
+    "sleepPerformance": 82,
+    "strain": 14.4
+  },
+  {
+    "date": "2026-06-19",
+    "weightKg": 68.67,
+    "weightLbs": 151.4
   }
 ]
