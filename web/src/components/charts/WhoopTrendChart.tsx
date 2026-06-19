@@ -24,13 +24,13 @@ const METRIC_META: Record<WhoopMetric, { label: string; unit: string; color: str
   weightLbs:        { label: 'Weight',      unit: 'lbs', color: 'var(--act-weights)'            },
 };
 
-// Target ranges: what counts as "good" for each metric
-const TARGET_RANGES: Partial<Record<WhoopMetric, { lo: number; hi: number; label: string }>> = {
-  recovery:         { lo: 67,  hi: 100, label: 'Green zone'    },
-  hrv:              { lo: 70,  hi: 100, label: 'Optimal'       },
-  restingHr:        { lo: 40,  hi: 60,  label: 'Athlete range' },
-  sleepPerformance: { lo: 85,  hi: 100, label: 'Optimal sleep' },
-  strain:           { lo: 10,  hi: 18,  label: 'Training zone' },
+// Target thresholds: single line showing the "goal" boundary
+const TARGET_LINES: Partial<Record<WhoopMetric, { value: number; label: string }>> = {
+  recovery:         { value: 67, label: 'Green zone' },
+  hrv:              { value: 70, label: 'Optimal'    },
+  restingHr:        { value: 60, label: 'Athlete'    },
+  sleepPerformance: { value: 85, label: 'Optimal'    },
+  strain:           { value: 10, label: 'Training'   },
 };
 
 function recoveryFill(score: number) {
@@ -75,11 +75,11 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
 
   const { minV, maxV } = useMemo(() => {
     const meta = METRIC_META[metric];
-    const target = TARGET_RANGES[metric];
+    const target = TARGET_LINES[metric];
     if (meta.domain) return { minV: meta.domain[0], maxV: meta.domain[1] };
     const vals = filtered.map(r => r[metric] as number);
-    const lo = target ? Math.min(...vals, target.lo) : Math.min(...vals);
-    const hi = target ? Math.max(...vals, target.hi) : Math.max(...vals);
+    const lo = target ? Math.min(...vals, target.value) : Math.min(...vals);
+    const hi = target ? Math.max(...vals, target.value) : Math.max(...vals);
     const pad = (hi - lo) * 0.15 || 5;
     return { minV: lo - pad, maxV: hi + pad };
   }, [filtered, metric]);
@@ -139,12 +139,9 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
   }, [minV, maxV]);
 
   const meta = METRIC_META[metric];
-  const target = TARGET_RANGES[metric];
-
-  // Target band (clamped to chart area)
-  const bandTop = target ? Math.max(padT, yPos(Math.min(target.hi, maxV))) : 0;
-  const bandBot = target ? Math.min(padT + innerH, yPos(Math.max(target.lo, minV))) : 0;
-  const bandVisible = target ? bandBot > bandTop : false;
+  const target = TARGET_LINES[metric];
+  const targetY = target ? yPos(target.value) : null;
+  const targetVisible = targetY != null && targetY >= padT && targetY <= padT + innerH;
 
   const hiX = hover != null ? xPos(hover) : null;
   const hiRatio = hiX != null ? (hiX - padL) / innerW : 0;
@@ -176,13 +173,20 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
         }}
         onMouseLeave={() => setHover(null)}
       >
-        {/* target range band */}
-        {bandVisible && (
-          <rect
-            x={padL} y={bandTop}
-            width={innerW} height={bandBot - bandTop}
-            fill={meta.color} opacity="0.09"
-          />
+        {/* target line */}
+        {targetVisible && targetY != null && (
+          <g>
+            <line
+              x1={padL} x2={w - padR} y1={targetY} y2={targetY}
+              stroke={meta.color} strokeWidth="1.2" strokeOpacity="0.55"
+              strokeDasharray="6 3"
+            />
+            <text
+              x={padL + 4} y={targetY - 4}
+              fontSize="8.5" fontFamily="var(--font-mono)"
+              fill={meta.color} opacity="0.8"
+            >{target!.label}</text>
+          </g>
         )}
 
         {/* y-axis grid + labels */}
@@ -309,14 +313,13 @@ export default function WhoopTrendChart({ records, metric, height = 220 }: Props
             <span>trend {trendUp ? '↑' : '↓'}</span>
           </div>
         )}
-        {/* target band */}
-        {target && (
+        {/* target line */}
+        {target && targetVisible && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <div style={{
-              width: 14, height: 8, borderRadius: 2,
-              background: meta.color, opacity: 0.3, flexShrink: 0,
-            }} />
-            <span>{target.label} {target.lo}-{target.hi}{meta.unit === '/21' ? '' : meta.unit}</span>
+            <svg width="18" height="8" style={{ flexShrink: 0 }}>
+              <line x1="0" y1="4" x2="18" y2="4" stroke={meta.color} strokeWidth="1.2" strokeDasharray="6 3" strokeOpacity="0.7" />
+            </svg>
+            <span>{target.label} {target.value}{meta.unit === '/21' ? '' : meta.unit}</span>
           </div>
         )}
       </div>

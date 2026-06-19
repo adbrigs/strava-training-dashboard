@@ -45,10 +45,13 @@ export default function WhoopTrendSection({ from, to, refreshKey }: Props) {
           ? new Date(bodyMeasurement.fetchedAt).toISOString().slice(0, 10)
           : new Date().toISOString().slice(0, 10);
         const existing = history.find(r => r.date === date);
+        const weightKg  = bodyMeasurement.weightKg!;
+        const weightLbs = parseFloat((weightKg * 2.20462).toFixed(1));
+        const weightPatch = { weightKg, weightLbs };
 
         setAllRecords(existing
-          ? history.map(r => r.date === date ? { ...r, weightKg: bodyMeasurement.weightKg! } : r)
-          : [...history, { date, weightKg: bodyMeasurement.weightKg }].sort((a, b) => a.date.localeCompare(b.date)));
+          ? history.map(r => r.date === date ? { ...r, ...weightPatch } : r)
+          : [...history, { date, ...weightPatch }].sort((a, b) => a.date.localeCompare(b.date)));
       })
       .finally(() => setLoading(false))
       .catch(() => setLoading(false));

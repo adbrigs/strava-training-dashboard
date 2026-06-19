@@ -27,8 +27,8 @@ interface Props {
   filtered: Activity[];
   from: Date;
   to: Date;
-  period: 'weekly' | 'monthly';
-  onPeriod: (p: 'weekly' | 'monthly') => void;
+  period: 'daily' | 'weekly' | 'monthly';
+  onPeriod: (p: 'daily' | 'weekly' | 'monthly') => void;
   selectedTypes: Set<string>;
   selectedBucketStart?: Date | null;
   onBucketClick?: (start: Date, end: Date, label: string) => void;
@@ -42,12 +42,22 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
   const isZones = metric === 'zones';
 
   const buckets: Bucket[] = useMemo(() => {
-    const isWeekly = period === 'weekly';
-    const start = isWeekly ? weekStart(from) : new Date(from.getFullYear(), from.getMonth(), 1);
+    const isDaily   = period === 'daily';
+    const isWeekly  = period === 'weekly';
+    const start = isWeekly ? weekStart(from)
+                : isDaily  ? (() => { const d = new Date(from); d.setHours(0,0,0,0); return d; })()
+                : new Date(from.getFullYear(), from.getMonth(), 1);
     const bs: Bucket[] = [];
-    for (let d = new Date(start); d <= to; isWeekly ? d.setDate(d.getDate() + 7) : d.setMonth(d.getMonth() + 1)) {
+    function advance(d: Date) {
+      if (isDaily)  d.setDate(d.getDate() + 1);
+      else if (isWeekly)  d.setDate(d.getDate() + 7);
+      else          d.setMonth(d.getMonth() + 1);
+    }
+    for (let d = new Date(start); d <= to; advance(d)) {
       const periodEnd = new Date(d);
-      if (isWeekly) {
+      if (isDaily) {
+        periodEnd.setHours(23, 59, 59, 999);
+      } else if (isWeekly) {
         periodEnd.setDate(periodEnd.getDate() + 6);
         periodEnd.setHours(23, 59, 59, 999);
       } else {
@@ -55,8 +65,16 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
       }
       bs.push({
         start: new Date(d), end: periodEnd,
-        label: isWeekly ? fmtDate(d, { month: 'short', day: 'numeric' }) : d.toLocaleDateString(undefined, { month: 'short' }),
-        fullLabel: isWeekly ? `Week of ${fmtDate(d, { month: 'short', day: 'numeric' })}` : d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+        label: isDaily
+          ? fmtDate(d, { month: 'short', day: 'numeric' })
+          : isWeekly
+            ? fmtDate(d, { month: 'short', day: 'numeric' })
+            : d.toLocaleDateString(undefined, { month: 'short' }),
+        fullLabel: isDaily
+          ? fmtDate(d, { month: 'long', day: 'numeric', year: 'numeric' })
+          : isWeekly
+            ? `Week of ${fmtDate(d, { month: 'short', day: 'numeric' })}`
+            : d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
         byType: {}, total: 0, rolling: 0,
       });
     }
@@ -174,7 +192,7 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
             {metric === 'trimp' && (
               <span className="legend-item" style={{ '--c': 'var(--text)' } as React.CSSProperties}>
                 <span className="sw line" style={{ background: 'var(--text)', opacity: 0.7 }} />
-                8-{period === 'weekly' ? 'wk' : 'mo'} rolling avg
+                8-{period === 'daily' ? 'day' : period === 'weekly' ? 'wk' : 'mo'} rolling avg
               </span>
             )}
           </>

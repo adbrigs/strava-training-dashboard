@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { parseActivities, computePRs, fmtDateTime, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import type { Activity, PR } from '@/lib/types';
+import { useRenames } from '@/lib/useRenames';
 import Icon from './ui/Icon';
 import FilterBar from './FilterBar';
 import SummaryRow from './SummaryRow';
@@ -38,6 +39,7 @@ function Loading() {
 
 export default function Dashboard() {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const { renames, rename } = useRenames();
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window === 'undefined') return 'dark';
@@ -87,9 +89,9 @@ export default function Dashboard() {
 
   const [from, setFrom] = useState<Date>(new Date());
   const [to, setTo] = useState<Date>(new Date());
-  const [rangePreset, setRangePreset] = useState('60d');
+  const [rangePreset, setRangePreset] = useState('week');
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
-  const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly');
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
   const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
 
   // activities is already sorted desc by date from the load effect
@@ -143,14 +145,16 @@ export default function Dashboard() {
         parsed.sort((a, b) => b.date.getTime() - a.date.getTime());
         setActivities(parsed);
         if (parsed.length > 0) {
-          const maxDate = parsed[0].date;
-          const initFrom = new Date(maxDate);
-          initFrom.setDate(initFrom.getDate() - 59);
-          initFrom.setHours(0, 0, 0, 0);
-          setFrom(initFrom);
-          setTo(new Date(Math.max(maxDate.getTime(), Date.now())));
+          const now = new Date(Math.max(parsed[0].date.getTime(), Date.now()));
+          const sunday = new Date(now);
+          sunday.setDate(sunday.getDate() - sunday.getDay());
+          sunday.setHours(0, 0, 0, 0);
+          const saturday = new Date(sunday);
+          saturday.setDate(saturday.getDate() + 6);
+          setFrom(sunday);
+          setTo(saturday);
           const allTypes = [...new Set(parsed.map(a => a.type))];
-          setSelectedTypes(new Set(allTypes));
+          setSelectedTypes(new Set(allTypes.filter(t => t !== 'Walk')));
         }
       } catch (err) {
         console.error('Failed to load activity data:', err);
@@ -193,16 +197,21 @@ export default function Dashboard() {
     setSelectedTypes(prev => { const n = new Set(prev); n.has(t) ? n.delete(t) : n.add(t); return n; });
   }
 
+  // Apply localStorage renames on top of raw Strava names
+  const namedActivities = useMemo(() =>
+    activities.map(a => renames[a.id] ? { ...a, name: renames[a.id] } : a),
+  [activities, renames]);
+
   const presentTypes = useMemo(() => {
-    const set = new Set(activities.map(a => a.type));
+    const set = new Set(namedActivities.map(a => a.type));
     return Object.keys(ACTIVITY_COLORS).filter(t => set.has(t)).concat(
       [...set].filter(t => !ACTIVITY_COLORS[t])
     );
-  }, [activities]);
+  }, [namedActivities]);
 
   const filtered = useMemo(() => {
-    return activities.filter(a => a.date >= from && a.date <= to && selectedTypes.has(a.type));
-  }, [activities, from, to, selectedTypes]);
+    return namedActivities.filter(a => a.date >= from && a.date <= to && selectedTypes.has(a.type));
+  }, [namedActivities, from, to, selectedTypes]);
 
   const hrActivities = useMemo(() => {
     if (!selectedBucket) return filtered;
@@ -222,7 +231,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="hdr">
         <div className="hdr-l">
-          <div className="brand">A</div>
+          <img src="/avatar.jpg" alt="Andrew" className="brand" style={{ objectFit: 'cover' }} />
           <div className="hdr-title">
             <h1>Andrew&apos;s Training</h1>
             <small>
@@ -232,9 +241,6 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="hdr-r">
-          <button className="icon-btn" title="Settings" onClick={() => setIsSettingsOpen(o => !o)}>
-            <Icon name="settings" size={15} />
-          </button>
           <button
             className="chat-toggle"
             title="Coach AI"
@@ -243,7 +249,14 @@ export default function Dashboard() {
           >
             <Icon name="chat" size={14} />
           </button>
-          <div className="avatar">AB</div>
+          <img
+            src="/avatar.jpg"
+            alt="Andrew"
+            className="avatar"
+            title="Settings"
+            style={{ objectFit: 'cover', cursor: 'pointer' }}
+            onClick={() => setIsSettingsOpen(o => !o)}
+          />
         </div>
       </header>
 
@@ -259,20 +272,24 @@ export default function Dashboard() {
         selectedTypes={selectedTypes}
         onTypeToggle={handleTypeToggle}
         onSelectAll={handleSelectAll}
-        period={period}
-        onPeriod={setPeriod}
       />
 
       {/* KPI metrics row */}
       <div className="stack">
-        <SummaryRow filtered={filtered} today={today} />
+        <SummaryRow
+          filtered={filtered}
+          allFiltered={namedActivities.filter(a => selectedTypes.has(a.type))}
+          from={from}
+          to={to}
+          today={today}
+        />
       </div>
 
       {/* Daily training + WHOOP readiness */}
       <div className="stack">
         <div className="grid-layout row-daily">
           <WhoopSection />
-          <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} refreshKey={whoopDataVersion} />
+          <TrainingCalendarSection activities={namedActivities} selectedTypes={selectedTypes} today={today} from={from} to={to} refreshKey={whoopDataVersion} />
         </div>
       </div>
 
@@ -314,7 +331,7 @@ export default function Dashboard() {
       {/* Fitness/Fatigue/Form */}
       <div className="stack">
         <FitnessFatigueSection
-          filtered={activities.filter(a => selectedTypes.has(a.type))}
+          filtered={namedActivities.filter(a => selectedTypes.has(a.type))}
           today={today}
         />
       </div>
@@ -329,13 +346,13 @@ export default function Dashboard() {
 
       {/* Activity table */}
       <div className="stack">
-        <ActivityTable filtered={filtered} />
+        <ActivityTable filtered={filtered} onRename={rename} />
       </div>
 
       <ChatBot
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        activities={activities}
+        activities={namedActivities}
         filtered={filtered}
         today={today}
         from={from}
@@ -350,6 +367,8 @@ export default function Dashboard() {
         theme={theme}
         onThemeChange={handleThemeChange}
         onSyncComplete={() => setWhoopDataVersion(v => v + 1)}
+        period={period}
+        onPeriod={setPeriod}
       />
     </div>
   );

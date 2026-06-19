@@ -16,11 +16,14 @@ function InfoDot({ text }: InfoDotProps) {
 }
 
 interface Props {
-  filtered: Activity[];
+  filtered: Activity[];       // current period, type-filtered
+  allFiltered: Activity[];    // all-time, type-filtered (for prev period lookup)
+  from: Date;
+  to: Date;
   today: Date;
 }
 
-export default function SummaryRow({ filtered, today }: Props) {
+export default function SummaryRow({ filtered, allFiltered, from, to, today }: Props) {
   const bins = useMemo(() => {
     const from = new Date(today); from.setDate(from.getDate() - 29); from.setHours(0, 0, 0, 0);
     const map: Record<string, number> = {};
@@ -66,14 +69,43 @@ export default function SummaryRow({ filtered, today }: Props) {
   const longestDist = filtered.reduce((m, a) => Math.max(m, a.distance || 0), 0);
   const { current: currentStreak, max: maxStreak } = useMemo(() => computeStreaks(filtered, today), [filtered, today]);
 
+  // Previous period — same duration, immediately before `from` (placed after existing hooks)
+  const prevTo = new Date(from.getTime() - 1);
+  const prev = useMemo(() => {
+    const duration = to.getTime() - from.getTime();
+    const prevFrom = new Date(from.getTime() - duration);
+    return allFiltered.filter(a => a.date >= prevFrom && a.date <= prevTo);
+  }, [allFiltered, from, to]);
+
+  // Previous period values
+  const prevTotal    = prev.length;
+  const prevSumTrimp = prev.reduce((s, a) => s + a.trimp, 0);
+  const prevAvgTrimp = prevTotal ? prevSumTrimp / prevTotal : 0;
+  const prevAvgWeekly = (() => {
+    if (!prev.length) return 0;
+    const times = prev.map(a => a.date.getTime()).filter(Boolean);
+    if (!times.length) return 0;
+    const span = Math.max(7, (Math.max(...times) - Math.min(...times)) / 86400000);
+    return prevSumTrimp / (span / 7);
+  })();
+  const prevMaxTrimp  = prev.reduce((m, a) => Math.max(m, a.trimp), 0);
+  const prevLongest   = prev.reduce((m, a) => Math.max(m, a.distance || 0), 0);
+  const { current: prevStreak } = computeStreaks(allFiltered, prevTo);
+
+  function delta(curr: number, p: number, decimals = 0): { val: string; up: boolean } | null {
+    if (!p && !curr) return null;
+    const d = curr - p;
+    return { val: (d >= 0 ? '+' : '') + fmtNum(d, decimals), up: d >= 0 };
+  }
+
   const metrics = [
-    { label: 'Workouts',     value: fmtNum(total),              sub: 'in range',       spark: countBins,  color: 'var(--text)' },
-    { label: 'Avg TRIMP',    value: fmtNum(avgTrimp, 1),        sub: 'per session',    spark: bins,       color: 'var(--accent)', info: 'Training Impulse — duration × HR-reserve × intensity. Higher = harder session.' },
-    { label: 'Weekly TRIMP', value: fmtNum(avgWeekly, 0),       sub: 'rolling avg',    spark: weeklyBins, color: 'var(--accent)' },
-    { label: 'Total TRIMP',  value: fmtNum(sumTrimp, 0),        sub: 'cumulative',     spark: weeklyBins, color: 'var(--z2)' },
-    { label: 'Max TRIMP',    value: fmtNum(maxTrimp, 1),        sub: 'single session', spark: bins,       color: 'var(--hot)' },
-    { label: 'Longest',      value: fmtNum(longestDist, 1),     sub: 'miles',          spark: bins,       color: 'var(--act-run)', unit: 'mi' },
-    { label: 'Streak',       value: fmtNum(currentStreak),      sub: `max ${maxStreak}d`, spark: countBins,  color: 'var(--warn)', unit: 'd' },
+    { label: 'Workouts',     value: fmtNum(total),          sub: 'in range',       spark: countBins,  color: 'var(--text)',    delta: delta(total, prevTotal) },
+    { label: 'Avg TRIMP',    value: fmtNum(avgTrimp, 1),    sub: 'per session',    spark: bins,       color: 'var(--accent)', info: 'Training Impulse — duration × HR-reserve × intensity. Higher = harder session.', delta: delta(avgTrimp, prevAvgTrimp, 1) },
+    { label: 'Weekly TRIMP', value: fmtNum(avgWeekly, 0),   sub: 'rolling avg',    spark: weeklyBins, color: 'var(--accent)', delta: delta(avgWeekly, prevAvgWeekly) },
+    { label: 'Total TRIMP',  value: fmtNum(sumTrimp, 0),    sub: 'cumulative',     spark: weeklyBins, color: 'var(--z2)',     delta: delta(sumTrimp, prevSumTrimp) },
+    { label: 'Max TRIMP',    value: fmtNum(maxTrimp, 1),    sub: 'single session', spark: bins,       color: 'var(--hot)',    delta: delta(maxTrimp, prevMaxTrimp, 1) },
+    { label: 'Longest',      value: fmtNum(longestDist, 1), sub: 'miles',          spark: bins,       color: 'var(--act-run)', unit: 'mi', delta: delta(longestDist, prevLongest, 1) },
+    { label: 'Streak',       value: fmtNum(currentStreak),  sub: `max ${maxStreak}d`, spark: countBins, color: 'var(--warn)', unit: 'd', delta: delta(currentStreak, prevStreak) },
   ];
 
   return (
@@ -90,6 +122,11 @@ export default function SummaryRow({ filtered, today }: Props) {
               {m.unit && <span className="unit">{m.unit}</span>}
             </div>
             <div className="metric-sub">{m.sub}</div>
+            {m.delta && (
+              <div className="whoop-metric-delta" style={{ color: m.delta.up ? 'var(--z2)' : 'var(--hot)', marginTop: 2 }}>
+                {m.delta.val} vs prev
+              </div>
+            )}
             {m.spark && (
               <div className="metric-spark">
                 <Sparkline values={m.spark} stroke={m.color} fill={m.color} />

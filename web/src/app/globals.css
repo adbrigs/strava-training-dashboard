@@ -602,7 +602,8 @@ input { font: inherit; color: inherit; touch-action: manipulation; }
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 6px;
+  min-width: 0;
 }
 .calendar-mode {
   padding: 1px;
@@ -620,7 +621,11 @@ input { font: inherit; color: inherit; touch-action: manipulation; }
   margin-top: 0;
 }
 .calendar-mobile-view {
-  display: none;
+  display: none; /* removed — calendar now uses a single unified grid */
+}
+.calendar-mode-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* === Volume chart === */
@@ -1037,26 +1042,6 @@ table.tbl {
     font-size: 10px;
     gap: 5px;
   }
-  .calendar-desktop-scroll {
-    display: none;
-  }
-  .calendar-mobile-view {
-    display: block;
-    width: 100%;
-    overflow: hidden;
-  }
-  .calendar-mobile-caption {
-    margin: 12px 0 6px;
-    color: var(--text-subtle);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .calendar-mobile-grid {
-    margin: 0 auto;
-  }
-
   .row-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stack { margin-bottom: 10px; }
 

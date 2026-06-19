@@ -2,9 +2,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { ACTIVITY_COLORS, ACTIVITY_LABELS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
-import Seg from './ui/Seg';
 
 const PRESETS = [
+  { id: 'week',  label: 'Week' },
   { id: '7d',    label: '7d',   days: 7 },
   { id: '30d',   label: '30d',  days: 30 },
   { id: '60d',   label: '60d',  days: 60 },
@@ -25,14 +25,11 @@ interface Props {
   selectedTypes: Set<string>;
   onTypeToggle: (t: string) => void;
   onSelectAll: () => void;
-  period: 'weekly' | 'monthly';
-  onPeriod: (p: 'weekly' | 'monthly') => void;
 }
 
 export default function FilterBar({
   today, from, to, rangePreset, onPreset, onCustomRange,
   activityTypes, selectedTypes, onTypeToggle, onSelectAll,
-  period, onPeriod,
 }: Props) {
   const [actOpen, setActOpen] = useState(false);
   const actRef = useRef<HTMLDivElement>(null);
@@ -72,7 +69,13 @@ export default function FilterBar({
       return;
     }
     let newFrom: Date;
-    if (p.id === 'ytd') {
+    let newTo: Date = today;
+    if (p.id === 'week') {
+      newFrom = new Date(today);
+      newFrom.setDate(newFrom.getDate() - newFrom.getDay()); // back to Sunday
+      newTo = new Date(newFrom);
+      newTo.setDate(newTo.getDate() + 6); // through Saturday
+    } else if (p.id === 'ytd') {
       newFrom = new Date(today.getFullYear(), 0, 1);
     } else if (p.id === 'all') {
       newFrom = new Date(today.getFullYear() - 2, 0, 1);
@@ -81,7 +84,7 @@ export default function FilterBar({
       newFrom.setDate(newFrom.getDate() - (p.days ?? 60) + 1);
     }
     newFrom.setHours(0, 0, 0, 0);
-    onPreset(p.id, newFrom, today);
+    onPreset(p.id, newFrom, newTo);
   }
 
   function handleCustomFrom(val: string) {
@@ -150,13 +153,6 @@ export default function FilterBar({
           />
         </div>
       )}
-
-      {/* Period toggle — right next to date range */}
-      <Seg
-        value={period}
-        onChange={v => onPeriod(v as 'weekly' | 'monthly')}
-        options={[{ value: 'weekly', label: 'Weekly' }, { value: 'monthly', label: 'Monthly' }]}
-      />
 
       {/* Activity dropdown */}
       <div ref={actRef} className="activity-filter">

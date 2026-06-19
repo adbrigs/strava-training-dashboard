@@ -10,9 +10,25 @@ interface Props {
 }
 
 export default function DistributionSection({ filtered }: Props) {
-  const [mode, setMode] = useState<'trimp' | 'count' | 'duration'>('trimp');
+  const [mode, setMode] = useState<'trimp' | 'count' | 'duration' | 'zones'>('trimp');
+
+  const ZONE_COLORS = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)', 'var(--z5)'];
+  const ZONE_NAMES  = ['Z1 Recovery', 'Z2 Aerobic', 'Z3 Tempo', 'Z4 Threshold', 'Z5 VO₂max'];
 
   const slices = useMemo(() => {
+    if (mode === 'zones') {
+      const sums = [0, 0, 0, 0, 0];
+      filtered.forEach(a => {
+        if (a.zoneTimes?.length >= 5 && a.zoneTimes.some(t => t > 0)) {
+          a.zoneTimes.forEach((t, i) => { if (i < 5) sums[i] += t; });
+        } else if (a.zone >= 1 && a.zone <= 5) {
+          sums[a.zone - 1] += a.duration;
+        }
+      });
+      return sums
+        .map((v, i) => ({ name: ZONE_NAMES[i], value: v, color: ZONE_COLORS[i], type: `z${i + 1}` }))
+        .filter(s => s.value > 0);
+    }
     const sums: Record<string, number> = {};
     filtered.forEach(a => {
       const v = mode === 'trimp' ? a.trimp : mode === 'count' ? 1 : a.duration;
@@ -30,10 +46,10 @@ export default function DistributionSection({ filtered }: Props) {
   }, [filtered, mode]);
 
   const total = slices.reduce((s, x) => s + x.value, 0);
-  const centerValue = mode === 'duration'
+  const centerValue = mode === 'duration' || mode === 'zones'
     ? `${Math.round(total / 60)}h`
     : fmtNum(total, 0);
-  const centerLabel = mode === 'trimp' ? 'Total TRIMP' : mode === 'count' ? 'Workouts' : 'Minutes';
+  const centerLabel = mode === 'trimp' ? 'Total TRIMP' : mode === 'count' ? 'Workouts' : 'Time';
 
   return (
     <div className="card card-fill fade-in">
@@ -41,8 +57,8 @@ export default function DistributionSection({ filtered }: Props) {
         <div className="card-title">Activity Mix</div>
         <Seg
           value={mode}
-          onChange={v => setMode(v as 'trimp' | 'count' | 'duration')}
-          options={[{ value: 'trimp', label: 'TRIMP' }, { value: 'count', label: '#' }, { value: 'duration', label: 'Time' }]}
+          onChange={v => setMode(v as 'trimp' | 'count' | 'duration' | 'zones')}
+          options={[{ value: 'trimp', label: 'TRIMP' }, { value: 'count', label: '#' }, { value: 'duration', label: 'Time' }, { value: 'zones', label: 'Zones' }]}
         />
       </div>
       <div className="donut-wrap">
@@ -59,7 +75,7 @@ export default function DistributionSection({ filtered }: Props) {
               <span className="sw" />
               <span className="nm">{s.name}</span>
               <span className="pct">{((s.value / total) * 100).toFixed(1)}%</span>
-              <span className="ct">{mode === 'duration' ? `${Math.round(s.value)}m` : fmtNum(s.value, 0)}</span>
+              <span className="ct">{mode === 'duration' || mode === 'zones' ? `${Math.round(s.value)}m` : fmtNum(s.value, 0)}</span>
             </div>
           ))}
         </div>

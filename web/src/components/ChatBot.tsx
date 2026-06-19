@@ -58,6 +58,39 @@ function activityLabel(type: string): string {
   return ACTIVITY_LABELS[type] || type.replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
+interface WhoopRecord {
+  date: string;
+  recovery?: number;
+  hrv?: number;
+  restingHr?: number;
+  sleepMs?: number;
+  sleepPerformance?: number;
+  strain?: number;
+  weightLbs?: number;
+}
+
+interface LiveWhoop {
+  connected: boolean;
+  recovery?: { score: number; hrv: number; restingHr: number; date: string } | null;
+  sleep?: { durationMs: number; performance: number; efficiency: number; date: string } | null;
+  strain?: { score: number; avgHr: number; date: string } | null;
+}
+
+function fmtWhoopHistory(records: WhoopRecord[]): string {
+  if (!records.length) return 'No WHOOP history available.';
+  return records.map(r => {
+    const parts: string[] = [r.date];
+    if (r.recovery != null)        parts.push(`Recovery ${r.recovery}`);
+    if (r.hrv != null)             parts.push(`HRV ${r.hrv}ms`);
+    if (r.restingHr != null)       parts.push(`RHR ${r.restingHr}bpm`);
+    if (r.sleepPerformance != null) parts.push(`Sleep ${r.sleepPerformance}%`);
+    if (r.sleepMs != null)         parts.push(`${(r.sleepMs / 3600000).toFixed(1)}h`);
+    if (r.strain != null)          parts.push(`Strain ${r.strain}`);
+    if (r.weightLbs != null)       parts.push(`${r.weightLbs}lbs`);
+    return parts.join(' · ');
+  }).join('\n');
+}
+
 function buildDashboardContext(
   activities: Activity[],
   filtered: Activity[],
@@ -66,6 +99,8 @@ function buildDashboardContext(
   to: Date,
   selectedTypes: Set<string>,
   restDate: string | null,
+  whoopHistory: WhoopRecord[],
+  liveWhoop: LiveWhoop | null,
 ): string {
   const rec = recommendWorkout(
     activities.filter(a => selectedTypes.has(a.type)),
@@ -97,13 +132,55 @@ function buildDashboardContext(
   // Note the current dashboard filter for reference only — does not limit data access
   const filterNote = `Dashboard currently filtered to ${from.toLocaleDateString()} – ${to.toLocaleDateString()} (${filtered.length} activities shown), but you have full all-time access via the CSV data.`;
 
+  // Today's live WHOOP scores
+  let liveWhoopStr = 'No live WHOOP data (not connected or not yet scored today).';
+  if (liveWhoop?.connected) {
+    const parts: string[] = [];
+    if (liveWhoop.recovery) parts.push(`Recovery ${liveWhoop.recovery.score} · HRV ${liveWhoop.recovery.hrv}ms · RHR ${liveWhoop.recovery.restingHr}bpm`);
+    if (liveWhoop.sleep)    parts.push(`Sleep ${(liveWhoop.sleep.durationMs / 3600000).toFixed(1)}h · ${liveWhoop.sleep.performance}% perf`);
+    if (liveWhoop.strain)   parts.push(`Day strain ${liveWhoop.strain.score}`);
+    liveWhoopStr = parts.length ? parts.join(' | ') : 'Connected but no scores yet today.';
+  }
+
+  // Last 90 days of WHOOP history
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  const recentWhoop = whoopHistory.filter(r => r.date >= cutoffStr).slice(-90);
+
+  // 30-day averages
+  const last30 = whoopHistory.filter(r => r.date >= new Date(today.getTime() - 30 * 864e5).toISOString().slice(0, 10));
+  function avg(vals: number[]) { return vals.length ? Math.round(vals.reduce((a, b) => a + b) / vals.length) : null; }
+  const avgRecovery  = avg(last30.map(r => r.recovery).filter((v): v is number => v != null));
+  const avgHrv       = avg(last30.map(r => r.hrv).filter((v): v is number => v != null));
+  const avgRhr       = avg(last30.map(r => r.restingHr).filter((v): v is number => v != null));
+  const avgSleep     = avg(last30.map(r => r.sleepPerformance).filter((v): v is number => v != null));
+  const avgStrain    = last30.map(r => r.strain).filter((v): v is number => v != null);
+  const avgStrainVal = avgStrain.length ? parseFloat((avgStrain.reduce((a, b) => a + b) / avgStrain.length).toFixed(1)) : null;
+
+  const whoopSummary = [
+    avgRecovery  != null ? `Avg recovery: ${avgRecovery}` : null,
+    avgHrv       != null ? `Avg HRV: ${avgHrv}ms` : null,
+    avgRhr       != null ? `Avg RHR: ${avgRhr}bpm` : null,
+    avgSleep     != null ? `Avg sleep performance: ${avgSleep}%` : null,
+    avgStrainVal != null ? `Avg strain: ${avgStrainVal}` : null,
+  ].filter(Boolean).join(' · ');
+
   return `=== CURRENT DASHBOARD FILTER (for reference only) ===
 ${filterNote}
 
 ${rec.chatContext}
 
 === MOST RECENT 20 ACTIVITIES (all-time) ===
-${recentStr}`;
+${recentStr}
+
+=== TODAY'S WHOOP SCORES (live) ===
+${liveWhoopStr}
+
+=== WHOOP 30-DAY AVERAGES ===
+${whoopSummary || 'No data'}
+
+=== WHOOP HISTORY (last 90 days) ===
+${fmtWhoopHistory(recentWhoop)}`;
 }
 
 
@@ -115,8 +192,21 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
   const [notes, setNotes]         = useState<string[]>(() =>
     typeof window !== 'undefined' ? loadNotes() : []
   );
+  const [whoopHistory, setWhoopHistory] = useState<WhoopRecord[]>([]);
+  const [liveWhoop, setLiveWhoop]       = useState<LiveWhoop | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef    = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    fetch('/data/whoop_history.json')
+      .then(r => r.json())
+      .then(setWhoopHistory)
+      .catch(() => {});
+    fetch('/api/whoop/data')
+      .then(r => r.json())
+      .then(setLiveWhoop)
+      .catch(() => {});
+  }, []);
 
   function addNote(note: string) {
     const updated = [...notes, note.trim()];
@@ -130,9 +220,9 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
   }
 
   const dashboardContext = useMemo(() =>
-    buildDashboardContext(activities, filtered, today, from, to, selectedTypes, restDate),
+    buildDashboardContext(activities, filtered, today, from, to, selectedTypes, restDate, whoopHistory, liveWhoop),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [activities.length, today.getTime(), from.getTime(), to.getTime(), filtered.length, restDate]);
+  [activities.length, today.getTime(), from.getTime(), to.getTime(), filtered.length, restDate, whoopHistory.length, liveWhoop]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

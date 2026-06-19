@@ -7,6 +7,8 @@ interface Props {
   activities: Activity[];
   selectedTypes: Set<string>;
   today: Date;
+  from: Date;
+  to: Date;
   refreshKey?: number;
 }
 
@@ -141,7 +143,7 @@ function hasTooltip(day: DayData, mode: CalendarMode): boolean {
   }
 }
 
-export default function TrainingCalendarSection({ activities, selectedTypes, today, refreshKey }: Props) {
+export default function TrainingCalendarSection({ activities, selectedTypes, today, from, to, refreshKey }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<CalendarMode>('recovery');
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
@@ -159,12 +161,16 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
   }, [refreshKey]);
 
   const { weeks, maxTrimp } = useMemo(() => {
-    const todaySunday = new Date(today);
-    todaySunday.setDate(todaySunday.getDate() - todaySunday.getDay());
-    todaySunday.setHours(0, 0, 0, 0);
+    // Snap to Sun–Sat boundaries
+    const startSunday = new Date(from);
+    startSunday.setDate(startSunday.getDate() - startSunday.getDay());
+    startSunday.setHours(0, 0, 0, 0);
 
-    const startSunday = new Date(todaySunday);
-    startSunday.setDate(startSunday.getDate() - 52 * 7);
+    const endSaturday = new Date(to);
+    endSaturday.setDate(endSaturday.getDate() + (6 - endSaturday.getDay()));
+    endSaturday.setHours(23, 59, 59, 999);
+
+    const numWeeks = Math.max(1, Math.round((endSaturday.getTime() - startSunday.getTime()) / (7 * 24 * 60 * 60 * 1000)));
 
     const dayMap = new Map<string, { trimp: number; acts: string[] }>();
     activities.forEach(a => {
@@ -176,6 +182,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
       dayMap.set(k, e);
     });
 
+    // Form (CTL/ATL) needs full history regardless of display range
     const dailyForm = new Map<string, { ctl: number; atl: number; tsb: number }>();
     const firstActivity = activities
       .filter(a => selectedTypes.has(a.type) && a.date <= today)
@@ -184,10 +191,8 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
     formStart.setHours(0, 0, 0, 0);
     if (formStart > startSunday) formStart.setTime(startSunday.getTime());
 
-    let ctl = 30;
-    let atl = 30;
-    const ctlA = 2 / (42 + 1);
-    const atlA = 2 / (7 + 1);
+    let ctl = 30, atl = 30;
+    const ctlA = 2 / (42 + 1), atlA = 2 / (7 + 1);
     for (let d = new Date(formStart); d <= today; d.setDate(d.getDate() + 1)) {
       const k = dateKey(d);
       const t = dayMap.get(k)?.trimp || 0;
@@ -198,7 +203,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
 
     let maxTrimp = 0;
     const weeks: DayData[][] = [];
-    for (let w = 0; w < 53; w++) {
+    for (let w = 0; w < numWeeks; w++) {
       const week: DayData[] = [];
       for (let d = 0; d < 7; d++) {
         const date = new Date(startSunday);
@@ -214,7 +219,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
       weeks.push(week);
     }
     return { weeks, maxTrimp };
-  }, [activities, selectedTypes, today, whoopMap]);
+  }, [activities, selectedTypes, today, from, to, whoopMap]);
 
   const monthLabels = useMemo(() => {
     const labels: { col: number; label: string }[] = [];
@@ -226,19 +231,10 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
     return labels;
   }, [weeks]);
 
-  const mobileWeeks = useMemo(() => weeks.slice(-20), [weeks]);
-  const mobileMonthLabels = useMemo(() => {
-    const labels: { col: number; label: string }[] = [];
-    let lastMonth = -1;
-    mobileWeeks.forEach((week, col) => {
-      const m = week[0].date.getMonth();
-      if (m !== lastMonth) { labels.push({ col, label: MONTHS[m] }); lastMonth = m; }
-    });
-    return labels;
-  }, [mobileWeeks]);
-
-  const cellSize = 10;
-  const gap = 3;
+  // Auto-size cells: bigger when fewer weeks fit on screen
+  const numWeeks = weeks.length;
+  const cellSize = numWeeks <= 2 ? 22 : numWeeks <= 4 ? 18 : numWeeks <= 8 ? 14 : numWeeks <= 13 ? 12 : 10;
+  const gap = cellSize >= 18 ? 4 : 3;
   const stride = cellSize + gap;
   const padLeft = 20;
   const padTop = 18;
@@ -379,16 +375,18 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
             Training Calendar
             <span className="info" title={modeTitle[mode]}>i</span>
           </div>
-          <div className="seg calendar-mode" aria-label="Calendar metric">
-            {MODE_ORDER.map(m => (
-              <button
-                key={m}
-                className={mode === m ? 'on' : ''}
-                onClick={() => { setMode(m); setTooltip(null); }}
-              >
-                {MODE_LABELS[m]}
-              </button>
-            ))}
+          <div className="calendar-mode-wrap">
+            <div className="seg calendar-mode" aria-label="Calendar metric">
+              {MODE_ORDER.map(m => (
+                <button
+                  key={m}
+                  className={mode === m ? 'on' : ''}
+                  onClick={() => { setMode(m); setTooltip(null); }}
+                >
+                  {MODE_LABELS[m]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <div className="calendar-scale">
@@ -396,8 +394,8 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
         </div>
       </div>
 
-      <div className="calendar-scroll calendar-desktop-scroll" style={{ overflowX: 'auto', paddingBottom: 4, flex: 1, display: 'flex', alignItems: 'center' }}>
-        <div className="calendar-grid" style={{ position: 'relative', width: padLeft + weeks.length * stride, height: padTop + 7 * stride + 4, minWidth: 200 }}>
+      <div style={{ overflowX: 'auto', paddingBottom: 4, flex: 1, display: 'flex', alignItems: 'center', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div style={{ position: 'relative', width: padLeft + numWeeks * stride, height: padTop + 7 * stride + 4, minWidth: 60, flexShrink: 0 }}>
           {monthLabels.map(({ col, label }) => (
             <span key={col} style={{
               position: 'absolute', left: padLeft + col * stride, top: 0,
@@ -421,57 +419,16 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
                   key={day.key}
                   onMouseEnter={e => handleCellEnter(e, day, row)}
                   onMouseLeave={() => setTooltip(null)}
+                  onClick={e => handleCellEnter(e, day, row)}
                   style={{
                     position: 'absolute',
                     left: padLeft + col * stride,
                     top: padTop + row * stride,
                     width: cellSize, height: cellSize,
-                    borderRadius: 3,
+                    borderRadius: cellSize >= 14 ? 4 : 3,
                     background: bg,
                     opacity: isFuture ? 0.3 : 1,
-                    transition: 'opacity 0.1s',
-                  }}
-                />
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      <div className="calendar-mobile-view">
-        <div className="calendar-mobile-caption">Recent 20 weeks</div>
-        <div className="calendar-mobile-grid" style={{ position: 'relative', width: padLeft + mobileWeeks.length * stride, height: padTop + 7 * stride + 4 }}>
-          {mobileMonthLabels.map(({ col, label }) => (
-            <span key={col} style={{
-              position: 'absolute', left: padLeft + col * stride, top: 0,
-              fontSize: 9, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)',
-            }}>{label}</span>
-          ))}
-
-          {[1, 3, 5].map(d => (
-            <span key={d} style={{
-              position: 'absolute', left: 0, top: padTop + d * stride + (cellSize - 10) / 2,
-              fontSize: 8, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)', lineHeight: 1,
-            }}>{DAYS[d]}</span>
-          ))}
-
-          {mobileWeeks.map((week, col) =>
-            week.map((day, row) => {
-              const isFuture = day.date > today;
-              const bg = getCellBg(day, mode, isFuture, maxTrimp);
-              return (
-                <div
-                  key={`m-${day.key}`}
-                  onMouseEnter={e => handleCellEnter(e, day, row)}
-                  onMouseLeave={() => setTooltip(null)}
-                  style={{
-                    position: 'absolute',
-                    left: padLeft + col * stride,
-                    top: padTop + row * stride,
-                    width: cellSize, height: cellSize,
-                    borderRadius: 3,
-                    background: bg,
-                    opacity: isFuture ? 0.3 : 1,
+                    cursor: hasTooltip(day, mode) && !isFuture ? 'pointer' : 'default',
                     transition: 'opacity 0.1s',
                   }}
                 />

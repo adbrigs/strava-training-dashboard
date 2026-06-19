@@ -6,6 +6,7 @@ interface WhoopData {
   recovery?: { score: number; hrv: number; restingHr: number; date: string; } | null;
   sleep?: { durationMs: number; performance: number; efficiency: number; remMs: number; deepMs: number; date: string; } | null;
   strain?: { score: number; avgHr: number; date: string; } | null;
+  bodyMeasurement?: { weightKg: number | null; heightM: number | null; maxHeartRate: number | null; } | null;
 }
 
 function recoveryColor(v: number) {
@@ -146,7 +147,10 @@ export default function WhoopSection() {
     );
   }
 
-  const { recovery, sleep, strain } = data;
+  const { recovery, sleep, strain, bodyMeasurement } = data;
+  const weightLbs = bodyMeasurement?.weightKg != null
+    ? parseFloat((bodyMeasurement.weightKg * 2.20462).toFixed(1))
+    : null;
   const rc = recovery ? recoveryColor(recovery.score) : 'var(--text-subtle)';
   const lightMs = sleep ? Math.max(0, sleep.durationMs - sleep.remMs - sleep.deepMs) : 0;
   const hrvDelta = recovery && avgHrv != null ? recovery.hrv - avgHrv : null;
@@ -252,22 +256,33 @@ export default function WhoopSection() {
             )}
           </div>
 
-          {/* Day Strain — pinned to bottom */}
+          {/* Day Strain + Weight — pinned to bottom */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            paddingTop: 10, borderTop: '1px solid var(--border)', marginTop: 'auto',
+            paddingTop: 10, borderTop: '1px solid var(--border)', marginTop: 'auto', gap: 12,
           }}>
-            <div className="whoop-metric-label">DAY STRAIN</div>
-            {strain ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 18, letterSpacing: '-0.03em', color: strainColor(strain.score) }}>
-                  {strain.score}
-                  <span style={{ fontSize: 10, color: 'var(--text-subtle)', fontWeight: 400 }}>/21</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div className="whoop-metric-label">DAY STRAIN</div>
+              {strain ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 18, letterSpacing: '-0.03em', color: strainColor(strain.score) }}>
+                    {strain.score}
+                    <span style={{ fontSize: 10, color: 'var(--text-subtle)', fontWeight: 400 }}>/21</span>
+                  </span>
+                  <Badge label={strainLabel(strain.score)} color={strainColor(strain.score)} />
+                </div>
+              ) : (
+                <span style={{ color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)', fontSize: 14 }}>—</span>
+              )}
+            </div>
+            {weightLbs != null && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-end' }}>
+                <div className="whoop-metric-label">WEIGHT</div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 18, letterSpacing: '-0.03em', color: 'var(--text)' }}>
+                  {weightLbs}
+                  <span style={{ fontSize: 10, color: 'var(--text-subtle)', fontWeight: 400 }}> lbs</span>
                 </span>
-                <Badge label={strainLabel(strain.score)} color={strainColor(strain.score)} />
               </div>
-            ) : (
-              <span style={{ color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)', fontSize: 14 }}>—</span>
             )}
           </div>
 

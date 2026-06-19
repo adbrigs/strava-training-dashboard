@@ -8,6 +8,8 @@ interface Props {
   theme: 'dark' | 'light';
   onThemeChange: (t: 'dark' | 'light') => void;
   onSyncComplete?: () => void;
+  period: 'daily' | 'weekly' | 'monthly';
+  onPeriod: (p: 'daily' | 'weekly' | 'monthly') => void;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -30,7 +32,7 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, onSyncComplete }: Props) {
+export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, onSyncComplete, period, onPeriod }: Props) {
   const [whoopConnected, setWhoopConnected] = useState<boolean | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
@@ -137,16 +139,25 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
           {/* ── Appearance ── */}
           <section>
             <SectionLabel>Appearance</SectionLabel>
-            <SettingRow label="Theme">
-              <div className="seg">
-                <button className={theme === 'light' ? 'on' : ''} onClick={() => onThemeChange('light')}>
-                  Light
-                </button>
-                <button className={theme === 'dark' ? 'on' : ''} onClick={() => onThemeChange('dark')}>
-                  Dark
-                </button>
-              </div>
-            </SettingRow>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <SettingRow label="Theme">
+                <div className="seg">
+                  <button className={theme === 'light' ? 'on' : ''} onClick={() => onThemeChange('light')}>
+                    Light
+                  </button>
+                  <button className={theme === 'dark' ? 'on' : ''} onClick={() => onThemeChange('dark')}>
+                    Dark
+                  </button>
+                </div>
+              </SettingRow>
+              <SettingRow label="Volume period">
+                <div className="seg">
+                  <button className={period === 'daily' ? 'on' : ''} onClick={() => onPeriod('daily')}>Daily</button>
+                  <button className={period === 'weekly' ? 'on' : ''} onClick={() => onPeriod('weekly')}>Weekly</button>
+                  <button className={period === 'monthly' ? 'on' : ''} onClick={() => onPeriod('monthly')}>Monthly</button>
+                </div>
+              </SettingRow>
+            </div>
           </section>
 
           {/* ── WHOOP ── */}

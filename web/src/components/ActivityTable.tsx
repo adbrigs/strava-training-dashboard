@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, fmtDateTime, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
@@ -10,27 +10,48 @@ const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'date',      l: 'Date' },
   { k: 'name',      l: 'Activity' },
   { k: 'type',      l: 'Sport' },
-  { k: 'distance',  l: 'Dist (mi)', num: true },
+  { k: 'trimp',     l: 'TRIMP',      num: true },
+  { k: 'distance',  l: 'Dist (mi)',  num: true },
   { k: 'duration',  l: 'Time (min)', num: true },
   { k: 'pace',      l: 'Pace (/mi)', num: true },
-  { k: 'top1',      l: 'Zone 1' },
-  { k: 'top2',      l: 'Zone 2' },
-  { k: 'top3',      l: 'Zone 3' },
-  { k: 'avgHr',     l: 'Avg HR',    num: true },
-  { k: 'maxHr',     l: 'Max HR',    num: true },
-  { k: 'trimp',     l: 'TRIMP',     num: true },
+  { k: 'avgHr',     l: 'Avg HR',     num: true },
+  { k: 'maxHr',     l: 'Max HR',     num: true },
+  { k: 'top1',      l: 'Top Zone' },
+  { k: 'top2',      l: '2nd Zone' },
+  { k: 'top3',      l: '3rd Zone' },
 ];
 
 const PER_PAGE = 10;
 
 interface Props {
   filtered: Activity[];
+  onRename?: (id: string, name: string) => void;
 }
 
-export default function ActivityTable({ filtered }: Props) {
+export default function ActivityTable({ filtered, onRename }: Props) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ k: SortKey; dir: -1 | 1 }>({ k: 'date', dir: -1 });
   const [page, setPage] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function startEdit(a: Activity) {
+    if (!onRename) return;
+    setEditingId(a.id);
+    setEditValue(a.name);
+    setTimeout(() => { inputRef.current?.select(); }, 0);
+  }
+
+  function commitEdit() {
+    if (editingId) onRename?.(editingId, editValue);
+    setEditingId(null);
+  }
+
+  function handleEditKey(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') commitEdit();
+    if (e.key === 'Escape') setEditingId(null);
+  }
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -91,20 +112,46 @@ export default function ActivityTable({ filtered }: Props) {
           <tbody>
             {pageRows.map(a => (
               <tr key={a.id}>
-                <td className="date">{fmtDateTime(a.date)}</td>
-                <td className="name">{a.name}</td>
+                <td className="date" style={{ whiteSpace: 'nowrap' }}>
+                  {a.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} '{String(a.date.getFullYear()).slice(-2)}
+                </td>
+                <td className="name">
+                  {editingId === a.id ? (
+                    <input
+                      ref={inputRef}
+                      value={editValue}
+                      onChange={e => setEditValue(e.target.value)}
+                      onBlur={commitEdit}
+                      onKeyDown={handleEditKey}
+                      style={{
+                        width: '100%', background: 'var(--surface-2)',
+                        border: '1px solid var(--accent)', borderRadius: 4,
+                        color: 'var(--text)', padding: '1px 5px', fontSize: 'inherit',
+                        fontFamily: 'inherit', outline: 'none',
+                      }}
+                    />
+                  ) : (
+                    <span
+                      onDoubleClick={() => startEdit(a)}
+                      title={onRename ? 'Double-click to rename' : undefined}
+                      style={{ cursor: onRename ? 'text' : undefined }}
+                    >
+                      {a.name}
+                    </span>
+                  )}
+                </td>
                 <td>
                   <span className="ap" style={{ '--c': ACTIVITY_COLORS[a.type] || a.color } as React.CSSProperties}>
                     <span className="sw" />
                     {ACTIVITY_LABELS[a.type] || a.type}
                   </span>
                 </td>
+                <td className="num trimp-cell">{fmtNum(a.trimp, 1)}</td>
                 <td className="num">{a.distance ? fmtNum(a.distance, 2) : '—'}</td>
                 <td className="num">{fmtNum(a.duration, 1)}</td>
                 <td className="num">{a.pace ? fmtPace(a.pace) : '—'}</td>
-                {
-                  /* Compute top 3 zones (zone number + minutes) */
-                }
+                <td className="num">{a.avgHr ? fmtNum(a.avgHr) : '—'}</td>
+                <td className="num">{a.maxHr ? fmtNum(a.maxHr) : '—'}</td>
                 {(() => {
                   const fmtMin = (min?: number) => {
                     if (min == null || isNaN(min) || min <= 0) return '—';
@@ -130,9 +177,6 @@ export default function ActivityTable({ filtered }: Props) {
                   });
                   return cells;
                 })()}
-                <td className="num">{a.avgHr ? fmtNum(a.avgHr) : '—'}</td>
-                <td className="num">{a.maxHr ? fmtNum(a.maxHr) : '—'}</td>
-                <td className="num trimp-cell">{fmtNum(a.trimp, 1)}</td>
               </tr>
             ))}
             {pageRows.length === 0 && (
