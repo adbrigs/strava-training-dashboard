@@ -13,6 +13,8 @@ on:
 jobs:
   run-refresh:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # 1️⃣ Check out the repository WITH PUSH PERMISSIONS
@@ -57,6 +59,10 @@ jobs:
           WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
           WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
           WHOOP_REFRESH_TOKEN: ${{ secrets.WHOOP_REFRESH_TOKEN }}
+          # GH_PAT must be a classic PAT with 'repo' scope (or fine-grained with Secrets read+write).
+          # Create one at github.com/settings/tokens and store it as the GH_PAT secret.
+          # Without it the script still fetches WHOOP data — it just won't auto-rotate the secret.
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: python Training_Intensity_Report/dashboard/fetch_whoop.py
 
       # 8️⃣ Commit and push any updated data files

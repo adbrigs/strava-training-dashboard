@@ -2,15 +2,18 @@
 Fetch WHOOP historical data and write to web/public/data/whoop_history.json.
 Runs in GitHub Actions using WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN secrets.
 """
-import json, os, sys
+import base64, json, os, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+from nacl import encoding, public
 
 CLIENT_ID     = os.environ.get("WHOOP_CLIENT_ID", "")
 CLIENT_SECRET = os.environ.get("WHOOP_CLIENT_SECRET", "")
 REFRESH_TOKEN = os.environ.get("WHOOP_REFRESH_TOKEN", "")
+GH_TOKEN      = os.environ.get("GH_TOKEN", "")
+GH_REPO       = os.environ.get("GITHUB_REPOSITORY", "")  # automatically set in Actions
 
 API       = "https://api.prod.whoop.com/developer/v2"
 TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token"
@@ -18,7 +21,8 @@ OUT_PATH  = Path(__file__).parents[2] / "web" / "public" / "data" / "whoop_histo
 BODY_OUT_PATH = Path(__file__).parents[2] / "web" / "public" / "data" / "whoop_body_measurement.json"
 
 
-def get_access_token() -> str:
+def get_tokens() -> tuple[str, str]:
+    """Exchange the refresh token for a new access + refresh token pair."""
     r = requests.post(TOKEN_URL, data={
         "grant_type":    "refresh_token",
         "refresh_token": REFRESH_TOKEN,
@@ -30,7 +34,33 @@ def get_access_token() -> str:
         print("Go to Settings in the dashboard → copy the refresh token → update WHOOP_REFRESH_TOKEN in GitHub Secrets.")
         sys.exit(0)
     r.raise_for_status()
-    return r.json()["access_token"]
+    data = r.json()
+    return data["access_token"], data["refresh_token"]
+
+
+def update_github_secret(secret_name: str, secret_value: str) -> None:
+    """Write a new value to a GitHub Actions secret using the repo public key."""
+    if not GH_TOKEN or not GH_REPO:
+        print(f"  GH_TOKEN or GITHUB_REPOSITORY not set — skipping secret update for {secret_name}.")
+        return
+    api = f"https://api.github.com/repos/{GH_REPO}"
+    headers = {
+        "Authorization": f"token {GH_TOKEN}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    r = requests.get(f"{api}/actions/secrets/public-key", headers=headers)
+    r.raise_for_status()
+    key_data = r.json()
+    pub_key = public.PublicKey(key_data["key"].encode(), encoding.Base64Encoder())
+    encrypted = base64.b64encode(public.SealedBox(pub_key).encrypt(secret_value.encode())).decode()
+    r = requests.put(
+        f"{api}/actions/secrets/{secret_name}",
+        headers=headers,
+        json={"encrypted_value": encrypted, "key_id": key_data["key_id"]},
+    )
+    r.raise_for_status()
+    print(f"  Updated GitHub Secret: {secret_name}")
 
 
 def paginate(endpoint: str, token: str, params: dict | None = None) -> list:
@@ -63,7 +93,12 @@ def main():
         sys.exit(0)
 
     print("Fetching WHOOP access token…")
-    token = get_access_token()
+    token, new_refresh_token = get_tokens()
+    print("Updating WHOOP_REFRESH_TOKEN secret…")
+    try:
+        update_github_secret("WHOOP_REFRESH_TOKEN", new_refresh_token)
+    except Exception as e:
+        print(f"  Warning: could not update secret: {e}")
 
     print("Fetching recovery records…")
     recoveries = paginate("/recovery", token)

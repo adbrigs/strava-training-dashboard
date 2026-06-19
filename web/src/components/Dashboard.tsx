@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [whoopDataVersion, setWhoopDataVersion] = useState(0);
 
   const [restDate, setRestDate] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
@@ -105,6 +106,20 @@ export default function Dashboard() {
     setTheme(t);
     try { localStorage.setItem('brig_theme', t); } catch {}
   }
+
+  // Auto-trigger backfill when returning from WHOOP OAuth
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('whoop') !== 'connected') return;
+    // Clean the URL without a reload
+    const clean = window.location.pathname + (params.toString().replace('whoop=connected', '').replace(/^&|&$/, '') ? '?' + params.toString().replace('whoop=connected', '').replace(/^&|&$/, '') : '');
+    window.history.replaceState({}, '', clean);
+    // Kick off backfill so trends + calendar reflect fresh data
+    fetch('/api/whoop/backfill', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (d.ok) setWhoopDataVersion(v => v + 1); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(
@@ -257,7 +272,7 @@ export default function Dashboard() {
       <div className="stack">
         <div className="grid-layout row-daily">
           <WhoopSection />
-          <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} />
+          <TrainingCalendarSection activities={activities} selectedTypes={selectedTypes} today={today} refreshKey={whoopDataVersion} />
         </div>
       </div>
 
@@ -288,7 +303,7 @@ export default function Dashboard() {
 
       {/* WHOOP Trends */}
       <div className="stack">
-        <WhoopTrendSection from={from} to={to} />
+        <WhoopTrendSection from={from} to={to} refreshKey={whoopDataVersion} />
       </div>
 
       {/* Lift Split */}
@@ -334,6 +349,7 @@ export default function Dashboard() {
         onClose={() => setIsSettingsOpen(false)}
         theme={theme}
         onThemeChange={handleThemeChange}
+        onSyncComplete={() => setWhoopDataVersion(v => v + 1)}
       />
     </div>
   );

@@ -128,6 +128,9 @@ export async function GET(req: NextRequest) {
     if (newTokens) {
       response.cookies.set('whoop_access', newTokens.access_token, { ...COOKIE_OPTS, maxAge: newTokens.expires_in });
       response.cookies.set('whoop_refresh', newTokens.refresh_token, { ...COOKIE_OPTS, maxAge: 60 * 60 * 24 * 30 });
+    } else if (refreshToken) {
+      // Reset expiry so the refresh cookie doesn't expire 30 days after the original login
+      response.cookies.set('whoop_refresh', refreshToken, { ...COOKIE_OPTS, maxAge: 60 * 60 * 24 * 30 });
     }
 
     return response;

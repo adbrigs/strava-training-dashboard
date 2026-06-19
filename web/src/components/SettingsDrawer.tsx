@@ -7,6 +7,7 @@ interface Props {
   onClose: () => void;
   theme: 'dark' | 'light';
   onThemeChange: (t: 'dark' | 'light') => void;
+  onSyncComplete?: () => void;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -29,11 +30,13 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }: Props) {
+export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, onSyncComplete }: Props) {
   const [whoopConnected, setWhoopConnected] = useState<boolean | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ ok: boolean; count?: number; error?: string } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -69,6 +72,25 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  async function syncWhoopData() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch('/api/whoop/backfill', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setSyncResult({ ok: true, count: data.count });
+        onSyncComplete?.();
+      } else {
+        setSyncResult({ ok: false, error: data.error ?? 'Sync failed' });
+      }
+    } catch {
+      setSyncResult({ ok: false, error: 'Network error' });
+    } finally {
+      setSyncing(false);
+    }
   }
 
   const btnBase: React.CSSProperties = {
@@ -151,6 +173,29 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange }
                 >
                   {whoopConnected ? 'Reconnect WHOOP' : 'Connect WHOOP'}
                 </a>
+                {whoopConnected && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <button
+                      onClick={syncWhoopData}
+                      disabled={syncing}
+                      style={{
+                        ...btnBase, alignSelf: 'flex-start',
+                        opacity: syncing ? 0.6 : 1,
+                        cursor: syncing ? 'default' : 'pointer',
+                      }}
+                    >
+                      {syncing ? 'Syncing…' : 'Sync WHOOP Data'}
+                    </button>
+                    {syncResult && (
+                      <span style={{
+                        fontSize: 11, fontFamily: 'var(--font-mono)',
+                        color: syncResult.ok ? 'var(--z2)' : 'var(--hot)',
+                      }}>
+                        {syncResult.ok ? `✓ ${syncResult.count} records` : `✗ ${syncResult.error}`}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div style={{ height: 1, background: 'var(--border)' }} />

@@ -14,6 +14,7 @@ const METRICS: { key: WhoopMetric; label: string }[] = [
 interface Props {
   from: Date;
   to: Date;
+  refreshKey?: number;
 }
 
 interface WhoopBodyMeasurement {
@@ -21,15 +22,16 @@ interface WhoopBodyMeasurement {
   fetchedAt?: string | null;
 }
 
-export default function WhoopTrendSection({ from, to }: Props) {
+export default function WhoopTrendSection({ from, to, refreshKey }: Props) {
   const [allRecords, setAllRecords] = useState<WhoopRecord[]>([]);
   const [metric, setMetric] = useState<WhoopMetric>('recovery');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      fetch('/data/whoop_history.json').then(r => r.json() as Promise<WhoopRecord[]>),
-      fetch('/data/whoop_body_measurement.json')
+      fetch(`/data/whoop_history.json?v=${refreshKey ?? 0}`).then(r => r.json() as Promise<WhoopRecord[]>),
+      fetch(`/data/whoop_body_measurement.json?v=${refreshKey ?? 0}`)
         .then(r => r.ok ? r.json() as Promise<WhoopBodyMeasurement> : null)
         .catch(() => null),
     ])
@@ -50,7 +52,7 @@ export default function WhoopTrendSection({ from, to }: Props) {
       })
       .finally(() => setLoading(false))
       .catch(() => setLoading(false));
-  }, []);
+  }, [refreshKey]);
 
   const fromStr = from.toISOString().slice(0, 10);
   const toStr   = to.toISOString().slice(0, 10);

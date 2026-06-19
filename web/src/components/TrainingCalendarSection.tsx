@@ -7,6 +7,7 @@ interface Props {
   activities: Activity[];
   selectedTypes: Set<string>;
   today: Date;
+  refreshKey?: number;
 }
 
 interface WhoopEntry {
@@ -140,14 +141,14 @@ function hasTooltip(day: DayData, mode: CalendarMode): boolean {
   }
 }
 
-export default function TrainingCalendarSection({ activities, selectedTypes, today }: Props) {
+export default function TrainingCalendarSection({ activities, selectedTypes, today, refreshKey }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<CalendarMode>('recovery');
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
   const [whoopMap, setWhoopMap] = useState<Map<string, WhoopEntry>>(new Map());
 
   useEffect(() => {
-    fetch('/data/whoop_history.json')
+    fetch(`/data/whoop_history.json?v=${refreshKey ?? 0}`)
       .then(r => r.json())
       .then((records: Array<{ date: string } & WhoopEntry>) => {
         const m = new Map<string, WhoopEntry>();
@@ -155,7 +156,7 @@ export default function TrainingCalendarSection({ activities, selectedTypes, tod
         setWhoopMap(m);
       })
       .catch(() => {});
-  }, []);
+  }, [refreshKey]);
 
   const { weeks, maxTrimp } = useMemo(() => {
     const todaySunday = new Date(today);
