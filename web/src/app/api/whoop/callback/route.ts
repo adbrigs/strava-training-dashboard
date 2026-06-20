@@ -87,7 +87,12 @@ export async function GET(req: NextRequest) {
         status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' },
       });
     }
-    return NextResponse.redirect(new URL('/?whoop=error', req.url));
+    // WHOOP drops `state` on its error redirect, so cron failures land here too.
+    // Carry the reason in the URL so it isn't silently swallowed.
+    const url = new URL('/?whoop=error', req.url);
+    url.searchParams.set('reason', error || 'no_code');
+    if (errorDescription) url.searchParams.set('desc', errorDescription);
+    return NextResponse.redirect(url);
   }
 
   const body = new URLSearchParams({
@@ -112,7 +117,9 @@ export async function GET(req: NextRequest) {
         status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' },
       });
     }
-    return NextResponse.redirect(new URL('/?whoop=error', req.url));
+    const url = new URL('/?whoop=error', req.url);
+    url.searchParams.set('reason', `token_exchange_${res.status}`);
+    return NextResponse.redirect(url);
   }
 
   const { access_token, refresh_token, expires_in } = await res.json() as {

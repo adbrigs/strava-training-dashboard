@@ -32,11 +32,11 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, onSyncComplete, period, onPeriod }: Props) {
+export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, period, onPeriod }: Props) {
   const [whoopConnected, setWhoopConnected] = useState<boolean | null>(null);
   const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{ ok: boolean; count?: number; error?: string } | null>(null);
+  const [syncResult, setSyncResult] = useState<{ ok: boolean; error?: string } | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -68,8 +68,7 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
       const res = await fetch('/api/whoop/backfill', { method: 'POST' });
       const data = await res.json();
       if (res.ok && data.ok) {
-        setSyncResult({ ok: true, count: data.count });
-        onSyncComplete?.();
+        setSyncResult({ ok: true });
       } else {
         setSyncResult({ ok: false, error: data.error ?? 'Sync failed' });
       }
@@ -187,7 +186,7 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
                         fontSize: 11, fontFamily: 'var(--font-mono)',
                         color: syncResult.ok ? 'var(--z2)' : 'var(--hot)',
                       }}>
-                        {syncResult.ok ? `✓ ${syncResult.count} records` : `✗ ${syncResult.error}`}
+                        {syncResult.ok ? '✓ Refresh started — updates in ~2 min' : `✗ ${syncResult.error}`}
                       </span>
                     )}
                   </div>
