@@ -34,17 +34,11 @@ export default function FilterBar({
   const [actOpen, setActOpen] = useState(false);
   const actRef = useRef<HTMLDivElement>(null);
 
-  // Custom date strings (yyyy-MM-dd for input[type=date])
-  const [customFrom, setCustomFrom] = useState('');
-  const [customTo, setCustomTo] = useState('');
-
-  // Sync custom inputs when switching to custom preset
-  useEffect(() => {
-    if (rangePreset === 'custom') {
-      setCustomFrom(toInputDate(from));
-      setCustomTo(toInputDate(to));
-    }
-  }, [rangePreset]); // only when switching to custom
+  // Custom date strings (yyyy-MM-dd for input[type=date]). Seeded from the
+  // current range if we mount already in custom mode; applyPreset() re-seeds
+  // them whenever the user switches into custom mode at runtime.
+  const [customFrom, setCustomFrom] = useState(() => rangePreset === 'custom' ? toInputDate(from) : '');
+  const [customTo, setCustomTo] = useState(() => rangePreset === 'custom' ? toInputDate(to) : '');
 
   // Close activity dropdown on outside click
   useEffect(() => {

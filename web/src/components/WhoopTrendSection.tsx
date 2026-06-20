@@ -28,7 +28,6 @@ export default function WhoopTrendSection({ from, to, refreshKey }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([
       fetch(`/data/whoop_history.json?v=${refreshKey ?? 0}`).then(r => r.json() as Promise<WhoopRecord[]>),
       fetch(`/data/whoop_body_measurement.json?v=${refreshKey ?? 0}`)

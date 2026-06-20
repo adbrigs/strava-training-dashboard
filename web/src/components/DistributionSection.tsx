@@ -9,11 +9,11 @@ interface Props {
   filtered: Activity[];
 }
 
+const ZONE_COLORS = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)', 'var(--z5)'];
+const ZONE_NAMES  = ['Z1 Recovery', 'Z2 Aerobic', 'Z3 Tempo', 'Z4 Threshold', 'Z5 VO₂max'];
+
 export default function DistributionSection({ filtered }: Props) {
   const [mode, setMode] = useState<'trimp' | 'count' | 'duration' | 'zones'>('trimp');
-
-  const ZONE_COLORS = ['var(--z1)', 'var(--z2)', 'var(--z3)', 'var(--z4)', 'var(--z5)'];
-  const ZONE_NAMES  = ['Z1 Recovery', 'Z2 Aerobic', 'Z3 Tempo', 'Z4 Threshold', 'Z5 VO₂max'];
 
   const slices = useMemo(() => {
     if (mode === 'zones') {

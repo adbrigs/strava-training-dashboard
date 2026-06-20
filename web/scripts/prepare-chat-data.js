@@ -5,6 +5,10 @@
 //
 // Run: node scripts/prepare-chat-data.js
 // (from the web/ directory)
+//
+// This is a standalone Node CommonJS build script, not part of the Next bundle,
+// so require() is intentional here.
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 const fs   = require('fs');
 const path = require('path');

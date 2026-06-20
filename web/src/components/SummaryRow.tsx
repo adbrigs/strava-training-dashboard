@@ -70,12 +70,12 @@ export default function SummaryRow({ filtered, allFiltered, from, to, today }: P
   const { current: currentStreak, max: maxStreak } = useMemo(() => computeStreaks(filtered, today), [filtered, today]);
 
   // Previous period — same duration, immediately before `from` (placed after existing hooks)
-  const prevTo = new Date(from.getTime() - 1);
+  const prevTo = useMemo(() => new Date(from.getTime() - 1), [from]);
   const prev = useMemo(() => {
     const duration = to.getTime() - from.getTime();
     const prevFrom = new Date(from.getTime() - duration);
     return allFiltered.filter(a => a.date >= prevFrom && a.date <= prevTo);
-  }, [allFiltered, from, to]);
+  }, [allFiltered, from, to, prevTo]);
 
   // Previous period values
   const prevTotal    = prev.length;

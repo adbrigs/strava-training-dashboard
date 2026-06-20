@@ -34,7 +34,7 @@ interface Props {
   onBucketClick?: (start: Date, end: Date, label: string) => void;
 }
 
-export default function VolumeSection({ filtered, from, to, period, onPeriod, selectedTypes, selectedBucketStart, onBucketClick }: Props) {
+export default function VolumeSection({ filtered, from, to, period, selectedTypes, selectedBucketStart, onBucketClick }: Props) {
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [chartStyle, setChartStyle] = useState<'bar' | 'area' | 'line'>('bar');
   const [metric, setMetric] = useState<'trimp' | 'count' | 'zones'>('trimp');
@@ -125,7 +125,7 @@ export default function VolumeSection({ filtered, from, to, period, onPeriod, se
     return out;
   }, [usedTypes, isZones]);
 
-  const toggle = (t: string) => setMuted(m => { const n = new Set(m); n.has(t) ? n.delete(t) : n.add(t); return n; });
+  const toggle = (t: string) => setMuted(m => { const n = new Set(m); if (n.has(t)) n.delete(t); else n.add(t); return n; });
 
   const selectedBucketIdx = useMemo(() => {
     if (!selectedBucketStart) return null;

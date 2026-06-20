@@ -203,7 +203,7 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
                   <a href="https://developer.whoop.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
                     WHOOP Developer Portal
                   </a>
-                  {' '}under your app's webhook settings. WHOOP will then push new scores automatically.
+                  {' '}under your app&apos;s webhook settings. WHOOP will then push new scores automatically.
                 </div>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 8,

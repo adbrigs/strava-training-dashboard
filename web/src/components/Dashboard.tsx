@@ -94,11 +94,15 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
   const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
 
+  // Stable "now" captured once at mount — avoids calling the impure Date.now()
+  // during render on every pass.
+  const [now] = useState(() => Date.now());
+
   // activities is already sorted desc by date from the load effect
   const today = useMemo(() => {
-    const activityDate = activities.length > 0 ? activities[0].date : new Date();
-    return new Date(Math.max(activityDate.getTime(), Date.now()));
-  }, [activities]);
+    const activityDate = activities.length > 0 ? activities[0].date : new Date(now);
+    return new Date(Math.max(activityDate.getTime(), now));
+  }, [activities, now]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -194,7 +198,11 @@ export default function Dashboard() {
   }
 
   function handleTypeToggle(t: string) {
-    setSelectedTypes(prev => { const n = new Set(prev); n.has(t) ? n.delete(t) : n.add(t); return n; });
+    setSelectedTypes(prev => {
+      const n = new Set(prev);
+      if (n.has(t)) n.delete(t); else n.add(t);
+      return n;
+    });
   }
 
   // Apply localStorage renames on top of raw Strava names
@@ -202,12 +210,12 @@ export default function Dashboard() {
     activities.map(a => renames[a.id] ? { ...a, name: renames[a.id] } : a),
   [activities, renames]);
 
-  const presentTypes = useMemo(() => {
-    const set = new Set(namedActivities.map(a => a.type));
-    return Object.keys(ACTIVITY_COLORS).filter(t => set.has(t)).concat(
-      [...set].filter(t => !ACTIVITY_COLORS[t])
-    );
-  }, [namedActivities]);
+  // Plain computation — the React Compiler auto-memoizes this; a manual useMemo
+  // here could not be preserved and forced the whole component out of optimization.
+  const presentTypeSet = new Set(namedActivities.map(a => a.type));
+  const presentTypes = Object.keys(ACTIVITY_COLORS)
+    .filter(t => presentTypeSet.has(t))
+    .concat([...presentTypeSet].filter(t => !ACTIVITY_COLORS[t]));
 
   const filtered = useMemo(() => {
     return namedActivities.filter(a => a.date >= from && a.date <= to && selectedTypes.has(a.type));
@@ -231,6 +239,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="hdr">
         <div className="hdr-l">
+          {/* eslint-disable-next-line @next/next/no-img-element -- small static avatar sized via CSS class */}
           <img src="/avatar.jpg" alt="Andrew" className="brand" style={{ objectFit: 'cover' }} />
           <div className="hdr-title">
             <h1>Andrew&apos;s Training</h1>
@@ -249,6 +258,7 @@ export default function Dashboard() {
           >
             <Icon name="chat" size={14} />
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element -- small static avatar sized via CSS class */}
           <img
             src="/avatar.jpg"
             alt="Andrew"

@@ -23,6 +23,7 @@ export function Avatar({ src, alt, fallback, size = "md", className, ...props }:
 			{...props}
 		>
 			{showImg ? (
+				// eslint-disable-next-line @next/next/no-img-element -- arbitrary external src with onError fallback to initials
 				<img
 					src={src}
 					alt={alt ?? ""}

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo, useRef } from 'react';
 import type { Activity } from '@/lib/types';
-import { fmtNum, fmtPace, fmtDateTime, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
+import { fmtNum, fmtPace, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
 type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'top1' | 'top2' | 'top3';
@@ -113,7 +113,7 @@ export default function ActivityTable({ filtered, onRename }: Props) {
             {pageRows.map(a => (
               <tr key={a.id}>
                 <td className="date" style={{ whiteSpace: 'nowrap' }}>
-                  {a.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} '{String(a.date.getFullYear()).slice(-2)}
+                  {a.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} &apos;{String(a.date.getFullYear()).slice(-2)}
                 </td>
                 <td className="name">
                   {editingId === a.id ? (

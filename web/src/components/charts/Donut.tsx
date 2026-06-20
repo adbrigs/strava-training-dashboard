@@ -18,16 +18,20 @@ export default function Donut({ slices, size = 160, thickness = 22, centerLabel,
   const total = slices.reduce((s, x) => s + x.value, 0) || 1;
   const r = size / 2 - thickness / 2 - 1;
   const cx = size / 2, cy = size / 2;
-  let cum = -Math.PI / 2;
+  const start0 = -Math.PI / 2;
+
+  // Cumulative value before each slice — computed without mutating state during
+  // render (slices are few, so the O(n²) prefix sum is negligible).
+  const offsets = slices.map((_, i) =>
+    slices.slice(0, i).reduce((acc, s) => acc + s.value, 0),
+  );
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--surface-2)" strokeWidth={thickness} />
       {slices.map((s, i) => {
-        const frac = s.value / total;
-        const a0 = cum;
-        const a1 = cum + frac * Math.PI * 2;
-        cum = a1;
+        const a0 = start0 + (offsets[i] / total) * Math.PI * 2;
+        const a1 = start0 + ((offsets[i] + s.value) / total) * Math.PI * 2;
         const gap = 0.02;
         const start = a0 + gap / 2, end = a1 - gap / 2;
         if (end - start <= 0.001) return null;
