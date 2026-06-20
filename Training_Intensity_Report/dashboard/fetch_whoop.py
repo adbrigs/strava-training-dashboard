@@ -161,10 +161,25 @@ def main():
             continue
         strain_by_date[date] = {"strain": round(c["score"]["strain"], 1)}
 
-    # Write today's weight snapshot into per-date history if available
+    # Weight comes from /user/measurement/body, which only returns the *current*
+    # value — previous days are not re-derivable from the API. So we must carry
+    # forward weight snapshots already saved in the existing history file;
+    # otherwise each refresh would overwrite history with only today's weight.
+    weight_by_date: dict[str, dict] = {}
+    if OUT_PATH.exists():
+        try:
+            for entry in json.loads(OUT_PATH.read_text()):
+                if "weightKg" in entry:
+                    weight_by_date[entry["date"]] = {
+                        "weightKg":  entry["weightKg"],
+                        "weightLbs": entry["weightLbs"],
+                    }
+        except (json.JSONDecodeError, KeyError, OSError) as exc:
+            print(f"  could not read existing weight history: {exc}")
+
+    # Overlay today's weight snapshot if available.
     weight_kg = body_measurement.get("weight_kilogram")
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    weight_by_date: dict[str, dict] = {}
     if weight_kg is not None:
         weight_lbs = round(weight_kg * 2.20462, 1)
         weight_by_date[today_str] = {"weightKg": round(weight_kg, 2), "weightLbs": weight_lbs}
