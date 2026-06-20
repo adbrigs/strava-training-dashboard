@@ -47,12 +47,46 @@ function cronTokenPage(refreshToken: string): string {
 </body></html>`;
 }
 
+/** Error page shown when the cron-token OAuth flow fails, surfacing the actual
+ *  WHOOP reason instead of a blank redirect. Detail is injected via a JSON
+ *  string into script context so it can't break out of HTML. */
+function cronMessagePage(title: string, detail: string): string {
+  const detailJson = JSON.stringify(detail);
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WHOOP cron token — ${title}</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#0b0b0e; color:#e7e7ea; font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; display:flex; justify-content:center; }
+  main { max-width:560px; padding:48px 24px; }
+  h1 { font-size:20px; margin:0 0 8px; color:#f06c6c; }
+  pre { white-space:pre-wrap; word-break:break-word; background:#15151a; color:#e7e7ea; border:1px solid #2a2a32; border-radius:8px; padding:12px; font-family:ui-monospace,monospace; font-size:12px; }
+</style></head>
+<body><main>
+  <h1>${title}</h1>
+  <p>Share this message so the issue can be diagnosed:</p>
+  <pre id="d"></pre>
+</main>
+<script>
+  document.getElementById('d').textContent = ${detailJson};
+</script>
+</body></html>`;
+}
+
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   const error = req.nextUrl.searchParams.get('error');
+  const errorDescription = req.nextUrl.searchParams.get('error_description');
   const state = req.nextUrl.searchParams.get('state');
+  const isCron = state === 'cron';
 
   if (error || !code) {
+    const detail = `WHOOP authorization failed: ${error || 'no authorization code returned'}${errorDescription ? ` — ${errorDescription}` : ''}`;
+    if (isCron) {
+      return new NextResponse(cronMessagePage('Authorization failed', detail), {
+        status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
+    }
     return NextResponse.redirect(new URL('/?whoop=error', req.url));
   }
 
@@ -71,7 +105,13 @@ export async function GET(req: NextRequest) {
   });
 
   if (!res.ok) {
-    console.error('WHOOP token exchange failed:', await res.text());
+    const body = await res.text();
+    console.error('WHOOP token exchange failed:', res.status, body);
+    if (isCron) {
+      return new NextResponse(cronMessagePage('Token exchange failed', `WHOOP returned HTTP ${res.status}: ${body}`), {
+        status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
+    }
     return NextResponse.redirect(new URL('/?whoop=error', req.url));
   }
 
@@ -85,7 +125,7 @@ export async function GET(req: NextRequest) {
   // Show the refresh token for copying into the WHOOP_REFRESH_TOKEN secret, and
   // deliberately do NOT set session cookies — so it never collides with the
   // live dashboard's rotating token.
-  if (state === 'cron') {
+  if (isCron) {
     return new NextResponse(cronTokenPage(refresh_token), {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
