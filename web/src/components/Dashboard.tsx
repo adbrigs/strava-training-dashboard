@@ -91,7 +91,7 @@ export default function Dashboard() {
   const [to, setTo] = useState<Date>(new Date());
   const [rangePreset, setRangePreset] = useState('week');
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
-  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
 
   // Stable "now" captured once at mount — avoids calling the impure Date.now()
