@@ -52,9 +52,12 @@ jobs:
       - name: Run Strava refresh script
         run: python Training_Intensity_Report/dashboard/refresh_app_daily.py
 
-      # 7️⃣ Run WHOOP history fetch (exits cleanly if secret missing or token expired)
+      # 7️⃣ Run WHOOP history fetch.
+      # Skips cleanly (exit 0) if WHOOP_REFRESH_TOKEN is unset, but FAILS the run
+      # (exit 1) if the token is expired/invalid — so a stale token surfaces as a
+      # failed workflow instead of silently freezing the committed history. The
+      # commit step below still runs (if: always()) so Strava data keeps flowing.
       - name: Run WHOOP fetch script
-        continue-on-error: true
         env:
           WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
           WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}

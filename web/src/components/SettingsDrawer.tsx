@@ -34,9 +34,7 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
 
 export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, onSyncComplete, period, onPeriod }: Props) {
   const [whoopConnected, setWhoopConnected] = useState<boolean | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ ok: boolean; count?: number; error?: string } | null>(null);
 
@@ -46,11 +44,6 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
       .then(r => r.json())
       .then(d => setWhoopConnected(d.connected))
       .catch(() => setWhoopConnected(false));
-
-    fetch('/api/whoop/get-refresh-token')
-      .then(r => r.json())
-      .then(d => { if (d.refreshToken) setRefreshToken(d.refreshToken); })
-      .catch(() => {});
   }, [isOpen]);
 
   useEffect(() => {
@@ -65,14 +58,6 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
     navigator.clipboard.writeText(url).then(() => {
       setWebhookUrlCopied(true);
       setTimeout(() => setWebhookUrlCopied(false), 2000);
-    });
-  }
-
-  function copyToken() {
-    if (!refreshToken) return;
-    navigator.clipboard.writeText(refreshToken).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     });
   }
 
@@ -247,27 +232,22 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
                   <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-subtle)', background: 'var(--surface-3)', padding: '2px 6px', borderRadius: 4, border: '1px solid var(--border)' }}>optional</span>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Only needed if you want the nightly GitHub Actions workflow to refresh WHOOP data automatically. Skip this if you&apos;ll run backfills manually.
+                  Only needed if you want the GitHub Actions workflow to refresh WHOOP data automatically. Skip this if you&apos;ll run backfills manually.
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Add <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)', fontSize: 11 }}>WHOOP_REFRESH_TOKEN</span> to GitHub → Settings → Secrets → Actions.
+                  This mints an <strong>independent</strong> token just for the workflow, so rotating it never disconnects this dashboard. Paste it into <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text)', fontSize: 11 }}>WHOOP_REFRESH_TOKEN</span> at GitHub → Settings → Secrets → Actions.
                 </div>
-                {refreshToken ? (
-                  <button
-                    onClick={copyToken}
-                    style={{
-                      ...btnBase, alignSelf: 'flex-start', fontFamily: 'var(--font-mono)', fontSize: 11,
-                      background: copied ? 'var(--z2)' : 'var(--surface-3)',
-                      color: copied ? 'var(--accent-ink)' : 'var(--text)',
-                    }}
-                  >
-                    {copied ? '✓ Copied' : 'Copy refresh token'}
-                  </button>
-                ) : (
-                  <span style={{ fontSize: 11, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)' }}>
-                    {whoopConnected === false ? 'Connect WHOOP first' : 'loading…'}
-                  </span>
-                )}
+                <a
+                  href="/api/whoop/auth?mode=cron"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    ...btnBase, alignSelf: 'flex-start', textDecoration: 'none',
+                    background: 'var(--surface-3)', color: 'var(--text)',
+                  }}
+                >
+                  Generate cron token
+                </a>
               </div>
 
             </div>
