@@ -14,8 +14,10 @@ export async function GET(req: NextRequest) {
   // workflow. The resulting token is shown for copying into the WHOOP_REFRESH_TOKEN
   // secret — it is never stored in the browser session, so its rotating lineage
   // can never collide with the live dashboard's token.
+  // WHOOP rejects state values shorter than 8 characters (invalid_state), so
+  // both values below are deliberately long enough.
   const mode = req.nextUrl.searchParams.get('mode');
-  const state = mode === 'cron' ? 'cron' : 'dashboard';
+  const state = mode === 'cron' ? 'cron-token' : 'dashboard';
 
   const url = new URL('https://api.prod.whoop.com/oauth/oauth2/auth');
   url.searchParams.set('client_id', clientId);

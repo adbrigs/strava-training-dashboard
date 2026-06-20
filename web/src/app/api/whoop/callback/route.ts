@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
   const error = req.nextUrl.searchParams.get('error');
   const errorDescription = req.nextUrl.searchParams.get('error_description');
   const state = req.nextUrl.searchParams.get('state');
-  const isCron = state === 'cron';
+  const isCron = state === 'cron-token';
 
   if (error || !code) {
     const detail = `WHOOP authorization failed: ${error || 'no authorization code returned'}${errorDescription ? ` — ${errorDescription}` : ''}`;
