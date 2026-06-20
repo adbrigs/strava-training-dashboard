@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),zone_1_time_minutes,zone_2_time_minutes,zone_3_time_minutes,zone_4_time_minutes,zone_5_time_minutes,trimp (score),id
+"Jun 20, 2026 12:48 PM",Lunch Run,Run,3.1332632675,30.0,9.574682188750998,9:34 /mi,41.338584,148.2,169.0,0.6903860711582134,2,3.2,11.166666666666666,14.25,1.6166666666666667,0.0,77.96299755714705,19000014142
 "Jun 19, 2026 11:32 AM",Lunch Stand Up Paddling,StandUpPaddling,0.0,55.916666666666664,,,0.0,115.4,157.0,0.44208932626797887,1,47.1,7.866666666666666,0.9666666666666667,0.0,0.0,57.76775060309739,18986227464
 "Jun 19, 2026 10:30 AM",Morning Stand Up Paddling,StandUpPaddling,0.0,41.983333333333334,,,0.0,112.9,146.0,0.42316426949280855,1,39.81666666666667,2.183333333333333,0.0,0.0,0.0,40.034968318910956,18986228372
 "Jun 18, 2026 04:32 PM",Afternoon Weight Training - Push,WeightTraining,0.0,60.11666666666667,,,0.0,113.3,149.0,0.4261922785768357,1,56.65,3.4833333333333334,0.0,0.0,0.0,58.07362587521683,18976955873
