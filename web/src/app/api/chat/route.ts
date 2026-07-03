@@ -46,13 +46,15 @@ ${processedCsv}
 
 === ADDITIONAL ACTIVITY METADATA ===
 Join key: "id" column matches "id" in the activity history above.
-Columns: id, workout_type, elapsed_time_sec, average_watts, max_watts, weighted_avg_watts, kilojoules, gear_id, pr_count, suffer_score, device_name, city, state, achievement_count, kudos_count
+Columns: id, workout_type, elapsed_time_sec, average_watts, max_watts, weighted_avg_watts, kilojoules, gear_id, pr_count, suffer_score, device_name, city, state, achievement_count, kudos_count, strain, calories
+(strain = WHOOP cardio-load score 0-21; strain and calories exist only for WHOOP-era activities, from July 2026 on)
 ${supplementCsv}
 
 === HEART RATE STREAM SUMMARIES (per activity) ===
 Join key: "activity_id" column matches "id" in the activity history above.
 Columns: activity_id, hr_avg, hr_min, hr_max, hr_median, first_half_avg, second_half_avg, cardiac_drift, pct_over_150, pct_over_160, pct_over_170
 (cardiac_drift = second_half_avg − first_half_avg bpm; positive = HR rose over the activity)
+(WHOOP-era activities, from July 2026 on, have only hr_avg, hr_max and pct_over_* — the pct_over_* values are estimates derived from HR-zone durations, and stream-only fields are blank)
 ${hrSummariesCsv}
 
 Today is ${today}.
@@ -70,6 +72,7 @@ Never use raw column names in your response text. Always use the human label:
 trimp → TRIMP | avg_hr → avg HR | max_hr → max HR | cardiac_drift → cardiac drift
 hr_zone → HR zone | moving_time_min → duration | distance_miles → distance
 zone_1_time_min … zone_5_time_min → Zone 1 … Zone 5 time | suffer_score → Suffer Score
+strain → Strain | calories → Calories
 first_half_avg_hr → first-half avg HR | second_half_avg_hr → second-half avg HR
 pct_time_over_150bpm → % time >150 bpm | pr_count → PRs
 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse('Bad Request', { status: 400 });
   }
 
-  const relevant = ['recovery.score.updated', 'sleep.score.updated', 'cycle.score.updated'];
+  const relevant = ['recovery.score.updated', 'sleep.score.updated', 'cycle.score.updated', 'workout.score.updated'];
   if (!relevant.includes(event.event ?? '')) {
     return new NextResponse('OK', { status: 200 });
   }
