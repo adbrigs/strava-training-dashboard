@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set('client_id', clientId);
   url.searchParams.set('redirect_uri', redirectUri);
   url.searchParams.set('response_type', 'code');
-  url.searchParams.set('scope', 'offline read:recovery read:sleep read:cycles read:body_measurement');
+  url.searchParams.set('scope', 'offline read:recovery read:sleep read:cycles read:body_measurement read:workout');
   url.searchParams.set('state', state);
 
   return NextResponse.redirect(url.toString());
