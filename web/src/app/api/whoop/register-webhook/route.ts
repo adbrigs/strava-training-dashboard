@@ -94,7 +94,7 @@ export async function PUT(req: NextRequest) {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url:    webhookUrl,
-        events: ['recovery.score.updated', 'sleep.score.updated', 'cycle.score.updated'],
+        events: ['workout.updated', 'sleep.updated', 'recovery.updated'],
       }),
     });
 

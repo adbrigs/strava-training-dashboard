@@ -6,18 +6,19 @@ export const dynamic = 'force-dynamic';
 const GITHUB_OWNER = 'adbrigs';
 const GITHUB_REPO  = 'strava-training-dashboard';
 
-// WHOOP sends events for: recovery.score.updated, sleep.score.updated,
-// workout.score.updated, cycle.score.updated
+// WHOOP v2 puts the event category in `type` (NOT `event`) using
+// `<resource>.updated` names: workout.updated, sleep.updated, recovery.updated.
+// There are no cycle/strain/body-measurement webhooks.
 export async function POST(request: NextRequest) {
-  let event: { user_id?: number; event?: string; type?: string };
+  let event: { user_id?: number; id?: number | string; type?: string; trace_id?: string };
   try {
     event = await request.json();
   } catch {
     return new NextResponse('Bad Request', { status: 400 });
   }
 
-  const relevant = ['recovery.score.updated', 'sleep.score.updated', 'cycle.score.updated', 'workout.score.updated'];
-  if (!relevant.includes(event.event ?? '')) {
+  const relevant = ['workout.updated', 'sleep.updated', 'recovery.updated'];
+  if (!relevant.includes(event.type ?? '')) {
     return new NextResponse('OK', { status: 200 });
   }
 
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           event_type: 'whoop-data',
-          client_payload: { event: event.event },
+          client_payload: { event: event.type },
         }),
       },
     );
