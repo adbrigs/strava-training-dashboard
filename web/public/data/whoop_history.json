@@ -2555,7 +2555,7 @@
     "restingHr": 53,
     "sleepMs": 29231680,
     "sleepPerformance": 85,
-    "strain": 15.0,
+    "strain": 14.8,
     "weightKg": 69.4,
     "weightLbs": 153.0
   },
@@ -2566,8 +2566,8 @@
     "restingHr": 63,
     "sleepMs": 21738950,
     "sleepPerformance": 70,
-    "strain": 0.5,
-    "weightKg": 69.4,
-    "weightLbs": 153.0
+    "strain": 4.3,
+    "weightKg": 68.95,
+    "weightLbs": 152.0
   }
 ]
