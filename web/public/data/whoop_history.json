@@ -2599,7 +2599,12 @@
     "restingHr": 54,
     "sleepMs": 23300550,
     "sleepPerformance": 78,
-    "strain": 10.4,
+    "strain": 10.8,
+    "weightKg": 69.22,
+    "weightLbs": 152.6
+  },
+  {
+    "date": "2026-07-24",
     "weightKg": 69.22,
     "weightLbs": 152.6
   }
