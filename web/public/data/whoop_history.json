@@ -2671,11 +2671,11 @@
   },
   {
     "date": "2026-07-30",
-    "recovery": 32,
-    "hrv": 61,
+    "recovery": 63,
+    "hrv": 63,
     "restingHr": 54,
-    "sleepMs": 15176370,
-    "sleepPerformance": 41,
+    "sleepMs": 24893690,
+    "sleepPerformance": 79,
     "strain": 0.1,
     "weightKg": 69.4,
     "weightLbs": 153.0
