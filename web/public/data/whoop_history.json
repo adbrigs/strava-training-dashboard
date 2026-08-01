@@ -2693,12 +2693,12 @@
   },
   {
     "date": "2026-08-01",
-    "recovery": 19,
-    "hrv": 42,
-    "restingHr": 64,
-    "sleepMs": 16992460,
-    "sleepPerformance": 56,
-    "strain": 0.3,
+    "recovery": 28,
+    "hrv": 45,
+    "restingHr": 63,
+    "sleepMs": 21710310,
+    "sleepPerformance": 70,
+    "strain": 0.4,
     "weightKg": 69.4,
     "weightLbs": 153.0
   }
