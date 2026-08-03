@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),zone_1_time_minutes,zone_2_time_minutes,zone_3_time_minutes,zone_4_time_minutes,zone_5_time_minutes,trimp (score),id
+"Aug 03, 2026 07:00 PM",Evening Walk,Walk,0.0,17.983,,,0.0,101,119,0.333081,1,17.983,0.0,0.0,0.0,0.0,11.354,fa0f82a4-4202-4111-99e7-b49ff8941494
 "Aug 03, 2026 05:54 PM",Evening Run,Run,1.987315,20.3983,10.2642,10:16 /mi,223.41,142,161,0.643452,2,5.7667,9.283,5.35,0.0,0.0,45.149,14d94042-db62-416b-8f54-6b1d47310894
 "Aug 02, 2026 05:18 PM",Evening Walk,Walk,0.0,40.0358,,,0.0,103,125,0.348221,1,40.0493,0.0,0.0,0.0,0.0,27.2061,274c2b27-7f6d-431f-aa66-e96c2d63ccb6
 "Aug 02, 2026 01:53 PM",Lunch Walk,Walk,0.0,67.0,,,0.0,97,120,0.302801,1,66.9985,0.0,0.0,0.0,0.0,36.2845,f87fb000-d292-4b7b-8652-9f2cb6056823
