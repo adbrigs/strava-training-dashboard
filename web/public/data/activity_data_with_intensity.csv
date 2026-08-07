@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),zone_1_time_minutes,zone_2_time_minutes,zone_3_time_minutes,zone_4_time_minutes,zone_5_time_minutes,trimp (score),id
+"Aug 07, 2026 06:33 PM",Evening Cleaning,Cleaning,0.0,25.9828,,,0.0,105,120,0.363361,1,25.9828,0.0,0.0,0.0,0.0,18.9676,516ad1db-a896-41f1-afd8-1ea848fe5b47
 "Aug 06, 2026 08:54 PM",Evening Walk,Walk,0.0,48.9823,,,0.0,104,125,0.355791,1,48.9823,0.0,0.0,0.0,0.0,34.5072,c25c6852-3b56-49a9-9caf-4c614d3cc760
 "Aug 06, 2026 05:57 PM",Evening Walk,Walk,0.0,26.9828,,,0.0,89,110,0.242241,1,26.9828,0.0,0.0,0.0,0.0,10.407,37f824f9-80ac-4580-8f5e-b6db7c848f41
 "Aug 06, 2026 02:39 PM",Afternoon Walk,Walk,0.0,40.9823,,,0.0,101,121,0.333081,1,40.9823,0.0,0.0,0.0,0.0,25.8753,9152ef38-d92e-45aa-b286-7d08c2fd89cd
