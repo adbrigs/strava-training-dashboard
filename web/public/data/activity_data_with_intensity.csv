@@ -1,4 +1,5 @@
 start_date_local_formatted,name,sport_type,distance (miles),moving_time (minutes),pace (min_per_mile),pace_formatted,elevation_gain (feet),average_heartrate,max_heartrate,hr_ratio (0-1),hr_zone (1-5),zone_1_time_minutes,zone_2_time_minutes,zone_3_time_minutes,zone_4_time_minutes,zone_5_time_minutes,trimp (score),id
+"Aug 10, 2026 12:35 PM",Lunch Weight Training,WeightTraining,0.0,61.1133,,,0.0,107,144,0.378501,1,60.5487,0.5667,0.0,0.0,0.0,47.8426,28bfb090-ca68-4068-8d60-45f598720b24
 "Aug 09, 2026 08:29 AM",Morning Golf,Golf,5.539137,213.1067,38.4729,38:28 /mi,982.89,107,135,0.378501,1,208.3788,0.0,0.0,0.0,0.0,166.8306,18be943b-9bba-43db-903d-7881261b4bd1
 "Aug 09, 2026 07:30 AM",Morning Activity,Activity,0.0,59.406,,,0.0,108,139,0.386071,1,59.3488,0.0667,0.0,0.0,0.0,48.1306,29d7a3ba-b96e-4271-8bb9-d187b15c6a85
 "Aug 08, 2026 02:28 PM",Afternoon Walk,Walk,0.0,12.9832,,,0.0,105,137,0.363361,1,12.9832,0.0,0.0,0.0,0.0,9.4778,b341e170-83fb-4a7c-81a5-f2189ae167ac
