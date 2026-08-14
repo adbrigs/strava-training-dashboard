@@ -2836,12 +2836,12 @@
   },
   {
     "date": "2026-08-14",
-    "recovery": 80,
+    "recovery": 84,
     "hrv": 78,
     "restingHr": 51,
-    "sleepMs": 22844400,
-    "sleepPerformance": 74,
-    "strain": 0.0,
+    "sleepMs": 24826460,
+    "sleepPerformance": 80,
+    "strain": 4.0,
     "weightKg": 68.4,
     "weightLbs": 150.8
   }
