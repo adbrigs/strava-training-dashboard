@@ -2891,11 +2891,11 @@
   },
   {
     "date": "2026-08-19",
-    "recovery": 16,
-    "hrv": 37,
-    "restingHr": 64,
-    "sleepMs": 17309410,
-    "sleepPerformance": 54,
+    "recovery": 23,
+    "hrv": 40,
+    "restingHr": 63,
+    "sleepMs": 19680410,
+    "sleepPerformance": 67,
     "strain": 0.3,
     "weightKg": 68.31,
     "weightLbs": 150.6
