@@ -2968,6 +2968,12 @@
   },
   {
     "date": "2026-08-26",
+    "recovery": 55,
+    "hrv": 58,
+    "restingHr": 54,
+    "sleepMs": 24147650,
+    "sleepPerformance": 81,
+    "strain": 1.8,
     "weightKg": 67.31,
     "weightLbs": 148.4
   }
