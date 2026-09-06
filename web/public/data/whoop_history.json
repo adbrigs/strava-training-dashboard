@@ -3078,17 +3078,17 @@
   },
   {
     "date": "2026-09-05",
-    "sleepMs": 18419400,
-    "sleepPerformance": 42,
-    "strain": 0.3,
+    "sleepMs": 25984410,
+    "sleepPerformance": 63,
+    "strain": 0.4,
     "weightKg": 67.31,
     "weightLbs": 148.4
   },
   {
     "date": "2026-09-06",
-    "recovery": 19,
-    "hrv": 42,
-    "restingHr": 60,
+    "recovery": 24,
+    "hrv": 44,
+    "restingHr": 59,
     "weightKg": 67.31,
     "weightLbs": 148.4
   }
