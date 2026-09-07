@@ -3080,7 +3080,7 @@
     "date": "2026-09-05",
     "sleepMs": 25984410,
     "sleepPerformance": 63,
-    "strain": 7.9,
+    "strain": 10.4,
     "weightKg": 67.31,
     "weightLbs": 148.4
   },
@@ -3089,12 +3089,17 @@
     "recovery": 24,
     "hrv": 44,
     "restingHr": 59,
-    "strain": 7.2,
+    "sleepMs": 4700090,
+    "sleepPerformance": 1,
+    "strain": 4.4,
     "weightKg": 67.31,
     "weightLbs": 148.4
   },
   {
     "date": "2026-09-07",
+    "recovery": 1,
+    "hrv": 51,
+    "restingHr": 64,
     "weightKg": 67.31,
     "weightLbs": 148.4
   }
