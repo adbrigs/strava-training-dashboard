@@ -3089,17 +3089,17 @@
     "recovery": 24,
     "hrv": 44,
     "restingHr": 59,
-    "sleepMs": 4700090,
+    "sleepMs": 5958260,
     "sleepPerformance": 1,
-    "strain": 4.4,
+    "strain": 4.5,
     "weightKg": 67.31,
     "weightLbs": 148.4
   },
   {
     "date": "2026-09-07",
     "recovery": 1,
-    "hrv": 51,
-    "restingHr": 64,
+    "hrv": 42,
+    "restingHr": 65,
     "weightKg": 67.31,
     "weightLbs": 148.4
   }
