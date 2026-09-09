@@ -3108,16 +3108,16 @@
     "recovery": 1,
     "hrv": 48,
     "restingHr": 59,
-    "sleepMs": 15736290,
-    "sleepPerformance": 42,
+    "sleepMs": 21083240,
+    "sleepPerformance": 65,
     "strain": 0.1,
     "weightKg": 67.31,
     "weightLbs": 148.4
   },
   {
     "date": "2026-09-09",
-    "recovery": 17,
-    "hrv": 52,
+    "recovery": 46,
+    "hrv": 54,
     "restingHr": 56,
     "weightKg": 67.31,
     "weightLbs": 148.4
