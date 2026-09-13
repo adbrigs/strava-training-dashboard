@@ -586,6 +586,7 @@ id,workout_type,elapsed_time,average_watts,max_watts,weighted_average_watts,kilo
 18570866345,30.0,3523,,,,,,0,,Apple Watch Series 10,,,0,0,,
 21f825bf-1614-4b24-98b1-e281f31d25a6,,958,,,,158.0,,,,WHOOP,,,,,4.4,38
 61ec17f1-627d-40f8-ab3a-62d6cc152819,,1258,,,,146.3,,,,WHOOP,,,,,5.5,35
+1ed60144-b29e-44ba-9919-b02ba55e0d3a,,1078,,,,378.2,,,,WHOOP,,,,,5.0,90
 69885fc1-a958-4dfc-9851-ea924f89a9ad,,2338,,,,858.6,,,,WHOOP,,,,,10.4,205
 65436b95-2d8a-4bdd-9c0a-a60486bbd136,,1678,,,,371.8,,,,WHOOP,,,,,5.0,89
 d1fc337c-f1f6-44df-a433-92fb30ba7050,,4498,,,,1232.5,,,,WHOOP,,,,,7.3,295
