@@ -4,7 +4,7 @@ Also fetches WHOOP workouts (from WORKOUT_CUTOFF onward) and merges them into
 activity_data_with_intensity.csv — the frozen Strava history stays untouched.
 Runs in GitHub Actions using WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN secrets.
 """
-import base64, csv, json, math, os, sys
+import base64, csv, json, math, os, sys, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -348,10 +348,17 @@ def main():
     print("Fetching WHOOP access token…")
     token, new_refresh_token = get_tokens()
     print("Updating WHOOP_REFRESH_TOKEN secret…")
-    try:
-        update_github_secret("WHOOP_REFRESH_TOKEN", new_refresh_token)
-    except Exception as e:
-        print(f"  Warning: could not update secret: {e}")
+    # The old refresh token is already burned, so losing the new one kills the
+    # token chain. Retry, and fail the run at the end if it still didn't save.
+    secret_saved = False
+    for attempt in range(1, 4):
+        try:
+            update_github_secret("WHOOP_REFRESH_TOKEN", new_refresh_token)
+            secret_saved = True
+            break
+        except Exception as e:
+            print(f"  Attempt {attempt}/3: could not update secret: {e}")
+            time.sleep(2 * attempt)
 
     print("Fetching recovery records…")
     recoveries = paginate("/recovery", token)
@@ -470,6 +477,11 @@ def main():
         "fetchedAt": datetime.now(timezone.utc).isoformat(),
     }, indent=2))
     print(f"Wrote WHOOP body measurement → {BODY_OUT_PATH}")
+
+    if not secret_saved and GH_TOKEN:
+        print("::error::WHOOP_REFRESH_TOKEN secret was NOT updated — the next run will fail. "
+              "Regenerate the token and update the secret manually.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

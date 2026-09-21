@@ -1,13 +1,20 @@
-name: 4-Hour Data Refresh
+name: 12-Hour Data Refresh
 
 on:
   schedule:
-    # Safety net: run every 4 hours in case a webhook event is missed
-    - cron: "0 */4 * * *"
+    # Safety net: run every 12 hours in case a webhook event is missed
+    - cron: "0 */12 * * *"
   workflow_dispatch:  # Allows manual triggering
   repository_dispatch:
     # Fired instantly by the WHOOP webhook (web/src/app/api/whoop/webhook)
     types: [whoop-data]
+
+# WHOOP refresh tokens are single-use and rotate on every fetch. Runs must be
+# serialized, otherwise two simultaneous runs (WHOOP sends duplicate webhooks)
+# both use the same token and the loser fails with HTTP 400.
+concurrency:
+  group: whoop-data-refresh
+  cancel-in-progress: false
 
 jobs:
   run-refresh:
