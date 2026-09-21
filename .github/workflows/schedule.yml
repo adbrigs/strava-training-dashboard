@@ -79,5 +79,13 @@ jobs:
           # Commit only if there are changes
           git diff --cached --quiet || git commit -m "Automated data refresh"
 
-          # ✅ Force push using token (bypasses 403 issues)
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          # Push using the token. If main moved while this run was working, rebase
+          # onto it (our fresh data wins any conflict) and retry.
+          REMOTE=https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          for attempt in 1 2 3 4; do
+            git push "$REMOTE" HEAD:main && exit 0
+            echo "Push rejected (attempt $attempt), rebasing onto latest main…"
+            git pull --rebase -X theirs "$REMOTE" main
+          done
+          echo "::error::Could not push after 4 attempts"
+          exit 1
