@@ -587,6 +587,7 @@ id,workout_type,elapsed_time,average_watts,max_watts,weighted_average_watts,kilo
 21f825bf-1614-4b24-98b1-e281f31d25a6,,958,,,,158.0,,,,WHOOP,,,,,4.4,38
 61ec17f1-627d-40f8-ab3a-62d6cc152819,,1258,,,,146.3,,,,WHOOP,,,,,5.5,35
 f996801e-93af-473c-bfcc-8b732be875f1,,1198,,,,257.5,,,,WHOOP,,,,,5.7,62
+213178fd-ce20-466a-95db-a7dd3cda427b,,1100,,,,816.0,,,,WHOOP,,,,,7.7,195
 55e43806-dfba-4d39-b0e1-76945f2f7886,,778,,,,111.9,,,,WHOOP,,,,,4.3,27
 26cf8af1-cc3c-4aa8-9303-ef1a1c8d2c6d,,3677,,,,610.2,,,,WHOOP,,,,,11.7,146
 df94f180-03fc-4864-8697-c2b378df8b1c,,1738,,,,298.4,,,,WHOOP,,,,,4.7,71
