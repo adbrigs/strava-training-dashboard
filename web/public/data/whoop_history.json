@@ -3534,7 +3534,7 @@
     "restingHr": 53,
     "sleepMs": 27757560,
     "sleepPerformance": 79,
-    "strain": 15.9,
+    "strain": 13.9,
     "weightKg": 68.31,
     "weightLbs": 150.6
   },
@@ -3545,7 +3545,12 @@
     "restingHr": 56,
     "sleepMs": 16716440,
     "sleepPerformance": 54,
-    "strain": 16.1,
+    "strain": 16.8,
+    "weightKg": 68.31,
+    "weightLbs": 150.6
+  },
+  {
+    "date": "2026-10-19",
     "weightKg": 68.31,
     "weightLbs": 150.6
   }
