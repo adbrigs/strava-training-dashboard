@@ -3639,12 +3639,12 @@
   },
   {
     "date": "2026-10-27",
-    "recovery": 75,
-    "hrv": 67,
-    "restingHr": 53,
-    "sleepMs": 20921530,
-    "sleepPerformance": 77,
-    "strain": 0.0,
+    "recovery": 74,
+    "hrv": 64,
+    "restingHr": 54,
+    "sleepMs": 24968040,
+    "sleepPerformance": 81,
+    "strain": 4.1,
     "weightKg": 66.5,
     "weightLbs": 146.6
   }
