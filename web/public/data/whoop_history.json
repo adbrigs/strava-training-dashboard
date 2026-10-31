@@ -3677,7 +3677,12 @@
     "restingHr": 52,
     "sleepMs": 24710660,
     "sleepPerformance": 87,
-    "strain": 12.5,
+    "strain": 13.3,
+    "weightKg": 66.5,
+    "weightLbs": 146.6
+  },
+  {
+    "date": "2026-10-31",
     "weightKg": 66.5,
     "weightLbs": 146.6
   }
