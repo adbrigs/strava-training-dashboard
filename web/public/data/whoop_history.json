@@ -3694,11 +3694,11 @@
   },
   {
     "date": "2026-11-01",
-    "recovery": 62,
+    "recovery": 64,
     "hrv": 58,
     "restingHr": 59,
-    "sleepMs": 22130520,
-    "sleepPerformance": 80,
+    "sleepMs": 23327570,
+    "sleepPerformance": 77,
     "strain": 0.4,
     "weightKg": 66.5,
     "weightLbs": 146.6
