@@ -20,6 +20,7 @@ import ChatBot from './ChatBot';
 import WhoopSection from './WhoopSection';
 import WhoopTrendSection from './WhoopTrendSection';
 import SettingsDrawer from './SettingsDrawer';
+import TodaysPlanSection from './TodaysPlanSection';
 
 function Loading() {
   return (
@@ -293,6 +294,11 @@ export default function Dashboard() {
           to={to}
           today={today}
         />
+      </div>
+
+      {/* Today's program workout (WHOOP-adjusted) */}
+      <div className="stack">
+        <TodaysPlanSection activities={namedActivities} today={today} refreshKey={whoopDataVersion} />
       </div>
 
       {/* Daily training + WHOOP readiness */}

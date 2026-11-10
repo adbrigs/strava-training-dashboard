@@ -1526,3 +1526,50 @@ table.tbl {
     border-radius: 14px;
   }
 }
+
+/* ─── Today's program workout ─────────────────────────────────────────── */
+.plan-card { border-left: 3px solid var(--plan-c, var(--accent)); }
+.plan-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.plan-chip {
+  font-family: var(--font-mono); font-size: 11px; padding: 3px 8px;
+  border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-muted);
+  border: 1px solid var(--border); white-space: nowrap;
+}
+.plan-tier { color: var(--plan-c); border-color: var(--plan-c); }
+.plan-toggle { cursor: pointer; }
+.plan-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+.plan-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr); gap: 24px; }
+.plan-title { font-size: 22px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+.plan-adjust { margin: 12px 0 0; padding: 10px 12px 10px 28px; border-radius: 8px; background: var(--surface-2); font-size: 12.5px; color: var(--text-muted); display: grid; gap: 4px; }
+.plan-adjust li::marker { color: var(--plan-c); }
+.plan-warmup { margin-top: 12px; font-size: 12.5px; color: var(--text-muted); display: flex; gap: 10px; }
+.plan-warmup span { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); min-width: 64px; padding-top: 1px; }
+.plan-table { margin-top: 12px; border-top: 1px solid var(--border); }
+.plan-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px 150px; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+.plan-row.main .plan-ex-name { color: var(--plan-c); font-weight: 600; }
+.plan-ex-name { font-size: 13.5px; color: var(--text); }
+.plan-ex-note { font-size: 11.5px; color: var(--text-subtle); margin-top: 2px; }
+.plan-ex-sets { font-family: var(--font-mono); font-size: 13px; color: var(--text); }
+.plan-ex-effort { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); }
+.plan-side { display: flex; flex-direction: column; gap: 16px; }
+.plan-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.plan-day { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 2px; border-radius: 8px; background: var(--surface-2); min-width: 0; }
+.plan-day.today { box-shadow: 0 0 0 1px var(--plan-c) inset; }
+.plan-day-name { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-subtle); }
+.plan-day-title { font-size: 10.5px; color: var(--text-muted); text-align: center; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.plan-day-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border-strong); }
+.plan-day.done .plan-day-dot { background: var(--z2); border-color: var(--z2); }
+.plan-day.missed .plan-day-dot { border-color: var(--z5); }
+.plan-day.rest .plan-day-dot { border-style: dashed; }
+.plan-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.plan-stats > div { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.plan-stats span { font-size: 10.5px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+.plan-stats strong { font-family: var(--font-mono); font-size: 15px; color: var(--text); }
+.plan-stats em { font-style: normal; font-size: 10.5px; color: var(--text-subtle); font-family: var(--font-mono); }
+@media (max-width: 1000px) { .plan-body { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .plan-row { grid-template-columns: minmax(0, 1fr) 72px; }
+  .plan-ex-effort { grid-column: 1 / -1; margin-top: -4px; }
+  .plan-stats { grid-template-columns: repeat(2, 1fr); }
+  .plan-title { font-size: 19px; }
+}

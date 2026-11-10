@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Activity } from '@/lib/types';
 import { recommendWorkout } from '@/lib/recommendation';
+import { planForDay, planChatContext } from '@/lib/trainingPlan';
+import { dateKey as localDateKey } from '@/lib/dataUtils';
 import { ACTIVITY_LABELS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
@@ -165,10 +167,23 @@ function buildDashboardContext(
     avgStrainVal != null ? `Avg strain: ${avgStrainVal}` : null,
   ].filter(Boolean).join(' · ');
 
+  const todayKeyStr = localDateKey(today);
+  const histToday = whoopHistory.find(r => r.date === todayKeyStr);
+  const liveToday = liveWhoop?.connected && liveWhoop.recovery && localDateKey(new Date(liveWhoop.recovery.date)) === todayKeyStr;
+  const plan = planForDay(today, liveToday ? {
+    recovery: liveWhoop!.recovery!.score, hrv: liveWhoop!.recovery!.hrv, restingHr: liveWhoop!.recovery!.restingHr,
+    sleepHours: liveWhoop!.sleep ? liveWhoop!.sleep.durationMs / 3.6e6 : null,
+  } : histToday?.recovery != null ? {
+    recovery: histToday.recovery, hrv: histToday.hrv ?? null, restingHr: histToday.restingHr ?? null,
+    sleepHours: histToday.sleepMs ? histToday.sleepMs / 3.6e6 : null,
+  } : null, activities);
+
   return `=== CURRENT DASHBOARD FILTER (for reference only) ===
 ${filterNote}
 
 ${rec.chatContext}
+
+${planChatContext(plan)}
 
 === MOST RECENT 20 ACTIVITIES (all-time) ===
 ${recentStr}
