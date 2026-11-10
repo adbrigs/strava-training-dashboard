@@ -62,6 +62,19 @@ export const WEEK_TEMPLATE: SessionKey[] = ['rest', 'legsA', 'push', 'easyRun', 
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+// One-off schedule changes, keyed by local date (YYYY-MM-DD).
+// Week of Nov 9: Andrew did Pull on Monday, so the week starts legs-first from Tuesday.
+export const SCHEDULE_OVERRIDES: Record<string, SessionKey> = {
+  '2026-11-09': 'pull',
+  '2026-11-10': 'legsA',
+  '2026-11-11': 'push',
+  '2026-11-12': 'easyRun',
+};
+
+export function sessionKeyFor(date: Date): SessionKey {
+  return SCHEDULE_OVERRIDES[dateKey(date)] ?? WEEK_TEMPLATE[date.getDay()];
+}
+
 // ─── Block math ──────────────────────────────────────────────────────────────
 
 function startOfDay(d: Date): Date {
@@ -217,7 +230,7 @@ function buildSession(key: SessionKey, week: number): Session {
 
 export function plannedSessionFor(date: Date): Session {
   const { blockWeek } = blockPosition(date);
-  return buildSession(WEEK_TEMPLATE[date.getDay()], blockWeek);
+  return buildSession(sessionKeyFor(date), blockWeek);
 }
 
 // ─── Readiness ───────────────────────────────────────────────────────────────
@@ -267,7 +280,7 @@ function missedLegDays(activities: Activity[], today: Date): SessionKey[] {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
     if (d >= startOfDay(today)) break;
-    const key = WEEK_TEMPLATE[d.getDay()];
+    const key = sessionKeyFor(d);
     if ((key === 'legsA' || key === 'legsB') && !liftedOn(activities, d)) missed.push(key);
   }
   return missed;
