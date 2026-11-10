@@ -3793,12 +3793,12 @@
   },
   {
     "date": "2026-11-10",
-    "recovery": 34,
-    "hrv": 66,
-    "restingHr": 56,
-    "sleepMs": 15568390,
-    "sleepPerformance": 40,
-    "strain": 0.1,
+    "recovery": 79,
+    "hrv": 77,
+    "restingHr": 54,
+    "sleepMs": 27640710,
+    "sleepPerformance": 80,
+    "strain": 0.2,
     "weightKg": 67.13,
     "weightLbs": 148.0
   }
