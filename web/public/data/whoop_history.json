@@ -3804,11 +3804,11 @@
   },
   {
     "date": "2026-11-11",
-    "recovery": 52,
-    "hrv": 74,
+    "recovery": 83,
+    "hrv": 80,
     "restingHr": 53,
-    "sleepMs": 17074530,
-    "sleepPerformance": 55,
+    "sleepMs": 24162610,
+    "sleepPerformance": 81,
     "strain": 0.1,
     "weightKg": 67.13,
     "weightLbs": 148.0
