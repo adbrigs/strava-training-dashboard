@@ -3815,12 +3815,12 @@
   },
   {
     "date": "2026-11-12",
-    "recovery": 59,
+    "recovery": 60,
     "hrv": 62,
     "restingHr": 56,
-    "sleepMs": 24767420,
-    "sleepPerformance": 83,
-    "strain": 0.2,
+    "sleepMs": 25070430,
+    "sleepPerformance": 84,
+    "strain": 1.2,
     "weightKg": 67.13,
     "weightLbs": 148.0
   }
