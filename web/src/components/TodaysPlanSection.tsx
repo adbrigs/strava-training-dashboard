@@ -25,7 +25,8 @@ const SLEEP_TARGET = 7.5;
 export default function TodaysPlanSection({ activities, today, refreshKey = 0 }: Props) {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [history, setHistory] = useState<WhoopRecord[]>([]);
-  const [tomorrowPick, setTomorrowPick] = useState<boolean | null>(null);
+  // null = default view (today, or tomorrow once today's session is logged)
+  const [pickedKey, setPickedKey] = useState<string | null>(null);
 
   useEffect(() => {
     const todayKey = dateKey(new Date());
@@ -58,10 +59,32 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
   const tomorrowPlan = useMemo(() => planForDay(tomorrow, null, activities), [tomorrow, activities]);
   const week = useMemo(() => weekOverview(today, activities), [today, activities]);
 
+  const todayKey = dateKey(today);
+  const tomorrowKey = dateKey(tomorrow);
   // Once today's session is logged, default to showing tomorrow.
-  const showTomorrow = tomorrowPick ?? todayPlan.done;
-  const plan = showTomorrow ? tomorrowPlan : todayPlan;
+  const selectedKey = pickedKey ?? (todayPlan.done ? tomorrowKey : todayKey);
+  const isToday = selectedKey === todayKey;
+  const isTomorrow = selectedKey === tomorrowKey;
+
+  const selectedDate = useMemo(() => {
+    if (selectedKey === todayKey) return today;
+    if (selectedKey === tomorrowKey) return tomorrow;
+    return week.find(d => dateKey(d.date) === selectedKey)?.date ?? today;
+  }, [selectedKey, todayKey, tomorrowKey, today, tomorrow, week]);
+  const isPast = !isToday && selectedDate.getTime() < today.getTime();
+  const selectedStatus = week.find(d => dateKey(d.date) === selectedKey)?.status;
+
+  const plan = useMemo(() => {
+    if (isToday) return todayPlan;
+    if (isTomorrow) return tomorrowPlan;
+    return planForDay(selectedDate, null, activities);
+  }, [isToday, isTomorrow, todayPlan, tomorrowPlan, selectedDate, activities]);
   const s = plan.session;
+  const weekday = selectedDate.toLocaleDateString(undefined, { weekday: 'long' });
+  const headTitle = isToday
+    ? (todayPlan.done ? 'Today · done ✓' : "Today's workout")
+    : isTomorrow ? `Tomorrow · ${weekday}`
+    : `${weekday}${isPast ? (plan.done || selectedStatus === 'done' ? ' · done ✓' : s.kind === 'rest' ? '' : ' · missed') : ''}`;
 
   const stats = useMemo(() => {
     const last7 = history.slice(-7);
@@ -84,15 +107,13 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
     <div className="card plan-card fade-in" style={{ ['--plan-c' as string]: tierColor }}>
       <div className="card-head">
         <div className="card-title">
-          {showTomorrow
-            ? `${tomorrow.toLocaleDateString(undefined, { weekday: 'long' })}'s plan`
-            : todayPlan.done ? 'Today · done ✓' : "Today's workout"}
+          {headTitle}
         </div>
         <div className="plan-chips">
           <span className="plan-chip">Block {plan.blockNumber} · Wk {plan.blockWeek}{plan.isDeload ? ' · Deload' : ''}</span>
-          {!showTomorrow && <span className="plan-chip plan-tier">{TIER_LABEL[plan.tier]}{readiness?.recovery != null ? ` · ${readiness.recovery}%` : ''}</span>}
-          <button className="plan-chip plan-toggle" onClick={() => setTomorrowPick(!showTomorrow)}>
-            {showTomorrow ? (todayPlan.done ? '← Today ✓' : '← Today') : 'Tomorrow →'}
+          {isToday && <span className="plan-chip plan-tier">{TIER_LABEL[plan.tier]}{readiness?.recovery != null ? ` · ${readiness.recovery}%` : ''}</span>}
+          <button className="plan-chip plan-toggle" onClick={() => setPickedKey(isToday ? tomorrowKey : todayKey)}>
+            {isToday ? 'Tomorrow →' : (todayPlan.done ? '← Today ✓' : '← Today')}
           </button>
         </div>
       </div>
@@ -106,14 +127,14 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
             {plan.adjusted && plan.planned.title !== s.title && <span>planned: {plan.planned.title}</span>}
           </div>
 
-          {(plan.adjustments.length > 0 || plan.makeupNote) && !showTomorrow && (
+          {(plan.adjustments.length > 0 || plan.makeupNote) && (isToday || isPast) && (
             <ul className="plan-adjust">
               {plan.makeupNote && <li>{plan.makeupNote}</li>}
               {plan.adjustments.map(a => <li key={a}>{a}</li>)}
             </ul>
           )}
-          {showTomorrow && s.kind !== 'rest' && (
-            <ul className="plan-adjust"><li>Tomorrow’s session adjusts once WHOOP scores your recovery in the morning.</li></ul>
+          {!isToday && !isPast && s.kind !== 'rest' && (
+            <ul className="plan-adjust"><li>{isTomorrow ? 'Tomorrow’s' : `${weekday}’s`} session adjusts once WHOOP scores your recovery that morning.</li></ul>
           )}
 
           {s.warmup && <div className="plan-warmup"><span>Warm-up</span>{s.warmup}</div>}
@@ -135,13 +156,24 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
 
         <div className="plan-side">
           <div className="plan-week">
-            {week.map(d => (
-              <div key={d.day} className={`plan-day ${d.status}${d.isToday ? ' today' : ''}`} title={d.title}>
-                <span className="plan-day-name">{d.day}</span>
-                <span className="plan-day-dot" />
-                <span className="plan-day-title">{d.title}</span>
-              </div>
-            ))}
+            {week.map(d => {
+              const k = dateKey(d.date);
+              const selected = k === selectedKey;
+              return (
+                <button
+                  type="button"
+                  key={d.day}
+                  className={`plan-day ${d.status}${d.isToday ? ' today' : ''}${selected ? ' selected' : ''}`}
+                  title={`View ${d.title} workout`}
+                  aria-pressed={selected}
+                  onClick={() => setPickedKey(k)}
+                >
+                  <span className="plan-day-name">{d.day}</span>
+                  <span className="plan-day-dot" />
+                  <span className="plan-day-title">{d.title}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div className="plan-stats">
