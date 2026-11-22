@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { parseActivities, computePRs, fmtDateTime, ACTIVITY_COLORS } from '@/lib/dataUtils';
+import { parseActivities, parseStrainMap, computePRs, fmtDateTime, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import type { Activity, PR } from '@/lib/types';
 import { useRenames } from '@/lib/useRenames';
 import Icon from './ui/Icon';
@@ -144,9 +144,16 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/data/activity_data_with_intensity.csv');
+        const [res, supRes] = await Promise.all([
+          fetch('/data/activity_data_with_intensity.csv'),
+          fetch('/data/activity_supplement.csv').catch(() => null),
+        ]);
         const text = await res.text();
-        const parsed = parseActivities(text);
+        let strainById: Map<string, number> | undefined;
+        try {
+          if (supRes?.ok) strainById = parseStrainMap(await supRes.text());
+        } catch { /* strain is optional */ }
+        const parsed = parseActivities(text, strainById);
         parsed.sort((a, b) => b.date.getTime() - a.date.getTime());
         setActivities(parsed);
         if (parsed.length > 0) {

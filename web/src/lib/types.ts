@@ -15,6 +15,7 @@ export interface Activity {
   zone: number;     // 1-5 based on average HR
   zoneTimes: number[]; // time in minutes for zones 1-5
   trimp: number;
+  strain: number | null; // WHOOP strain (0-21), null when unavailable
 }
 
 export interface PR {

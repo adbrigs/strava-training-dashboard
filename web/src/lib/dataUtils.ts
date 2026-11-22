@@ -56,7 +56,17 @@ export function dateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function parseActivities(csvText: string): Activity[] {
+export function parseStrainMap(supplementCsv: string): Map<string, number> {
+  const out = new Map<string, number>();
+  const res = Papa.parse<Record<string, string>>(supplementCsv, { header: true, skipEmptyLines: true });
+  for (const row of res.data) {
+    const v = parseFloat(row.strain);
+    if (row.id && Number.isFinite(v)) out.set(row.id, v);
+  }
+  return out;
+}
+
+export function parseActivities(csvText: string, strainById?: Map<string, number>): Activity[] {
   const result = Papa.parse<Record<string, string>>(csvText, { header: true, skipEmptyLines: true });
 
   return result.data
@@ -80,8 +90,10 @@ export function parseActivities(csvText: string): Activity[] {
         parseFloat(r.zone_5_time_minutes) || 0,
       ];
 
+      const id = r.id || String(date.getTime());
+
       return {
-        id: r.id || String(date.getTime()),
+        id,
         date,
         week: weekStart(date),
         name: r.name || type,
@@ -97,6 +109,7 @@ export function parseActivities(csvText: string): Activity[] {
         zone: isNaN(hrZoneRaw) ? 1 : Math.max(1, Math.min(5, hrZoneRaw)),
         zoneTimes,
         trimp: parseFloat(r.trimp_score) || 0,
+        strain: strainById?.get(id) ?? null,
       } as Activity;
     })
     .filter((a): a is Activity => a !== null);

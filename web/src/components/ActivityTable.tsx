@@ -4,13 +4,14 @@ import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
 
-type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'top1' | 'top2' | 'top3';
+type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'strain' | 'top1' | 'top2' | 'top3';
 
 const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'date',      l: 'Date' },
   { k: 'name',      l: 'Activity' },
   { k: 'type',      l: 'Sport' },
   { k: 'trimp',     l: 'TRIMP',      num: true },
+  { k: 'strain',    l: 'Strain',     num: true },
   { k: 'distance',  l: 'Dist (mi)',  num: true },
   { k: 'duration',  l: 'Time (min)', num: true },
   { k: 'pace',      l: 'Pace (/mi)', num: true },
@@ -147,6 +148,7 @@ export default function ActivityTable({ filtered, onRename }: Props) {
                   </span>
                 </td>
                 <td className="num trimp-cell">{fmtNum(a.trimp, 1)}</td>
+                <td className="num">{a.strain != null ? fmtNum(a.strain, 1) : '—'}</td>
                 <td className="num">{a.distance ? fmtNum(a.distance, 2) : '—'}</td>
                 <td className="num">{fmtNum(a.duration, 1)}</td>
                 <td className="num">{a.pace ? fmtPace(a.pace) : '—'}</td>
