@@ -50,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
 
     steps:
       # 1️⃣ Check out the repository WITH PUSH PERMISSIONS
@@ -96,10 +97,13 @@ jobs:
           exit $code
 
       # 4b. Token rejected: retry if another run just rotated it, else fail.
+      #     Uses the built-in GITHUB_TOKEN: repository_dispatch is one of the
+      #     few events it is allowed to trigger, so this doesn't depend on GH_PAT.
       - name: Handle rejected WHOOP token
         if: steps.fetch.outputs.code == '3'
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WHOOP_RETRY: ${{ github.event.client_payload.retry }}
         run: bash .github/scripts/whoop_guard.sh token-check
 
       # 5️⃣ Commit and push any updated data files

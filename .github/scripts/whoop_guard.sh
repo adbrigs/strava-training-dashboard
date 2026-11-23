@@ -16,8 +16,9 @@
 #                               fresh run (which gets the new token) and exit 0.
 #                               Otherwise the token really is bad: exit 1.
 #
-# Needs GH_TOKEN (actions read; token-check also needs repo scope to dispatch),
-# GITHUB_REPOSITORY and GITHUB_RUN_ID.
+# Needs GH_TOKEN (actions: read; token-check also needs contents: write to
+# dispatch), GITHUB_REPOSITORY and GITHUB_RUN_ID. token-check reads WHOOP_RETRY
+# ("true" when this run was itself started by a retry).
 set -euo pipefail
 
 repo="$GITHUB_REPOSITORY"
@@ -25,13 +26,17 @@ created=$(gh api "repos/$repo/actions/runs/$GITHUB_RUN_ID" --jq .created_at)
 echo "This run was triggered at $created."
 
 # Print "<started_at> <completed_at>" of the refresh job for each of the last
-# few runs whose refresh job actually ran and succeeded (not skipped).
+# few runs that REALLY refreshed: the refresh job ran and succeeded (not
+# skipped), and it did not take the rejected-token path. A run that only
+# re-triggered itself also ends green, but it fetched nothing, so it must not
+# count, or a truly expired token would make runs re-trigger each other forever.
 recent_successes() {
   for id in $(gh run list --repo "$repo" --workflow schedule.yml --status success \
                 --limit 5 --json databaseId --jq '.[].databaseId'); do
     [ "$id" = "$GITHUB_RUN_ID" ] && continue
     gh api "repos/$repo/actions/runs/$id/jobs" \
       --jq '.jobs[] | select(.name == "run-refresh" and .conclusion == "success")
+            | select(all(.steps[]; .name != "Handle rejected WHOOP token" or .conclusion == "skipped"))
             | "\(.started_at) \(.completed_at)"'
   done
 }
@@ -49,13 +54,19 @@ case "${1:-}" in
     ;;
 
   token-check)
-    while read -r _ completed; do
-      if [[ "$completed" > "$created" ]]; then
-        echo "::notice::Token was rotated by a refresh that finished at $completed. Re-triggering a fresh run so no data is missed."
-        gh api "repos/$repo/dispatches" -f event_type=whoop-data >/dev/null
-        exit 0
-      fi
-    done < <(recent_successes)
+    # Safety net: a run that is itself a retry never retries again. If the
+    # fresh token is still rejected, the token really is bad.
+    if [ "${WHOOP_RETRY:-}" = "true" ]; then
+      echo "This run was already a retry; not retrying again."
+    else
+      while read -r _ completed; do
+        if [[ "$completed" > "$created" ]]; then
+          echo "::notice::Token was rotated by a refresh that finished at $completed. Re-triggering a fresh run so no data is missed."
+          gh api "repos/$repo/dispatches" -f event_type=whoop-data -F 'client_payload[retry]=true' >/dev/null
+          exit 0
+        fi
+      done < <(recent_successes)
+    fi
     echo "::error::WHOOP refresh token is invalid or expired (HTTP 400), and no other run explains it."
     echo "Open the dashboard → Settings → 'Generate cron token' → update WHOOP_REFRESH_TOKEN in GitHub Secrets."
     exit 1
