@@ -16,11 +16,41 @@ concurrency:
   group: whoop-data-refresh
   cancel-in-progress: false
 
+# Serializing alone isn't enough: WHOOP sends sleep.updated and recovery.updated
+# together each morning, and the queued second run still starts with the old
+# (already-used) token. Two guards (.github/scripts/whoop_guard.sh) fix this
+# without ever dropping data:
+#   1. dedupe: a webhook run skips only if a refresh that started AFTER it was
+#      triggered already succeeded (that refresh already fetched its data).
+#   2. token-check: if the token was used up by another successful run, the run
+#      re-triggers itself fresh instead of failing. A truly bad token still fails.
 jobs:
+  dedupe:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Checkout repo
+        if: github.event_name == 'repository_dispatch'
+        uses: actions/checkout@v4
+
+      - name: Skip if a later refresh already covered this one
+        id: check
+        if: github.event_name == 'repository_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/whoop_guard.sh skip-check
+
   run-refresh:
+    needs: dedupe
+    if: needs.dedupe.outputs.skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
 
     steps:
       # 1️⃣ Check out the repository WITH PUSH PERMISSIONS
@@ -56,7 +86,25 @@ jobs:
           # Create one at github.com/settings/tokens and store it as the GH_PAT secret.
           # Without it the script still fetches WHOOP data — it just won't auto-rotate the secret.
           GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: python Training_Intensity_Report/dashboard/fetch_whoop.py
+        id: fetch
+        run: |
+          set +e
+          python Training_Intensity_Report/dashboard/fetch_whoop.py
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          # 3 = token rejected: handled by the next step instead of failing here.
+          [ "$code" -eq 3 ] && exit 0
+          exit $code
+
+      # 4b. Token rejected: retry if another run just rotated it, else fail.
+      #     Uses the built-in GITHUB_TOKEN: repository_dispatch is one of the
+      #     few events it is allowed to trigger, so this doesn't depend on GH_PAT.
+      - name: Handle rejected WHOOP token
+        if: steps.fetch.outputs.code == '3'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WHOOP_RETRY: ${{ github.event.client_payload.retry }}
+        run: bash .github/scripts/whoop_guard.sh token-check
 
       # 5️⃣ Commit and push any updated data files
       - name: Commit and push changes

@@ -62,9 +62,10 @@ def get_tokens() -> tuple[str, str]:
     if r.status_code == 400:
         print("::error::WHOOP refresh token is invalid or expired (HTTP 400).")
         print("Open the dashboard → Settings → 'Generate cron token' → update WHOOP_REFRESH_TOKEN in GitHub Secrets.")
-        # Exit non-zero so the workflow run is marked failed and surfaces the
-        # stale token instead of silently freezing the committed history.
-        sys.exit(1)
+        # Exit code 3 (not 1) marks "token rejected" specifically. The workflow
+        # then checks whether another run just rotated the token (and retries)
+        # or the token is really stale (and fails, surfacing it).
+        sys.exit(3)
     r.raise_for_status()
     data = r.json()
     return data["access_token"], data["refresh_token"]
