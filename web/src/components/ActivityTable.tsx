@@ -161,13 +161,22 @@ export default function ActivityTable({ filtered, onRename, sessions }: Props) {
                 <td className="session-cell">
                   {(() => {
                     const l = sessions?.get(a.id);
-                    const text = l?.key ? <>{SESSION_LABEL[l.key]} <span>{l.tagged ? 'tagged' : 'auto'}</span></> : '—';
+                    const text = (
+                      <span className="session-text">
+                        {l?.key ? SESSION_LABEL[l.key] : '—'}
+                        {l?.key && <em>{l.tagged ? 'tagged' : 'auto'}</em>}
+                      </span>
+                    );
                     if (!canTag) return text;
                     const tagged = l?.tagged ? l.key! : '';
                     // The blank option means "no tag": it shows the auto match, or "—".
                     const autoLabel = l?.tagged ? 'Auto (clear tag)' : l?.key ? `${SESSION_LABEL[l.key]} · auto` : '—';
+                    // The cell shows plain text; an invisible native dropdown
+                    // sits on top so a click (or tap) opens the picker.
                     return (
-                      <>
+                      <label className="session-pick">
+                        {text}
+                        <i aria-hidden="true">▾</i>
                         <select
                           className="session-select"
                           value={tagged}
@@ -179,8 +188,7 @@ export default function ActivityTable({ filtered, onRename, sessions }: Props) {
                           <option value="">{autoLabel}</option>
                           {TAGGABLE_SESSIONS.map(k => <option key={k} value={k}>{SESSION_LABEL[k]}</option>)}
                         </select>
-                        {l?.tagged && <span>tagged</span>}
-                      </>
+                      </label>
                     );
                   })()}
                 </td>
