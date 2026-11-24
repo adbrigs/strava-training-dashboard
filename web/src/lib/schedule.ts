@@ -3,17 +3,17 @@
 // which writes them to Upstash Redis. The swap rules live in scheduleRules.ts.
 
 import { useSyncExternalStore } from 'react';
-import type { DayOverrides } from './trainingPlan';
-import { applyChanges, type DayChanges } from './scheduleRules';
+import type { ActivityTags, DayOverrides } from './trainingPlan';
+import { applyChanges, applyTagChanges, type DayChanges, type TagChanges } from './scheduleRules';
 
 export * from './scheduleRules';
 
 // ─── Shared client store ─────────────────────────────────────────────────────
 
 export type ScheduleStatus = 'loading' | 'ready' | 'saving' | 'unavailable' | 'error';
-interface ScheduleState { overrides: DayOverrides; status: ScheduleStatus; message: string | null }
+interface ScheduleState { overrides: DayOverrides; tags: ActivityTags; status: ScheduleStatus; message: string | null }
 
-const EMPTY: ScheduleState = { overrides: {}, status: 'loading', message: null };
+const EMPTY: ScheduleState = { overrides: {}, tags: {}, status: 'loading', message: null };
 let state: ScheduleState = EMPTY;
 let loadStarted = false;
 const listeners = new Set<() => void>();
@@ -28,8 +28,8 @@ async function load() {
     const res = await fetch('/api/plan', { cache: 'no-store' });
     if (res.status === 503) { setState({ status: 'unavailable', message: 'Schedule changes are unavailable right now.' }); return; }
     if (!res.ok) throw new Error(String(res.status));
-    const data = await res.json() as { days?: DayOverrides };
-    setState({ overrides: data.days ?? {}, status: 'ready', message: null });
+    const data = await res.json() as { days?: DayOverrides; tags?: ActivityTags };
+    setState({ overrides: data.days ?? {}, tags: data.tags ?? {}, status: 'ready', message: null });
   } catch {
     setState({ status: 'unavailable', message: 'Couldn’t load your schedule changes. Showing the standard plan.' });
   }
@@ -47,22 +47,43 @@ export function useSchedule(): ScheduleState {
 }
 
 /** Apply edits on screen immediately, then save; roll back if the save fails. */
-export async function saveChanges(changes: DayChanges): Promise<boolean> {
-  if (Object.keys(changes).length === 0) return true;
-  const before = state.overrides;
-  setState({ overrides: applyChanges(before, changes), status: 'saving', message: null });
+async function save(changes: DayChanges, tagChanges: TagChanges): Promise<boolean> {
+  if (Object.keys(changes).length + Object.keys(tagChanges).length === 0) return true;
+  const before = { overrides: state.overrides, tags: state.tags };
+  const optimistic = {
+    overrides: applyChanges(before.overrides, changes),
+    tags: applyTagChanges(before.tags, tagChanges),
+  };
+  setState({ ...optimistic, status: 'saving', message: null });
   try {
     const res = await fetch('/api/plan', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ changes }),
+      body: JSON.stringify({
+        ...(Object.keys(changes).length ? { changes } : {}),
+        ...(Object.keys(tagChanges).length ? { tags: tagChanges } : {}),
+      }),
     });
     if (!res.ok) throw new Error(String(res.status));
-    const data = await res.json() as { days?: DayOverrides };
-    setState({ overrides: data.days ?? applyChanges(before, changes), status: 'ready', message: null });
+    const data = await res.json() as { days?: DayOverrides; tags?: ActivityTags };
+    setState({
+      overrides: data.days ?? optimistic.overrides,
+      tags: data.tags ?? optimistic.tags,
+      status: 'ready', message: null,
+    });
     return true;
   } catch {
-    setState({ overrides: before, status: 'error', message: 'Couldn’t save that change. Try again.' });
+    setState({ ...before, status: 'error', message: 'Couldn’t save that change. Try again.' });
     return false;
   }
+}
+
+/** Save day swaps / extra sessions. */
+export function saveChanges(changes: DayChanges): Promise<boolean> {
+  return save(changes, {});
+}
+
+/** Save which session logged workouts were (null = back to automatic). */
+export function saveTags(tagChanges: TagChanges): Promise<boolean> {
+  return save({}, tagChanges);
 }

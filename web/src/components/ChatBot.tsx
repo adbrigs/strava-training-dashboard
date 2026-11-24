@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Activity } from '@/lib/types';
 import { recommendWorkout } from '@/lib/recommendation';
-import { planForDay, planChatContext, type DayOverrides } from '@/lib/trainingPlan';
+import { planForDay, planChatContext, type ActivityTags, type DayOverrides } from '@/lib/trainingPlan';
 import { useSchedule } from '@/lib/schedule';
 import { dateKey as localDateKey } from '@/lib/dataUtils';
 import { ACTIVITY_LABELS } from '@/lib/dataUtils';
@@ -106,6 +106,7 @@ function buildDashboardContext(
   whoopHistory: WhoopRecord[],
   liveWhoop: LiveWhoop | null,
   overrides: DayOverrides,
+  tags: ActivityTags,
 ): string {
   const rec = recommendWorkout(
     activities.filter(a => selectedTypes.has(a.type)),
@@ -179,7 +180,7 @@ function buildDashboardContext(
   } : histToday?.recovery != null ? {
     recovery: histToday.recovery, hrv: histToday.hrv ?? null, restingHr: histToday.restingHr ?? null,
     sleepHours: histToday.sleepMs ? histToday.sleepMs / 3.6e6 : null,
-  } : null, activities, overrides);
+  } : null, activities, overrides, tags);
 
   return `=== CURRENT DASHBOARD FILTER (for reference only) ===
 ${filterNote}
@@ -235,11 +236,11 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
   }
 
   // Day swaps saved from the plan card, so the coach knows today's real session.
-  const { overrides: scheduleOverrides } = useSchedule();
+  const { overrides: scheduleOverrides, tags: scheduleTags } = useSchedule();
   const dashboardContext = useMemo(() =>
-    buildDashboardContext(activities, filtered, today, from, to, selectedTypes, restDate, whoopHistory, liveWhoop, scheduleOverrides),
+    buildDashboardContext(activities, filtered, today, from, to, selectedTypes, restDate, whoopHistory, liveWhoop, scheduleOverrides, scheduleTags),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [activities.length, today.getTime(), from.getTime(), to.getTime(), filtered.length, restDate, whoopHistory.length, liveWhoop, scheduleOverrides]);
+  [activities.length, today.getTime(), from.getTime(), to.getTime(), filtered.length, restDate, whoopHistory.length, liveWhoop, scheduleOverrides, scheduleTags]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

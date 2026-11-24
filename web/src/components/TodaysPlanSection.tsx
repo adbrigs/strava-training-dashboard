@@ -4,10 +4,10 @@ import type { Activity } from '@/lib/types';
 import { dateKey } from '@/lib/dataUtils';
 import { getWhoopLive } from '@/lib/whoopLive';
 import {
-  planForDay, weekOverview, PICKABLE_SESSIONS, EXTRA_SESSIONS, MAX_EXTRA_SESSIONS, SESSION_LABEL,
+  planForDay, weekOverview, PICKABLE_SESSIONS, EXTRA_SESSIONS, MAX_EXTRA_SESSIONS, SESSION_LABEL, TAGGABLE_SESSIONS,
   type Exercise, type Readiness, type ReadinessTier,
 } from '@/lib/trainingPlan';
-import { useSchedule, saveChanges, chooseSession, resetDay, addExtra, removeExtra } from '@/lib/schedule';
+import { useSchedule, saveChanges, saveTags, chooseSession, resetDay, addExtra, removeExtra } from '@/lib/schedule';
 
 interface Props {
   activities: Activity[];
@@ -53,13 +53,18 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
   // Swaps and extra sessions saved from this card (shared with the Coach AI).
   const schedule = useSchedule();
   const overrides = schedule.overrides;
+  const tags = schedule.tags;
 
   useEffect(() => {
+    // A WHOOP refresh can start a new request while an older one is still out;
+    // only the newest one may update the card.
+    let cancelled = false;
     const todayKey = dateKey(new Date());
     Promise.all([
       getWhoopLive(),
       fetch(`/data/whoop_history.json?v=${refreshKey}`).then(r => r.json()).catch(() => []),
     ]).then(([live, hist]: [{ connected?: boolean; recovery?: { score: number; hrv: number; restingHr: number; date: string } | null; sleep?: { durationMs: number } | null } | null, WhoopRecord[]]) => {
+      if (cancelled) return;
       // Prefer the live score if it was scored today; otherwise today's history row.
       const liveToday = live?.connected && live.recovery && dateKey(new Date(live.recovery.date)) === todayKey;
       if (liveToday) {
@@ -77,12 +82,13 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
         sleepHours: row.sleepMs ? row.sleepMs / 3.6e6 : null,
       } : { recovery: null, hrv: null, restingHr: null, sleepHours: null });
     });
+    return () => { cancelled = true; };
   }, [refreshKey]);
 
-  const todayPlan = useMemo(() => planForDay(today, readiness, activities, overrides), [today, readiness, activities, overrides]);
+  const todayPlan = useMemo(() => planForDay(today, readiness, activities, overrides, tags), [today, readiness, activities, overrides, tags]);
   const tomorrow = useMemo(() => { const d = new Date(today); d.setDate(d.getDate() + 1); return d; }, [today]);
-  const tomorrowPlan = useMemo(() => planForDay(tomorrow, null, activities, overrides), [tomorrow, activities, overrides]);
-  const week = useMemo(() => weekOverview(today, activities, overrides), [today, activities, overrides]);
+  const tomorrowPlan = useMemo(() => planForDay(tomorrow, null, activities, overrides, tags), [tomorrow, activities, overrides, tags]);
+  const week = useMemo(() => weekOverview(today, activities, overrides, tags), [today, activities, overrides, tags]);
   const weekDates = useMemo(() => week.map(d => d.date), [week]);
 
   const todayKey = dateKey(today);
@@ -103,8 +109,8 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
   const plan = useMemo(() => {
     if (isToday) return todayPlan;
     if (isTomorrow) return tomorrowPlan;
-    return planForDay(selectedDate, null, activities, overrides);
-  }, [isToday, isTomorrow, todayPlan, tomorrowPlan, selectedDate, activities, overrides]);
+    return planForDay(selectedDate, null, activities, overrides, tags);
+  }, [isToday, isTomorrow, todayPlan, tomorrowPlan, selectedDate, activities, overrides, tags]);
   const s = plan.session;
   const weekday = selectedDate.toLocaleDateString(undefined, { weekday: 'long' });
   const headTitle = isToday
@@ -112,16 +118,19 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
     : isTomorrow ? `Tomorrow · ${weekday}`
     : `${weekday}${isPast ? (plan.done || selectedStatus === 'done' ? ' · done ✓' : s.kind === 'rest' ? '' : ' · missed') : ''}`;
 
-  // Counts every session in the week, including extras (an added run counts).
+  // Done = workouts actually logged this week (matched or tagged), wherever
+  // they happened; total = sessions planned, including added ones.
   const stats = useMemo(() => {
-    const all = week.flatMap(d => d.sessions);
-    const lifts = all.filter(x => x.kind === 'lift');
-    const legs = all.filter(x => x.key === 'legsA' || x.key === 'legsB');
-    const runs = all.filter(x => x.kind === 'run');
+    const planned = week.flatMap(d => d.sessions);
+    const logged = week.flatMap(d => d.logged);
+    const legs = (k: string | null) => k === 'legsA' || k === 'legsB';
     return {
-      liftsDone: lifts.filter(x => x.done).length, liftsTotal: lifts.length,
-      legsDone: legs.filter(x => x.done).length, legsTotal: legs.length,
-      runsDone: runs.filter(x => x.done).length, runsTotal: runs.length,
+      liftsDone: logged.filter(l => l.kind === 'lift').length,
+      liftsTotal: planned.filter(x => x.kind === 'lift').length,
+      legsDone: logged.filter(l => legs(l.key)).length,
+      legsTotal: planned.filter(x => legs(x.key)).length,
+      runsDone: logged.filter(l => l.kind === 'run').length,
+      runsTotal: planned.filter(x => x.kind === 'run').length,
     };
   }, [week]);
 
@@ -130,6 +139,7 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
   const canEdit = selectedInWeek && schedule.status !== 'loading' && schedule.status !== 'unavailable';
   const dayChanged = selectedKey in overrides;
   const extraKeys = plan.extras.map(x => x.key);
+  const selectedLogged = week.find(d => dateKey(d.date) === selectedKey)?.logged ?? [];
 
   const tierColor = TIER_COLOR[plan.tier];
 
@@ -211,6 +221,7 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
                   <span className="plan-day-dot" />
                   <span className="plan-day-title">{d.title}</span>
                   {d.extraTitles.length > 0 && <span className="plan-day-extra">+ {d.extraTitles.join(', ')}</span>}
+                  {d.did.length > 0 && <span className="plan-day-did">did {d.did.join(', ')}</span>}
                 </button>
               );
             })}
@@ -265,6 +276,42 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
               ))}
             </div>
           </div>
+          {selectedLogged.length > 0 && (
+            <div className="plan-editor-row">
+              <span className="plan-editor-label">Logged</span>
+              <div className="plan-logged">
+                {selectedLogged.map(l => (
+                  <div key={l.activityId} className="plan-logged-item">
+                    <div className="plan-logged-name">
+                      {l.name} <span>{l.minutes} min · {l.tagged ? 'tagged' : 'auto'}</span>
+                    </div>
+                    <div className="plan-editor-options">
+                      {TAGGABLE_SESSIONS.map(k => (
+                        <button
+                          key={k} type="button"
+                          className={`plan-pick${l.key === k ? ' current' : ''}`}
+                          aria-pressed={l.key === k}
+                          disabled={schedule.status === 'saving'}
+                          onClick={() => void saveTags({ [l.activityId]: l.tagged && l.key === k ? null : k })}
+                        >
+                          {SESSION_LABEL[k]}
+                        </button>
+                      ))}
+                      {l.tagged && (
+                        <button
+                          type="button" className="plan-pick add"
+                          disabled={schedule.status === 'saving'}
+                          onClick={() => void saveTags({ [l.activityId]: null })}
+                        >
+                          Auto
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="plan-editor-foot">
             <span className="plan-editor-hint">
               {schedule.status === 'saving' ? 'Saving…' : 'Picking a session planned on another day swaps the two days.'}
