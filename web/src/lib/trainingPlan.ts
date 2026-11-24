@@ -69,6 +69,9 @@ export const SCHEDULE_OVERRIDES: Record<string, SessionKey> = {
   '2026-11-10': 'legsA',
   '2026-11-11': 'push',
   '2026-11-12': 'easyRun',
+  // Week of Nov 23: Pull on Tuesday, Push moves to Thursday.
+  '2026-11-24': 'pull',
+  '2026-11-26': 'push',
 };
 
 export function sessionKeyFor(date: Date): SessionKey {
