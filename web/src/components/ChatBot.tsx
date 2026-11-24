@@ -8,6 +8,7 @@ import { planForDay, planChatContext } from '@/lib/trainingPlan';
 import { dateKey as localDateKey } from '@/lib/dataUtils';
 import { ACTIVITY_LABELS } from '@/lib/dataUtils';
 import Icon from './ui/Icon';
+import { getWhoopLive } from '@/lib/whoopLive';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -217,10 +218,7 @@ export default function ChatBot({ isOpen, onClose, activities, filtered, today, 
       .then(r => r.json())
       .then(setWhoopHistory)
       .catch(() => {});
-    fetch('/api/whoop/data')
-      .then(r => r.json())
-      .then(setLiveWhoop)
-      .catch(() => {});
+    getWhoopLive().then(d => { if (d) setLiveWhoop(d); });
   }, []);
 
   function addNote(note: string) {
