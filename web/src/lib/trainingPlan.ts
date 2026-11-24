@@ -85,6 +85,12 @@ export interface DayOverride {
 /** Saved changes keyed by local date (YYYY-MM-DD). */
 export type DayOverrides = Record<string, DayOverride>;
 
+/** Logged workout id → the session it was (set from the dashboard). */
+export type ActivityTags = Record<string, SessionKey>;
+
+/** Sessions a logged workout can be tagged as. */
+export const TAGGABLE_SESSIONS: SessionKey[] = ['legsA', 'legsB', 'push', 'pull', 'easyRun', 'qualityRun'];
+
 /** Sessions Andrew can pick for a day, in picker order. */
 export const PICKABLE_SESSIONS: SessionKey[] = ['legsA', 'legsB', 'push', 'pull', 'easyRun', 'qualityRun', 'rest'];
 /** Sessions that can be added on top of a day's main session. */
@@ -297,41 +303,96 @@ function capLift(session: Session, adjustments: string[]): Session {
   };
 }
 
-// ─── Activity helpers ────────────────────────────────────────────────────────
+// ─── What was actually done ─────────────────────────────────────────────────
+//
+// Each qualifying workout (a lift of 25+ min, or a run) becomes one "logged
+// session". Its session is Andrew's tag if he set one; otherwise the day's
+// planned session of the same kind (main first, then extras); otherwise, for a
+// lift on a non-lift day, a leg day missed earlier this week (a make-up).
+// Counters, done dots and the Saturday make-up all read from this.
 
-function liftedOn(activities: Activity[], d: Date): boolean {
-  const k = dateKey(d);
-  return activities.some(a => dateKey(a.date) === k && a.type === 'WeightTraining' && a.duration >= 25);
-}
-function ranOn(activities: Activity[], d: Date): boolean {
-  const k = dateKey(d);
-  return activities.some(a => dateKey(a.date) === k && (a.type === 'Run' || a.type === 'TrailRun'));
+export interface LoggedSession {
+  activityId: string;
+  name: string;
+  minutes: number;
+  kind: 'lift' | 'run';
+  key: SessionKey | null;   // null = a workout that matches nothing planned
+  tagged: boolean;          // true when Andrew set the session himself
 }
 
-/** Leg days (Mon/Fri) earlier this week with no lift logged on that date. */
-function missedLegDays(activities: Activity[], today: Date, overrides: DayOverrides): SessionKey[] {
+function workoutKind(a: Activity): 'lift' | 'run' | null {
+  if (a.type === 'WeightTraining' && a.duration >= 25) return 'lift';
+  if (a.type === 'Run' || a.type === 'TrailRun') return 'run';
+  return null;
+}
+
+const KIND_OF: Record<SessionKey, SessionKind> = {
+  legsA: 'lift', legsB: 'lift', push: 'lift', pull: 'lift',
+  easyRun: 'run', qualityRun: 'run', rest: 'rest', recovery: 'rest',
+};
+const isLegs = (k: SessionKey | null) => k === 'legsA' || k === 'legsB';
+
+/** Planned sessions for a day: main first, then extras. */
+function plannedKeys(d: Date, overrides: DayOverrides): SessionKey[] {
+  return [sessionKeyFor(d, overrides), ...extraKeysFor(d, overrides)];
+}
+
+/** Workouts logged on a day, each matched to the session it counts as. */
+export function loggedSessions(
+  d: Date, activities: Activity[], overrides: DayOverrides = {}, tags: ActivityTags = {},
+): LoggedSession[] {
+  const k = dateKey(d);
+  const acts = activities
+    .filter(a => dateKey(a.date) === k && workoutKind(a) !== null)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  if (acts.length === 0) return [];
+
+  const open = plannedKeys(d, overrides);
+  const take = (key: SessionKey) => { const i = open.indexOf(key); if (i >= 0) open.splice(i, 1); };
+  let makeups: SessionKey[] | null = null;
+
+  // Tagged workouts claim their session first, so an untagged one on the
+  // same day doesn't grab it.
+  const out = acts.map(a => {
+    const kind = workoutKind(a)!;
+    const tag = tags[a.id];
+    if (tag) take(tag);
+    return { activityId: a.id, name: a.name, minutes: Math.round(a.duration), kind, key: tag ?? null, tagged: !!tag };
+  });
+  for (const l of out) {
+    if (l.tagged) continue;
+    const planned = open.find(x => KIND_OF[x] === l.kind);
+    if (planned) { l.key = planned; take(planned); continue; }
+    if (l.kind === 'lift') {
+      makeups ??= missedLegDays(activities, d, overrides, tags);
+      const m = makeups.shift();
+      if (m) l.key = m;
+    }
+  }
+  return out;
+}
+
+/** Leg sessions planned earlier this week that no workout has covered yet. */
+function missedLegDays(activities: Activity[], today: Date, overrides: DayOverrides, tags: ActivityTags): SessionKey[] {
   const mon = mondayOf(today);
-  const missed: SessionKey[] = [];
+  const planned: SessionKey[] = [];
+  const done: SessionKey[] = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
     if (d >= startOfDay(today)) break;
-    const key = sessionKeyFor(d, overrides);
-    if ((key === 'legsA' || key === 'legsB') && !liftedOn(activities, d)) missed.push(key);
+    planned.push(...plannedKeys(d, overrides).filter(isLegs));
+    done.push(...loggedSessions(d, activities, overrides, tags).map(l => l.key).filter(isLegs) as SessionKey[]);
   }
-  return missed;
-}
-
-export function sessionDone(session: Session, activities: Activity[], d: Date): boolean {
-  if (session.kind === 'lift') return liftedOn(activities, d);
-  if (session.kind === 'run') return ranOn(activities, d);
-  return false;
+  for (const k of done) { const i = planned.indexOf(k); if (i >= 0) planned.splice(i, 1); }
+  return planned;
 }
 
 // ─── The daily recommendation ────────────────────────────────────────────────
 
 export function planForDay(
-  date: Date, readiness: Readiness | null, activities: Activity[], overrides: DayOverrides = {},
+  date: Date, readiness: Readiness | null, activities: Activity[],
+  overrides: DayOverrides = {}, tags: ActivityTags = {},
 ): DailyPlan {
   const { blockNumber, blockWeek } = blockPosition(date);
   const planned = plannedSessionFor(date, overrides);
@@ -343,7 +404,7 @@ export function planForDay(
 
   // Saturday: if a leg day was missed this week, legs beat the quality run.
   if (planned.key === 'qualityRun') {
-    const missed = missedLegDays(activities, date, overrides);
+    const missed = missedLegDays(activities, date, overrides, tags);
     if (missed.length) {
       const key = missed[missed.length - 1];
       session = buildSession(key, blockWeek);
@@ -375,7 +436,12 @@ export function planForDay(
     adjustments.push(`Only ${readiness.sleepHours.toFixed(1)}h of sleep. Aim for bed 45 min earlier tonight.`);
   }
 
-  const done = sessionDone(session, activities, date) || sessionDone(planned, activities, date);
+  // Done when a workout today counts as the planned session, the session the
+  // plan switched to (make-up), or the same kind of work if WHOOP swapped in
+  // recovery and Andrew trained anyway.
+  const logged = loggedSessions(date, activities, overrides, tags);
+  const done = logged.some(l => l.key === planned.key || l.key === session.key
+    || (session.kind === 'rest' && planned.kind !== 'rest' && l.kind === planned.kind));
 
   return {
     date, blockNumber, blockWeek, isDeload: blockWeek === 4,
@@ -386,7 +452,7 @@ export function planForDay(
 }
 
 /** Mon–Sun strip for the current week with completion status. */
-export function weekOverview(today: Date, activities: Activity[], overrides: DayOverrides = {}) {
+export function weekOverview(today: Date, activities: Activity[], overrides: DayOverrides = {}, tags: ActivityTags = {}) {
   const mon = mondayOf(today);
   const t0 = startOfDay(today).getTime();
   return Array.from({ length: 7 }, (_, i) => {
@@ -396,11 +462,14 @@ export function weekOverview(today: Date, activities: Activity[], overrides: Day
     const s = plannedSessionFor(d, overrides);
     const isPast = d.getTime() < t0;
     const isToday = d.getTime() === t0;
-    const done = sessionDone(s, activities, d);
-    // Every session on the day (main first, then extras) with its own done state,
-    // so the weekly counters can include an added run.
+    const logged = loggedSessions(d, activities, overrides, tags);
+    const doneKeys = logged.map(l => l.key);
+    // Planned sessions on the day (main first, then extras) and whether each was done.
     const sessions = [s, ...extraKeysFor(d, overrides).map(k => buildSession(k, blockWeek))]
-      .map(x => ({ key: x.key, kind: x.kind, done: sessionDone(x, activities, d) }));
+      .map(x => ({ key: x.key, kind: x.kind, done: doneKeys.includes(x.key) }));
+    // What was done that wasn't planned that day (e.g. a leg make-up on Saturday).
+    const did = logged.filter(l => !sessions.some(x => x.key === l.key))
+      .map(l => (l.key ? SESSION_LABEL[l.key] : l.kind === 'lift' ? 'Lift' : 'Run'));
     return {
       date: d,
       day: DAY_SHORT[d.getDay()],
@@ -408,10 +477,13 @@ export function weekOverview(today: Date, activities: Activity[], overrides: Day
       title: SESSION_LABEL[s.key],
       extraTitles: sessions.slice(1).map(x => SESSION_LABEL[x.key]),
       sessions,
+      logged,
+      did,
       kind: s.kind,
       isToday,
       changed: dateKey(d) in overrides,
-      status: s.kind === 'rest' ? 'rest' as const : done ? 'done' as const : isPast ? 'missed' as const : 'upcoming' as const,
+      // Any logged workout marks the day as trained; "did" says what it was.
+      status: logged.length ? 'done' as const : s.kind === 'rest' ? 'rest' as const : isPast ? 'missed' as const : 'upcoming' as const,
     };
   });
 }

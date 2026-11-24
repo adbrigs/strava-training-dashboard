@@ -1569,6 +1569,11 @@ button.plan-day:focus-visible { outline: 2px solid var(--plan-c); outline-offset
 .plan-day { position: relative; }
 .plan-day.changed::after { content: ''; position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--plan-c); }
 .plan-day-extra { font-size: 9.5px; color: var(--plan-c); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.plan-day-did { font-size: 9.5px; color: var(--z2); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.plan-logged { display: grid; gap: 10px; min-width: 0; }
+.plan-logged-item { display: grid; gap: 6px; }
+.plan-logged-name { font-size: 12.5px; color: var(--text); padding-top: 6px; }
+.plan-logged-name span { color: var(--text-subtle); font-size: 11.5px; margin-left: 4px; }
 .plan-editor { margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--surface-2); display: grid; gap: 10px; }
 .plan-editor-row { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: start; }
 .plan-editor-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); padding-top: 7px; }

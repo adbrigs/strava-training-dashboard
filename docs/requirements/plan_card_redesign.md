@@ -1,6 +1,6 @@
 ---
 date: 2026-11-23
-status: draft
+status: built (steps 1-3 shipped Nov 23-24, 2026)
 author: Andrew Briglia
 ---
 
@@ -53,7 +53,8 @@ Andrew uses the dashboard on both laptop and phone (phone at the gym), so change
 2. Andrew can tag a logged workout with a specific session (e.g. mark Monday's WHOOP "Weightlifting" as Legs A). The tag saves to the same shared store, keyed by activity `id`.
 3. A tag overrides the default for "done" status and the Lifts / Legs / Runs counters.
 4. Tagging a workout that differs from the plan (e.g. Pull on a Push day) marks that session done and leaves the planned one owed for the week.
-5. Tagging is available from the plan card's week strip (tap a done day). Adding it to the Activity Details table is optional / later.
+5. Tagging is available from the plan card: select a day, open Change day, and pick a session for each logged workout ("Auto" goes back to the default). Adding it to the Activity Details table is optional / later.
+6. Counters and done dots come from what was logged (matched or tagged), not from the plan, so a Saturday leg make-up counts as legs and a swapped session leaves the planned one owed.
 
 ### D. Reliability
 

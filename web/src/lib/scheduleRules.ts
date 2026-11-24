@@ -4,10 +4,22 @@
 
 import { dateKey } from './dataUtils';
 import {
-  EXTRA_SESSIONS, MAX_EXTRA_SESSIONS, PICKABLE_SESSIONS,
+  EXTRA_SESSIONS, MAX_EXTRA_SESSIONS, PICKABLE_SESSIONS, TAGGABLE_SESSIONS,
   extraKeysFor, sessionKeyFor, templateKeyFor,
-  type DayOverride, type DayOverrides, type SessionKey,
+  type ActivityTags, type DayOverride, type DayOverrides, type SessionKey,
 } from './trainingPlan';
+
+/** Per-workout tag edits: the session it was, or null to go back to automatic. */
+export type TagChanges = Record<string, SessionKey | null>;
+
+export function applyTagChanges(tags: ActivityTags, changes: TagChanges): ActivityTags {
+  const next = { ...tags };
+  for (const [id, v] of Object.entries(changes)) {
+    if (v) next[id] = v;
+    else delete next[id];
+  }
+  return next;
+}
 
 /** Per-date edits: a new value for the day, or null to go back to the plan. */
 export type DayChanges = Record<string, DayOverride | null>;
@@ -82,6 +94,23 @@ export function applyChanges(overrides: DayOverrides, changes: DayChanges): DayO
 }
 
 // ─── Validation (shared with the API route) ──────────────────────────────────
+
+const ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+const TAG_OK = new Set<string>(TAGGABLE_SESSIONS);
+
+/** Returns the cleaned tag edits, or null if anything in them is invalid. */
+export function parseTagChanges(input: unknown): TagChanges | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const entries = Object.entries(input as Record<string, unknown>);
+  if (entries.length === 0 || entries.length > 20) return null;
+  const out: TagChanges = {};
+  for (const [id, v] of entries) {
+    if (!ID_RE.test(id)) return null;
+    if (v !== null && (typeof v !== 'string' || !TAG_OK.has(v))) return null;
+    out[id] = v as SessionKey | null;
+  }
+  return out;
+}
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MAIN_OK = new Set<string>(PICKABLE_SESSIONS);
