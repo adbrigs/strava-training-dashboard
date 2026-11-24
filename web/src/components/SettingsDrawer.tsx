@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Icon from './ui/Icon';
+import { getWhoopLive } from '@/lib/whoopLive';
 
 interface Props {
   isOpen: boolean;
@@ -40,10 +41,9 @@ export default function SettingsDrawer({ isOpen, onClose, theme, onThemeChange, 
 
   useEffect(() => {
     if (!isOpen) return;
-    fetch('/api/whoop/data')
-      .then(r => r.json())
-      .then(d => setWhoopConnected(d.connected))
-      .catch(() => setWhoopConnected(false));
+    getWhoopLive()
+      // A temporary WHOOP hiccup (transient) keeps the saved login, so it still counts as connected.
+      .then(d => setWhoopConnected(!!d && (d.connected || !!d.transient)));
   }, [isOpen]);
 
   useEffect(() => {

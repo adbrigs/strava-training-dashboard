@@ -1,8 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+import { getWhoopLive } from '@/lib/whoopLive';
+
+interface HistoryRow {
+  date: string; recovery?: number; hrv?: number; restingHr?: number;
+  sleepMs?: number; sleepPerformance?: number; strain?: number; weightKg?: number;
+}
+
 interface WhoopData {
   connected: boolean;
+  transient?: boolean;
   recovery?: { score: number; hrv: number; restingHr: number; date: string; } | null;
   sleep?: { durationMs: number; performance: number; efficiency: number; remMs: number; deepMs: number; date: string; } | null;
   strain?: { score: number; avgHr: number; date: string; } | null;
@@ -102,11 +110,13 @@ export default function WhoopSection() {
   const [avgHrv, setAvgHrv] = useState<number | null>(null);
   const [avgRestingHr, setAvgRestingHr] = useState<number | null>(null);
 
+  // Latest row of the auto-synced history (kept fresh by GitHub Actions with its
+  // own WHOOP login), used when the live browser connection isn't available.
+  const [latest, setLatest] = useState<HistoryRow | null>(null);
+
   useEffect(() => {
-    fetch('/api/whoop/data')
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    getWhoopLive()
+      .then(d => { setData(d); setLoading(false); });
 
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
@@ -114,7 +124,9 @@ export default function WhoopSection() {
 
     fetch('/data/whoop_history.json')
       .then(r => r.json())
-      .then((records: Array<{ date: string; hrv?: number; restingHr?: number }>) => {
+      .then((records: HistoryRow[]) => {
+        const withRecovery = records.filter(r => r.recovery != null);
+        if (withRecovery.length) setLatest(withRecovery[withRecovery.length - 1]);
         const recent = records.filter(r => r.date >= cutoffStr);
         const hrvVals = recent.filter(r => r.hrv != null).map(r => r.hrv!);
         const rhrVals = recent.filter(r => r.restingHr != null).map(r => r.restingHr!);
@@ -134,20 +146,35 @@ export default function WhoopSection() {
     );
   }
 
-  if (!data?.connected) {
+  // No live link (not connected, or WHOOP was briefly unreachable): show the
+  // last auto-synced day instead of a dead card.
+  const isLive = !!data?.connected;
+  if (!isLive && !latest) {
     return (
       <div className="card whoop-readiness-card fade-in">
         <div className="card-head">
           <div className="card-title"><WhoopLogo size={13} /> WHOOP READINESS</div>
         </div>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-          Not connected — open <strong style={{ color: 'var(--text)', margin: '0 3px' }}>Settings</strong> to connect.
+          {data?.transient
+            ? 'WHOOP is temporarily unreachable — refresh in a minute.'
+            : <>Not connected — open <strong style={{ color: 'var(--text)', margin: '0 3px' }}>Settings</strong> to connect.</>}
         </div>
       </div>
     );
   }
 
-  const { recovery, sleep, strain, bodyMeasurement } = data;
+  const fromHistory: WhoopData | null = !isLive && latest ? {
+    connected: false,
+    recovery: { score: latest.recovery!, hrv: latest.hrv ?? 0, restingHr: latest.restingHr ?? 0, date: latest.date },
+    sleep: latest.sleepMs ? {
+      durationMs: latest.sleepMs, performance: latest.sleepPerformance ?? 0, efficiency: 0,
+      remMs: 0, deepMs: 0, date: latest.date,
+    } : null,
+    strain: latest.strain != null ? { score: latest.strain, avgHr: 0, date: latest.date } : null,
+    bodyMeasurement: latest.weightKg != null ? { weightKg: latest.weightKg, heightM: null, maxHeartRate: null } : null,
+  } : null;
+  const { recovery, sleep, strain, bodyMeasurement } = (isLive ? data : fromHistory)!;
   const weightLbs = bodyMeasurement?.weightKg != null
     ? parseFloat((bodyMeasurement.weightKg * 2.20462).toFixed(1))
     : null;
@@ -161,6 +188,8 @@ export default function WhoopSection() {
     { label: 'REM',   ms: sleep.remMs,  color: 'var(--z2)' },
     { label: 'Light', ms: lightMs,      color: 'var(--accent)' },
   ].filter(s => s.ms > 0) : [];
+  // Sleep stages and efficiency only exist in the live feed, not the history file.
+  const showStages = isLive && stageRows.length > 0;
 
   return (
     <div className="card whoop-readiness-card fade-in">
@@ -172,6 +201,7 @@ export default function WhoopSection() {
         {recovery && (
           <span style={{ fontSize: 10, color: 'var(--text-subtle)', fontFamily: 'var(--font-mono)' }}>
             {new Date(recovery.date.slice(0, 10) + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {!isLive && ' · synced'}
           </span>
         )}
       </div>
@@ -235,10 +265,10 @@ export default function WhoopSection() {
             </div>
             {sleep && (
               <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                {sleep.performance}% perf · {sleep.efficiency}% eff
+                {sleep.performance}% perf{isLive ? ` · ${sleep.efficiency}% eff` : ''}
               </div>
             )}
-            {sleep && stageRows.length > 0 && (
+            {sleep && showStages && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 2 }}>
                 <SleepBar deepMs={sleep.deepMs} remMs={sleep.remMs} lightMs={lightMs} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>

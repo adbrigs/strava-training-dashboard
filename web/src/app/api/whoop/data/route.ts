@@ -14,6 +14,10 @@ interface TokenSet {
   expires_in: number;
 }
 
+/** WHOOP said the refresh token is dead (used, revoked or expired). Only this
+ *  case means the user truly has to reconnect; network blips and 5xx do not. */
+class TokenRejectedError extends Error {}
+
 async function refresh(refreshToken: string): Promise<TokenSet> {
   const body = new URLSearchParams({
     grant_type:    'refresh_token',
@@ -27,6 +31,7 @@ async function refresh(refreshToken: string): Promise<TokenSet> {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   });
+  if (res.status === 400 || res.status === 401) throw new TokenRejectedError(`Refresh rejected: ${res.status}`);
   if (!res.ok) throw new Error(`Refresh failed: ${res.status}`);
   return res.json();
 }
@@ -53,14 +58,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ connected: false });
   }
 
-  let newTokens: TokenSet | null = null;
+  // (cast: it's assigned inside a closure, which TypeScript can't see)
+  let newTokens = null as TokenSet | null;
+
+  // Refresh at most once per request. The four WHOOP calls below run in
+  // parallel; if each refreshed on its own they'd reuse the same single-use
+  // token and all but one would fail.
+  let refreshing: Promise<TokenSet> | null = null;
+  function refreshOnce(): Promise<TokenSet> {
+    if (!refreshing) {
+      refreshing = refresh(refreshToken!).then(t => { newTokens = t; return t; });
+    }
+    return refreshing;
+  }
 
   if (!accessToken && refreshToken) {
     try {
-      newTokens = await refresh(refreshToken);
-      accessToken = newTokens.access_token;
-    } catch {
-      return NextResponse.json({ connected: false });
+      accessToken = (await refreshOnce()).access_token;
+    } catch (err) {
+      console.error('WHOOP refresh failed:', err);
+      // Dead token: reconnect needed. Anything else (WHOOP 5xx, network): the
+      // saved login is probably still fine, so keep the cookies and say so.
+      return NextResponse.json(
+        err instanceof TokenRejectedError
+          ? { connected: false }
+          : { connected: false, transient: true },
+      );
     }
   }
 
@@ -70,8 +93,7 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       const e = err as { status?: number };
       if (e.status === 401 && refreshToken) {
-        newTokens = await refresh(refreshToken);
-        accessToken = newTokens.access_token;
+        accessToken = (await refreshOnce()).access_token;
         return await whoopGet(path, accessToken);
       }
       throw err;

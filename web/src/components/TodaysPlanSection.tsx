@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Activity } from '@/lib/types';
 import { dateKey } from '@/lib/dataUtils';
+import { getWhoopLive } from '@/lib/whoopLive';
 import { planForDay, weekOverview, type Readiness, type ReadinessTier } from '@/lib/trainingPlan';
 
 interface Props {
@@ -31,7 +32,7 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
   useEffect(() => {
     const todayKey = dateKey(new Date());
     Promise.all([
-      fetch('/api/whoop/data').then(r => r.json()).catch(() => null),
+      getWhoopLive(),
       fetch(`/data/whoop_history.json?v=${refreshKey}`).then(r => r.json()).catch(() => []),
     ]).then(([live, hist]: [{ connected?: boolean; recovery?: { score: number; hrv: number; restingHr: number; date: string } | null; sleep?: { durationMs: number } | null } | null, WhoopRecord[]]) => {
       setHistory(Array.isArray(hist) ? hist : []);
