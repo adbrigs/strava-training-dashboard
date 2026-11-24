@@ -1564,6 +1564,27 @@ button.plan-day:focus-visible { outline: 2px solid var(--plan-c); outline-offset
 .plan-day.rest .plan-day-dot { border-style: dashed; }
 .plan-stats { display: flex; gap: 16px; justify-content: flex-end; font-size: 10.5px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
 .plan-stats strong { font-family: var(--font-mono); font-size: 12.5px; color: var(--text); margin-left: 4px; letter-spacing: 0; }
+.plan-title-extra { font-size: 15px; font-weight: 500; color: var(--text-muted); }
+.plan-edit { color: var(--text); }
+.plan-day { position: relative; }
+.plan-day.changed::after { content: ''; position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--plan-c); }
+.plan-day-extra { font-size: 9.5px; color: var(--plan-c); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.plan-editor { margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--surface-2); display: grid; gap: 10px; }
+.plan-editor-row { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: start; }
+.plan-editor-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-subtle); padding-top: 7px; }
+.plan-editor-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.plan-pick { font: inherit; font-size: 12.5px; padding: 6px 10px; min-height: 32px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; }
+.plan-pick:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
+.plan-pick.current { color: var(--text); border-color: var(--plan-c); background: color-mix(in srgb, var(--plan-c) 14%, var(--surface)); }
+.plan-pick.add { border-style: dashed; }
+.plan-pick:disabled { opacity: 0.6; cursor: default; }
+.plan-pick:focus-visible { outline: 2px solid var(--plan-c); outline-offset: 1px; }
+.plan-editor-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.plan-editor-hint { font-size: 11.5px; color: var(--text-subtle); }
+.plan-status { margin: 10px 0 0; font-size: 12px; color: var(--z3); }
+.plan-extra { margin-top: 14px; }
+.plan-extra-head { font-size: 13px; font-weight: 600; color: var(--text); }
+.plan-extra-head span { font-weight: 400; font-size: 12px; color: var(--text-subtle); margin-left: 6px; }
 .plan-detail { margin-top: 14px; padding-top: 4px; border-top: 1px solid var(--border); max-width: 760px; }
 .plan-adjust { margin: 12px 0 0; max-width: 760px; padding: 10px 12px 10px 28px; border-radius: 8px; background: var(--surface-2); font-size: 12.5px; color: var(--text-muted); display: grid; gap: 4px; }
 .plan-adjust li::marker { color: var(--plan-c); }
@@ -1585,4 +1606,6 @@ button.plan-day:focus-visible { outline: 2px solid var(--plan-c); outline-offset
   .plan-row { grid-template-columns: minmax(0, 1fr) 120px; }
   .plan-title { font-size: 18px; }
   .plan-day-title { font-size: 9px; }
+  .plan-editor-row { grid-template-columns: 1fr; gap: 6px; }
+  .plan-editor-label { padding-top: 0; }
 }
