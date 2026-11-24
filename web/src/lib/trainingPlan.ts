@@ -55,6 +55,7 @@ export interface DailyPlan {
   adjustments: string[];       // human-readable changes made for readiness
   makeupNote: string | null;   // e.g. "Saturday is your Legs B make-up"
   done: boolean;               // the planned work is already logged today
+  extras: Session[];           // extra sessions added on top for this day
 }
 
 // Mon..Sun → session, JS getDay() indexing (0 = Sunday)
@@ -74,8 +75,40 @@ export const SCHEDULE_OVERRIDES: Record<string, SessionKey> = {
   '2026-11-26': 'push',
 };
 
-export function sessionKeyFor(date: Date): SessionKey {
+// ─── Saved schedule changes (made from the dashboard, stored in Upstash) ───
+
+/** One day's saved change: the session to do instead, plus any extra sessions. */
+export interface DayOverride {
+  main: SessionKey;
+  extra?: SessionKey[];
+}
+/** Saved changes keyed by local date (YYYY-MM-DD). */
+export type DayOverrides = Record<string, DayOverride>;
+
+/** Sessions Andrew can pick for a day, in picker order. */
+export const PICKABLE_SESSIONS: SessionKey[] = ['legsA', 'legsB', 'push', 'pull', 'easyRun', 'qualityRun', 'rest'];
+/** Sessions that can be added on top of a day's main session. */
+export const EXTRA_SESSIONS: SessionKey[] = ['easyRun', 'qualityRun', 'legsA', 'legsB', 'push', 'pull'];
+export const MAX_EXTRA_SESSIONS = 3;
+
+export const SESSION_LABEL: Record<SessionKey, string> = {
+  legsA: 'Legs A', legsB: 'Legs B', push: 'Push', pull: 'Pull',
+  easyRun: 'Easy run', qualityRun: 'Quality run', rest: 'Rest', recovery: 'Recovery',
+};
+
+/** What the plan says for a day, ignoring changes saved from the dashboard. */
+export function templateKeyFor(date: Date): SessionKey {
   return SCHEDULE_OVERRIDES[dateKey(date)] ?? WEEK_TEMPLATE[date.getDay()];
+}
+
+/** The day's main session: a saved change wins, then the plan. */
+export function sessionKeyFor(date: Date, overrides: DayOverrides = {}): SessionKey {
+  return overrides[dateKey(date)]?.main ?? templateKeyFor(date);
+}
+
+/** Extra sessions added on top of the day's main session. */
+export function extraKeysFor(date: Date, overrides: DayOverrides = {}): SessionKey[] {
+  return overrides[dateKey(date)]?.extra ?? [];
 }
 
 // ─── Block math ──────────────────────────────────────────────────────────────
@@ -231,9 +264,9 @@ function buildSession(key: SessionKey, week: number): Session {
   }
 }
 
-export function plannedSessionFor(date: Date): Session {
+export function plannedSessionFor(date: Date, overrides: DayOverrides = {}): Session {
   const { blockWeek } = blockPosition(date);
-  return buildSession(sessionKeyFor(date), blockWeek);
+  return buildSession(sessionKeyFor(date, overrides), blockWeek);
 }
 
 // ─── Readiness ───────────────────────────────────────────────────────────────
@@ -276,14 +309,14 @@ function ranOn(activities: Activity[], d: Date): boolean {
 }
 
 /** Leg days (Mon/Fri) earlier this week with no lift logged on that date. */
-function missedLegDays(activities: Activity[], today: Date): SessionKey[] {
+function missedLegDays(activities: Activity[], today: Date, overrides: DayOverrides): SessionKey[] {
   const mon = mondayOf(today);
   const missed: SessionKey[] = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
     if (d >= startOfDay(today)) break;
-    const key = sessionKeyFor(d);
+    const key = sessionKeyFor(d, overrides);
     if ((key === 'legsA' || key === 'legsB') && !liftedOn(activities, d)) missed.push(key);
   }
   return missed;
@@ -297,9 +330,12 @@ export function sessionDone(session: Session, activities: Activity[], d: Date): 
 
 // ─── The daily recommendation ────────────────────────────────────────────────
 
-export function planForDay(date: Date, readiness: Readiness | null, activities: Activity[]): DailyPlan {
+export function planForDay(
+  date: Date, readiness: Readiness | null, activities: Activity[], overrides: DayOverrides = {},
+): DailyPlan {
   const { blockNumber, blockWeek } = blockPosition(date);
-  const planned = plannedSessionFor(date);
+  const planned = plannedSessionFor(date, overrides);
+  const extras = extraKeysFor(date, overrides).map(k => buildSession(k, blockWeek));
   const tier = readiness ? readinessTier(readiness) : 'unknown';
   const adjustments: string[] = [];
   let session = planned;
@@ -307,7 +343,7 @@ export function planForDay(date: Date, readiness: Readiness | null, activities: 
 
   // Saturday: if a leg day was missed this week, legs beat the quality run.
   if (planned.key === 'qualityRun') {
-    const missed = missedLegDays(activities, date);
+    const missed = missedLegDays(activities, date, overrides);
     if (missed.length) {
       const key = missed[missed.length - 1];
       session = buildSession(key, blockWeek);
@@ -345,27 +381,36 @@ export function planForDay(date: Date, readiness: Readiness | null, activities: 
     date, blockNumber, blockWeek, isDeload: blockWeek === 4,
     planned, session, tier,
     adjusted: session !== planned,
-    adjustments, makeupNote, done,
+    adjustments, makeupNote, done, extras,
   };
 }
 
 /** Mon–Sun strip for the current week with completion status. */
-export function weekOverview(today: Date, activities: Activity[]) {
+export function weekOverview(today: Date, activities: Activity[], overrides: DayOverrides = {}) {
   const mon = mondayOf(today);
   const t0 = startOfDay(today).getTime();
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(mon);
     d.setDate(mon.getDate() + i);
-    const s = plannedSessionFor(d);
+    const { blockWeek } = blockPosition(d);
+    const s = plannedSessionFor(d, overrides);
     const isPast = d.getTime() < t0;
     const isToday = d.getTime() === t0;
     const done = sessionDone(s, activities, d);
+    // Every session on the day (main first, then extras) with its own done state,
+    // so the weekly counters can include an added run.
+    const sessions = [s, ...extraKeysFor(d, overrides).map(k => buildSession(k, blockWeek))]
+      .map(x => ({ key: x.key, kind: x.kind, done: sessionDone(x, activities, d) }));
     return {
       date: d,
       day: DAY_SHORT[d.getDay()],
-      title: s.key === 'rest' ? 'Rest' : s.title.split(' — ')[0].replace('Run — quality day', 'Run Q').replace('Easy aerobic run + core', 'Easy run'),
+      key: s.key,
+      title: SESSION_LABEL[s.key],
+      extraTitles: sessions.slice(1).map(x => SESSION_LABEL[x.key]),
+      sessions,
       kind: s.kind,
       isToday,
+      changed: dateKey(d) in overrides,
       status: s.kind === 'rest' ? 'rest' as const : done ? 'done' as const : isPast ? 'missed' as const : 'upcoming' as const,
     };
   });
@@ -379,7 +424,7 @@ export function planChatContext(plan: DailyPlan): string {
     `4-week blocks: weeks 1–3 build (main lifts RPE 7 → 8.5), week 4 deload. Block ${plan.blockNumber}, week ${plan.blockWeek}${plan.isDeload ? ' (deload)' : ''}.`,
     `Readiness rules: WHOOP recovery ≥67 = as written; 34–66 = cap RPE 7, one fewer main set, quality runs become easy; <34 = active recovery only. Sleep <5.5h drops one tier.`,
     `Goals: 150–155 lb lean (currently ~148), legs are the priority, keep running for cardio. Fix sleep (avg ~6.3h) and weekend recovery crashes.`,
-    `Today: ${plan.session.title} (${plan.tier} readiness${plan.adjusted ? ', adjusted from ' + plan.planned.title : ''})${plan.done ? ' — already done' : ''}.`,
+    `Today: ${plan.session.title}${plan.extras.length ? ' + ' + plan.extras.map(x => x.title).join(' + ') : ''} (${plan.tier} readiness${plan.adjusted ? ', adjusted from ' + plan.planned.title : ''})${plan.done ? ' — already done' : ''}.`,
     plan.session.exercises.map(e => `  - ${e.name}: ${e.sets}${e.effort ? ' @ ' + e.effort : ''}`).join('\n'),
   ].join('\n');
 }
