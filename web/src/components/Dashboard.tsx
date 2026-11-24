@@ -90,7 +90,7 @@ export default function Dashboard() {
 
   const [from, setFrom] = useState<Date>(new Date());
   const [to, setTo] = useState<Date>(new Date());
-  const [rangePreset, setRangePreset] = useState('week');
+  const [rangePreset, setRangePreset] = useState('30d');
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [selectedBucket, setSelectedBucket] = useState<{ start: Date; end: Date; label: string } | null>(null);
@@ -157,14 +157,13 @@ export default function Dashboard() {
         parsed.sort((a, b) => b.date.getTime() - a.date.getTime());
         setActivities(parsed);
         if (parsed.length > 0) {
+          // Default view: last 30 days (same dates as the 30d button).
           const now = new Date(Math.max(parsed[0].date.getTime(), Date.now()));
-          const sunday = new Date(now);
-          sunday.setDate(sunday.getDate() - sunday.getDay());
-          sunday.setHours(0, 0, 0, 0);
-          const saturday = new Date(sunday);
-          saturday.setDate(saturday.getDate() + 6);
-          setFrom(sunday);
-          setTo(saturday);
+          const start = new Date(now);
+          start.setDate(start.getDate() - 30 + 1);
+          start.setHours(0, 0, 0, 0);
+          setFrom(start);
+          setTo(now);
           const allTypes = [...new Set(parsed.map(a => a.type))];
           setSelectedTypes(new Set(allTypes.filter(t => t !== 'Walk')));
         }
