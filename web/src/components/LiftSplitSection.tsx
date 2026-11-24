@@ -52,9 +52,13 @@ export default function LiftSplitSection({ filtered, sessions }: Props) {
     return () => ro.disconnect();
   }, []);
 
+  // Weights sessions, plus anything you tagged as a lift session.
   const lifts = useMemo(
-    () => filtered.filter(a => a.type === 'WeightTraining'),
-    [filtered]
+    () => filtered.filter(a => {
+      const l = sessions?.get(a.id);
+      return a.type === 'WeightTraining' || (l?.tagged && l.kind === 'lift');
+    }),
+    [filtered, sessions]
   );
 
   // Per-split totals

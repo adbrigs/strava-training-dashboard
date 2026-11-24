@@ -2,7 +2,8 @@
 import { useState, useMemo, useRef } from 'react';
 import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
-import { SESSION_LABEL, type LoggedSession } from '@/lib/trainingPlan';
+import { SESSION_LABEL, TAGGABLE_SESSIONS, type LoggedSession } from '@/lib/trainingPlan';
+import { saveTags, useSchedule } from '@/lib/schedule';
 import Icon from './ui/Icon';
 
 type SortKey = 'date' | 'name' | 'type' | 'session' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'strain' | 'top1' | 'top2' | 'top3';
@@ -33,6 +34,9 @@ interface Props {
 }
 
 export default function ActivityTable({ filtered, onRename, sessions }: Props) {
+  const schedule = useSchedule();
+  // Tagging needs the store; while it's loading or unavailable, show text only.
+  const canTag = schedule.status === 'ready' || schedule.status === 'saving' || schedule.status === 'error';
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ k: SortKey; dir: -1 | 1 }>({ k: 'date', dir: -1 });
   const [page, setPage] = useState(0);
@@ -157,8 +161,27 @@ export default function ActivityTable({ filtered, onRename, sessions }: Props) {
                 <td className="session-cell">
                   {(() => {
                     const l = sessions?.get(a.id);
-                    if (!l?.key) return '—';
-                    return <>{SESSION_LABEL[l.key]} <span>{l.tagged ? 'tagged' : 'auto'}</span></>;
+                    const text = l?.key ? <>{SESSION_LABEL[l.key]} <span>{l.tagged ? 'tagged' : 'auto'}</span></> : '—';
+                    if (!canTag) return text;
+                    const tagged = l?.tagged ? l.key! : '';
+                    // The blank option means "no tag": it shows the auto match, or "—".
+                    const autoLabel = l?.tagged ? 'Auto (clear tag)' : l?.key ? `${SESSION_LABEL[l.key]} · auto` : '—';
+                    return (
+                      <>
+                        <select
+                          className="session-select"
+                          value={tagged}
+                          disabled={schedule.status === 'saving'}
+                          aria-label={`Session for ${a.name}`}
+                          title="Change which session this was"
+                          onChange={e => void saveTags({ [a.id]: (e.target.value || null) as typeof TAGGABLE_SESSIONS[number] | null })}
+                        >
+                          <option value="">{autoLabel}</option>
+                          {TAGGABLE_SESSIONS.map(k => <option key={k} value={k}>{SESSION_LABEL[k]}</option>)}
+                        </select>
+                        {l?.tagged && <span>tagged</span>}
+                      </>
+                    );
                   })()}
                 </td>
                 <td className="num trimp-cell">{fmtNum(a.trimp, 1)}</td>

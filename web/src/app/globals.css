@@ -1571,6 +1571,10 @@ button.plan-day:focus-visible { outline: 2px solid var(--plan-c); outline-offset
 .plan-day-extra { font-size: 9.5px; color: var(--plan-c); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .session-cell { white-space: nowrap; }
 .session-cell span { font-size: 11px; color: var(--text-subtle); margin-left: 3px; }
+.session-select { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 2px 4px; margin-left: -5px; cursor: pointer; max-width: 150px; }
+.session-select:hover, .session-select:focus-visible { border-color: var(--border-strong); background: var(--surface-2); outline: none; }
+.session-select:disabled { opacity: 0.6; cursor: default; }
+.session-select option { background: var(--surface); color: var(--text); }
 .plan-day-did { font-size: 9.5px; color: var(--z2); text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .plan-logged { display: grid; gap: 10px; min-width: 0; }
 .plan-logged-item { display: grid; gap: 6px; }

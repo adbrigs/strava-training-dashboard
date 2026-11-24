@@ -326,6 +326,13 @@ function workoutKind(a: Activity): 'lift' | 'run' | null {
   return null;
 }
 
+/** A tag decides the kind, so any tagged workout counts; otherwise by type. */
+function kindFor(a: Activity, tags: ActivityTags): 'lift' | 'run' | null {
+  const tag = tags[a.id];
+  if (tag) return tag === 'easyRun' || tag === 'qualityRun' ? 'run' : 'lift';
+  return workoutKind(a);
+}
+
 const KIND_OF: Record<SessionKey, SessionKind> = {
   legsA: 'lift', legsB: 'lift', push: 'lift', pull: 'lift',
   easyRun: 'run', qualityRun: 'run', rest: 'rest', recovery: 'rest',
@@ -343,7 +350,7 @@ export function loggedSessions(
 ): LoggedSession[] {
   const k = dateKey(d);
   const acts = activities
-    .filter(a => dateKey(a.date) === k && workoutKind(a) !== null)
+    .filter(a => dateKey(a.date) === k && kindFor(a, tags) !== null)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
   if (acts.length === 0) return [];
 
@@ -354,7 +361,7 @@ export function loggedSessions(
   // Tagged workouts claim their session first, so an untagged one on the
   // same day doesn't grab it.
   const out = acts.map(a => {
-    const kind = workoutKind(a)!;
+    const kind = kindFor(a, tags)!;
     const tag = tags[a.id];
     if (tag) take(tag);
     return { activityId: a.id, name: a.name, minutes: Math.round(a.duration), kind, key: tag ?? null, tagged: !!tag };
@@ -374,18 +381,24 @@ export function loggedSessions(
 
 /**
  * Every logged session since the plan started (Nov 9, 2026), keyed by workout
- * id. Workouts before the plan have no planned session to match, so they are
- * left out and other sections fall back to the workout name.
+ * id, plus any tagged workout from before it. Untagged workouts before the plan
+ * have nothing to match, so they are left out and other sections fall back to
+ * the workout name.
  */
 export function sessionsByActivity(
   activities: Activity[], overrides: DayOverrides = {}, tags: ActivityTags = {},
 ): Map<string, LoggedSession> {
   const anchor = startOfDay(PLAN_ANCHOR).getTime();
   const days = new Map<string, Date>();
-  for (const a of activities) {
-    if (workoutKind(a) && a.date.getTime() >= anchor) days.set(dateKey(a.date), startOfDay(a.date));
-  }
   const out = new Map<string, LoggedSession>();
+  for (const a of activities) {
+    const kind = kindFor(a, tags);
+    if (!kind) continue;
+    if (a.date.getTime() >= anchor) { days.set(dateKey(a.date), startOfDay(a.date)); continue; }
+    // Before the plan: only a tag says what it was (no plan to match against).
+    const tag = tags[a.id];
+    if (tag) out.set(a.id, { activityId: a.id, name: a.name, minutes: Math.round(a.duration), kind, key: tag, tagged: true });
+  }
   for (const d of days.values()) {
     for (const l of loggedSessions(d, activities, overrides, tags)) out.set(l.activityId, l);
   }
