@@ -31,8 +31,11 @@ function writeExpanded(v: boolean) {
   expandedListeners.forEach(l => l());
 }
 function subscribeExpanded(l: () => void) {
+  // Also follow changes made in another tab of the dashboard.
+  const onStorage = (e: StorageEvent) => { if (e.key === EXPANDED_KEY) l(); };
   expandedListeners.add(l);
-  return () => { expandedListeners.delete(l); };
+  window.addEventListener('storage', onStorage);
+  return () => { expandedListeners.delete(l); window.removeEventListener('storage', onStorage); };
 }
 
 export default function TodaysPlanSection({ activities, today, refreshKey = 0 }: Props) {
@@ -111,12 +114,15 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
 
   const tierColor = TIER_COLOR[plan.tier];
 
-  const liftCount = s.exercises.length;
-  const hasDetail = liftCount > 0 || !!s.warmup || !!s.finisher;
+  const exerciseCount = s.exercises.length;
+  const hasDetail = exerciseCount > 0 || !!s.warmup || !!s.finisher;
+  // Lifts drop the routine RPE targets; runs and recovery keep their HR targets,
+  // and a lift capped by low recovery keeps its caps.
+  const showEffort = s.kind !== 'lift' || plan.adjusted;
   const showAdjust = (plan.adjustments.length > 0 || !!plan.makeupNote) && (isToday || isPast);
 
   return (
-    <div className={`card plan-card fade-in${expanded ? ' expanded' : ''}`} style={{ ['--plan-c' as string]: tierColor }}>
+    <div className="card plan-card fade-in" style={{ ['--plan-c' as string]: tierColor }}>
       <div className="plan-summary">
         <div className="plan-main">
           <div className="plan-label">{headTitle}</div>
@@ -125,7 +131,7 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
             <div className="plan-meta">
               {s.focus && <span>{s.focus}</span>}
               {s.duration && <span>{s.duration}</span>}
-              {s.kind === 'lift' && liftCount > 0 && <span>{liftCount} lifts</span>}
+              {exerciseCount > 0 && <span>{exerciseCount} exercises</span>}
               {plan.adjusted && plan.planned.title !== s.title && <span>planned: {plan.planned.title}</span>}
             </div>
           </div>
@@ -172,16 +178,17 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
         </div>
       </div>
 
+      {showAdjust && (
+        <ul className="plan-adjust">
+          {plan.makeupNote && <li>{plan.makeupNote}</li>}
+          {plan.adjustments.map(a => <li key={a}>{a}</li>)}
+        </ul>
+      )}
+
       {expanded && hasDetail && (
         <div className="plan-detail">
-          {showAdjust && (
-            <ul className="plan-adjust">
-              {plan.makeupNote && <li>{plan.makeupNote}</li>}
-              {plan.adjustments.map(a => <li key={a}>{a}</li>)}
-            </ul>
-          )}
           {s.warmup && <div className="plan-warmup"><span>Warm-up</span>{s.warmup}</div>}
-          {liftCount > 0 && (
+          {exerciseCount > 0 && (
             <div className="plan-table">
               {s.exercises.map(e => (
                 <div key={e.name} className={`plan-row${e.main ? ' main' : ''}`}>
@@ -189,7 +196,10 @@ export default function TodaysPlanSection({ activities, today, refreshKey = 0 }:
                     <div className="plan-ex-name">{e.name}</div>
                     {e.note && <div className="plan-ex-note">{e.note}</div>}
                   </div>
-                  <div className="plan-ex-sets">{e.sets}</div>
+                  <div className="plan-ex-sets">
+                    {e.sets}
+                    {showEffort && e.effort && <div className="plan-ex-effort">{e.effort}</div>}
+                  </div>
                 </div>
               ))}
             </div>
