@@ -166,7 +166,9 @@ export default function Dashboard() {
           setFrom(start);
           setTo(now);
           const allTypes = [...new Set(parsed.map(a => a.type))];
-          setSelectedTypes(new Set(allTypes.filter(t => t !== 'Walk')));
+          // Walks and WHOOP's generic "Activity" are off by default (still selectable).
+          const hiddenByDefault = new Set(['Walk', 'Activity']);
+          setSelectedTypes(new Set(allTypes.filter(t => !hiddenByDefault.has(t))));
         }
       } catch (err) {
         console.error('Failed to load activity data:', err);
