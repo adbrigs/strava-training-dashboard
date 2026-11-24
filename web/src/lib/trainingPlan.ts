@@ -372,6 +372,26 @@ export function loggedSessions(
   return out;
 }
 
+/**
+ * Every logged session since the plan started (Nov 9, 2026), keyed by workout
+ * id. Workouts before the plan have no planned session to match, so they are
+ * left out and other sections fall back to the workout name.
+ */
+export function sessionsByActivity(
+  activities: Activity[], overrides: DayOverrides = {}, tags: ActivityTags = {},
+): Map<string, LoggedSession> {
+  const anchor = startOfDay(PLAN_ANCHOR).getTime();
+  const days = new Map<string, Date>();
+  for (const a of activities) {
+    if (workoutKind(a) && a.date.getTime() >= anchor) days.set(dateKey(a.date), startOfDay(a.date));
+  }
+  const out = new Map<string, LoggedSession>();
+  for (const d of days.values()) {
+    for (const l of loggedSessions(d, activities, overrides, tags)) out.set(l.activityId, l);
+  }
+  return out;
+}
+
 /** Leg sessions planned earlier this week that no workout has covered yet. */
 function missedLegDays(activities: Activity[], today: Date, overrides: DayOverrides, tags: ActivityTags): SessionKey[] {
   const mon = mondayOf(today);

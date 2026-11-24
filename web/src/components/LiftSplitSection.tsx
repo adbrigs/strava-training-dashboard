@@ -1,9 +1,11 @@
 'use client';
 import { useMemo, useRef, useEffect, useState } from 'react';
 import type { Activity } from '@/lib/types';
+import type { LoggedSession } from '@/lib/trainingPlan';
 
 interface Props {
   filtered: Activity[];
+  sessions?: Map<string, LoggedSession>;
 }
 
 type Split = 'Push' | 'Pull' | 'Legs' | 'Shoulders' | 'Other';
@@ -27,9 +29,18 @@ function classifyLift(name: string): Split {
   return 'Other';
 }
 
+/** Plan session first (tagged or auto-matched), then the workout name. */
+function splitFor(a: Activity, sessions?: Map<string, LoggedSession>): Split {
+  const key = sessions?.get(a.id)?.key;
+  if (key === 'legsA' || key === 'legsB') return 'Legs';
+  if (key === 'push') return 'Push';
+  if (key === 'pull') return 'Pull';
+  return classifyLift(a.name);
+}
+
 interface HoverBar { i: number; x: number; y: number; month: string; byType: Record<Split, number>; }
 
-export default function LiftSplitSection({ filtered }: Props) {
+export default function LiftSplitSection({ filtered, sessions }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(600);
   const [hover, setHover] = useState<HoverBar | null>(null);
@@ -51,7 +62,7 @@ export default function LiftSplitSection({ filtered }: Props) {
     const counts: Record<Split, number> = { Push: 0, Pull: 0, Legs: 0, Shoulders: 0, Other: 0 };
     const trimpSum: Record<Split, number> = { Push: 0, Pull: 0, Legs: 0, Shoulders: 0, Other: 0 };
     lifts.forEach(a => {
-      const s = classifyLift(a.name);
+      const s = splitFor(a, sessions);
       counts[s]++;
       trimpSum[s] += a.trimp;
     });
@@ -62,7 +73,7 @@ export default function LiftSplitSection({ filtered }: Props) {
       pct: lifts.length > 0 ? Math.round((counts[s] / lifts.length) * 100) : 0,
       color: SPLIT_COLORS[s],
     })).filter(s => s.count > 0);
-  }, [lifts]);
+  }, [lifts, sessions]);
 
   // Monthly breakdown for stacked bar
   const { months, maxCount } = useMemo(() => {
@@ -70,7 +81,7 @@ export default function LiftSplitSection({ filtered }: Props) {
     lifts.forEach(a => {
       const key = `${a.date.getFullYear()}-${String(a.date.getMonth() + 1).padStart(2, '0')}`;
       if (!map.has(key)) map.set(key, { Push: 0, Pull: 0, Legs: 0, Shoulders: 0, Other: 0 });
-      const s = classifyLift(a.name);
+      const s = splitFor(a, sessions);
       map.get(key)![s]++;
     });
     const sorted = [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
@@ -90,7 +101,7 @@ export default function LiftSplitSection({ filtered }: Props) {
       }),
       maxCount: Math.max(maxCount, 1),
     };
-  }, [lifts]);
+  }, [lifts, sessions]);
 
   if (lifts.length === 0) {
     return (
@@ -122,7 +133,7 @@ export default function LiftSplitSection({ filtered }: Props) {
       <div className="card-head">
         <div className="card-title">
           Lift Split
-          <span className="info" title="Weight training sessions classified by name: push/chest → Push, pull/back → Pull, leg → Legs, shoulder → Shoulders.">i</span>
+          <span className="info" title="Weight training sessions by the plan session they counted as (your tag, or matched to that day's plan). Before the plan started, or when nothing matches, by name: push/chest → Push, pull/back → Pull, leg → Legs, shoulder → Shoulders.">i</span>
         </div>
         <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>{lifts.length} sessions</span>
       </div>
