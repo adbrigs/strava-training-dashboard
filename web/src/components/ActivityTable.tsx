@@ -2,14 +2,17 @@
 import { useState, useMemo, useRef } from 'react';
 import type { Activity } from '@/lib/types';
 import { fmtNum, fmtPace, ACTIVITY_LABELS, ACTIVITY_COLORS } from '@/lib/dataUtils';
+import { SESSION_LABEL, TAGGABLE_SESSIONS, type LoggedSession } from '@/lib/trainingPlan';
+import { saveTags, useSchedule } from '@/lib/schedule';
 import Icon from './ui/Icon';
 
-type SortKey = 'date' | 'name' | 'type' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'strain' | 'top1' | 'top2' | 'top3';
+type SortKey = 'date' | 'name' | 'type' | 'session' | 'distance' | 'duration' | 'pace' | 'avgHr' | 'maxHr' | 'trimp' | 'strain' | 'top1' | 'top2' | 'top3';
 
 const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: 'date',      l: 'Date' },
   { k: 'name',      l: 'Activity' },
   { k: 'type',      l: 'Sport' },
+  { k: 'session',   l: 'Session' },
   { k: 'trimp',     l: 'TRIMP',      num: true },
   { k: 'strain',    l: 'Strain',     num: true },
   { k: 'distance',  l: 'Dist (mi)',  num: true },
@@ -27,9 +30,13 @@ const PER_PAGE = 10;
 interface Props {
   filtered: Activity[];
   onRename?: (id: string, name: string) => void;
+  sessions?: Map<string, LoggedSession>;
 }
 
-export default function ActivityTable({ filtered, onRename }: Props) {
+export default function ActivityTable({ filtered, onRename, sessions }: Props) {
+  const schedule = useSchedule();
+  // Tagging needs the store; while it's loading or unavailable, show text only.
+  const canTag = schedule.status === 'ready' || schedule.status === 'saving' || schedule.status === 'error';
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ k: SortKey; dir: -1 | 1 }>({ k: 'date', dir: -1 });
   const [page, setPage] = useState(0);
@@ -58,6 +65,10 @@ export default function ActivityTable({ filtered, onRename }: Props) {
     const q = query.trim().toLowerCase();
     const f = q ? filtered.filter(a => a.name.toLowerCase().includes(q) || a.type.toLowerCase().includes(q)) : filtered;
     const getVal = (a: Activity, k: SortKey): number | string | Date | null => {
+      if (k === 'session') {
+        const key = sessions?.get(a.id)?.key;
+        return key ? SESSION_LABEL[key] : null;
+      }
       if (k === 'top1' || k === 'top2' || k === 'top3') {
         const idx = parseInt(k[3]) - 1;
         const sorted = [...(a.zoneTimes || [])].sort((x, y) => y - x);
@@ -72,7 +83,7 @@ export default function ActivityTable({ filtered, onRename }: Props) {
       const bv2 = bv instanceof Date ? bv.getTime() : bv;
       return (av2 > bv2 ? 1 : av2 < bv2 ? -1 : 0) * sort.dir;
     });
-  }, [filtered, query, sort]);
+  }, [filtered, query, sort, sessions]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
   const pageRows = rows.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
@@ -146,6 +157,40 @@ export default function ActivityTable({ filtered, onRename }: Props) {
                     <span className="sw" />
                     {ACTIVITY_LABELS[a.type] || a.type}
                   </span>
+                </td>
+                <td className="session-cell">
+                  {(() => {
+                    const l = sessions?.get(a.id);
+                    const text = (
+                      <span className="session-text">
+                        {l?.key ? SESSION_LABEL[l.key] : '—'}
+                        {l?.key && <em>{l.tagged ? 'tagged' : 'auto'}</em>}
+                      </span>
+                    );
+                    if (!canTag) return text;
+                    const tagged = l?.tagged ? l.key! : '';
+                    // The blank option means "no tag": it shows the auto match, or "—".
+                    const autoLabel = l?.tagged ? 'Auto (clear tag)' : l?.key ? `${SESSION_LABEL[l.key]} · auto` : '—';
+                    // The cell shows plain text; an invisible native dropdown
+                    // sits on top so a click (or tap) opens the picker.
+                    return (
+                      <label className="session-pick">
+                        {text}
+                        <i aria-hidden="true">▾</i>
+                        <select
+                          className="session-select"
+                          value={tagged}
+                          disabled={schedule.status === 'saving'}
+                          aria-label={`Session for ${a.name}`}
+                          title="Change which session this was"
+                          onChange={e => void saveTags({ [a.id]: (e.target.value || null) as typeof TAGGABLE_SESSIONS[number] | null })}
+                        >
+                          <option value="">{autoLabel}</option>
+                          {TAGGABLE_SESSIONS.map(k => <option key={k} value={k}>{SESSION_LABEL[k]}</option>)}
+                        </select>
+                      </label>
+                    );
+                  })()}
                 </td>
                 <td className="num trimp-cell">{fmtNum(a.trimp, 1)}</td>
                 <td className="num">{a.strain != null ? fmtNum(a.strain, 1) : '—'}</td>

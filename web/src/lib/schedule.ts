@@ -2,8 +2,9 @@
 // reads the same copy; edits show immediately and are saved through /api/plan,
 // which writes them to Upstash Redis. The swap rules live in scheduleRules.ts.
 
-import { useSyncExternalStore } from 'react';
-import type { ActivityTags, DayOverrides } from './trainingPlan';
+import { useMemo, useSyncExternalStore } from 'react';
+import type { Activity } from './types';
+import { sessionsByActivity, type ActivityTags, type DayOverrides, type LoggedSession } from './trainingPlan';
 import { applyChanges, applyTagChanges, type DayChanges, type TagChanges } from './scheduleRules';
 
 export * from './scheduleRules';
@@ -44,6 +45,12 @@ function subscribe(l: () => void) {
 /** Saved schedule changes, shared by every widget on the page. */
 export function useSchedule(): ScheduleState {
   return useSyncExternalStore(subscribe, () => state, () => EMPTY);
+}
+
+/** Which session each workout counted as (tag, else auto-match to the plan). */
+export function useActivitySessions(activities: Activity[]): Map<string, LoggedSession> {
+  const { overrides, tags } = useSchedule();
+  return useMemo(() => sessionsByActivity(activities, overrides, tags), [activities, overrides, tags]);
 }
 
 /** Apply edits on screen immediately, then save; roll back if the save fails. */

@@ -16,6 +16,7 @@ import TrainingCalendarSection from './TrainingCalendarSection';
 import RunEfficiencySection from './RunEfficiencySection';
 import WeekPatternSection from './WeekPatternSection';
 import LiftSplitSection from './LiftSplitSection';
+import { useActivitySessions } from '@/lib/schedule';
 import ChatBot from './ChatBot';
 import WhoopSection from './WhoopSection';
 import WhoopTrendSection from './WhoopTrendSection';
@@ -224,6 +225,9 @@ export default function Dashboard() {
     .filter(t => presentTypeSet.has(t))
     .concat([...presentTypeSet].filter(t => !ACTIVITY_COLORS[t]));
 
+  // Which plan session each workout counted as, shared by Lift Split and the table.
+  const activitySessions = useActivitySessions(namedActivities);
+
   const filtered = useMemo(() => {
     return namedActivities.filter(a => a.date >= from && a.date <= to && selectedTypes.has(a.type));
   }, [namedActivities, from, to, selectedTypes]);
@@ -347,7 +351,7 @@ export default function Dashboard() {
 
       {/* Lift Split */}
       <div className="stack">
-        <LiftSplitSection filtered={filtered} />
+        <LiftSplitSection filtered={filtered} sessions={activitySessions} />
       </div>
 
       {/* Fitness/Fatigue/Form */}
@@ -368,7 +372,7 @@ export default function Dashboard() {
 
       {/* Activity table */}
       <div className="stack">
-        <ActivityTable filtered={filtered} onRename={rename} />
+        <ActivityTable filtered={filtered} onRename={rename} sessions={activitySessions} />
       </div>
 
       <ChatBot
